@@ -9,6 +9,7 @@ Rectangle {
 
     property string searchText: ""
     property bool showResults: searchText.length > 0
+    property int selectedIndex: -1
     signal itemSelected
 
     implicitWidth: 500
@@ -61,13 +62,24 @@ Rectangle {
                     color: Colors.foreground
                     background: null
 
-                    onTextChanged: root.searchText = text
+                    onTextChanged: {
+                        root.searchText = text;
+                        // Auto-highlight first app when text is entered
+                        if (text.length > 0) {
+                            root.selectedIndex = 0;
+                            resultsList.currentIndex = 0;
+                        } else {
+                            root.selectedIndex = -1;
+                            resultsList.currentIndex = -1;
+                        }
+                    }
 
                     onAccepted: {
-                        if (resultsList.count > 0) {
-                            let firstItem = resultsList.itemAtIndex(0);
-                            if (firstItem) {
-                                firstItem.clicked();
+                        if (root.selectedIndex >= 0 && root.selectedIndex < resultsList.count) {
+                            let selectedApp = resultsList.model[root.selectedIndex];
+                            if (selectedApp) {
+                                selectedApp.execute();
+                                root.itemSelected();
                             }
                         }
                     }
@@ -75,9 +87,28 @@ Rectangle {
                     Keys.onPressed: event => {
                         if (event.key === Qt.Key_Escape) {
                             root.itemSelected();
-                        } else if (event.key === Qt.Key_Down && resultsList.count > 0) {
-                            resultsList.forceActiveFocus();
-                            resultsList.currentIndex = 0;
+                        } else if (event.key === Qt.Key_Down) {
+                            if (resultsList.count > 0) {
+                                if (root.selectedIndex < resultsList.count - 1) {
+                                    root.selectedIndex++;
+                                    resultsList.currentIndex = root.selectedIndex;
+                                } else if (root.selectedIndex === -1) {
+                                    // When no search text and nothing selected, start at first item
+                                    root.selectedIndex = 0;
+                                    resultsList.currentIndex = 0;
+                                }
+                            }
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Up) {
+                            if (root.selectedIndex > 0) {
+                                root.selectedIndex--;
+                                resultsList.currentIndex = root.selectedIndex;
+                            } else if (root.selectedIndex === 0 && root.searchText.length === 0) {
+                                // When no search text, allow going back to no selection
+                                root.selectedIndex = -1;
+                                resultsList.currentIndex = -1;
+                            }
+                            event.accepted = true;
                         }
                     }
                 }
@@ -93,9 +124,18 @@ Rectangle {
             clip: true
 
             model: root.searchText.length > 0 ? AppSearch.fuzzyQuery(root.searchText) : AppSearch.getAllApps()
+            currentIndex: root.selectedIndex
+
+            // Sync currentIndex with selectedIndex
+            onCurrentIndexChanged: {
+                if (currentIndex !== root.selectedIndex) {
+                    root.selectedIndex = currentIndex;
+                }
+            }
 
             delegate: Rectangle {
                 required property var modelData
+                required property int index
 
                 width: resultsList.width
                 height: 48
@@ -107,6 +147,10 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
 
+                    onEntered: {
+                        root.selectedIndex = index;
+                        resultsList.currentIndex = index;
+                    }
                     onClicked: {
                         modelData.execute();
                         root.itemSelected();
@@ -150,26 +194,14 @@ Rectangle {
                 }
             }
 
-            Keys.onPressed: event => {
-                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                    if (currentItem) {
-                        let currentData = model[currentIndex];
-                        if (currentData) {
-                            currentData.execute();
-                            root.itemSelected();
-                        }
-                    }
-                } else if (event.key === Qt.Key_Escape) {
-                    searchInput.forceActiveFocus();
-                } else if (event.key === Qt.Key_Up && currentIndex === 0) {
-                    searchInput.forceActiveFocus();
-                }
-            }
-
             highlight: Rectangle {
                 color: Colors.surfaceBright
                 radius: 16
+                visible: root.selectedIndex >= 0
             }
+
+            highlightMoveDuration: 200
+            highlightMoveVelocity: -1
         }
     }
 
