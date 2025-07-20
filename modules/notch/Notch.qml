@@ -9,6 +9,7 @@ Rectangle {
 
     property Component defaultViewComponent
     property Component launcherViewComponent
+    property Component dashboardViewComponent
     property var stackView: stackViewInternal
     property bool isExpanded: stackViewInternal.currentItem !== stackViewInternal.initialItem
 

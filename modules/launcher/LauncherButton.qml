@@ -47,7 +47,7 @@ Button {
         GlobalStates.launcherOpen = !GlobalStates.launcherOpen;
     }
 
-    ToolTip.visible: hovered
+    ToolTip.visible: false
     ToolTip.text: "Open Application Launcher"
     ToolTip.delay: 1000
 }

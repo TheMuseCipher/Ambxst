@@ -11,6 +11,7 @@ Singleton {
     property bool sidebarRightOpen: false
     property bool overviewOpen: false
     property bool launcherOpen: false
+    property bool dashboardOpen: false
     property bool workspaceShowNumbers: false
     property bool superReleaseMightTrigger: true
 
@@ -37,6 +38,15 @@ Singleton {
         onReleased: {
             workspaceShowNumbersTimer.stop()
             workspaceShowNumbers = false
+        }
+    }
+
+    GlobalShortcut {
+        name: "toggleDashboard"
+        description: qsTr("Toggle dashboard")
+
+        onPressed: {
+            dashboardOpen = !dashboardOpen
         }
     }
 }

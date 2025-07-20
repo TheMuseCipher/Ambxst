@@ -17,12 +17,13 @@ PanelWindow {
 
     color: "transparent"
 
-    WlrLayershell.keyboardFocus: GlobalStates.launcherOpen ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     exclusionMode: ExclusionMode.Ignore
 
     implicitHeight: notchContainer.implicitHeight
     implicitWidth: notchContainer.implicitWidth
+    WlrLayershell.layer: WlrLayer.Overlay
 
     // Default view component - user@host text
     Component {
@@ -30,6 +31,28 @@ PanelWindow {
         Item {
             width: userHostText.implicitWidth + 24
             height: 28
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+
+                onClicked: {
+                    GlobalStates.dashboardOpen = !GlobalStates.dashboardOpen;
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 14
+                    color: parent.pressed ? Colors.surfaceContainerHighest : (parent.containsMouse ? Colors.surfaceContainerHigh : "transparent")
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 150
+                        }
+                    }
+                }
+            }
 
             Text {
                 id: userHostText
@@ -75,6 +98,33 @@ PanelWindow {
         }
     }
 
+    // Dashboard view component
+    Component {
+        id: dashboardViewComponent
+        Item {
+            width: 440
+            height: Math.min(dashboardItem.implicitHeight, 500)
+
+            Dashboard {
+                id: dashboardItem
+                anchors.fill: parent
+
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Escape) {
+                        GlobalStates.dashboardOpen = false;
+                        event.accepted = true;
+                    }
+                }
+
+                Component.onCompleted: {
+                    Qt.callLater(() => {
+                        forceActiveFocus();
+                    });
+                }
+            }
+        }
+    }
+
     // Center notch
     Notch {
         id: notchContainer
@@ -83,9 +133,19 @@ PanelWindow {
 
         defaultViewComponent: defaultViewComponent
         launcherViewComponent: launcherViewComponent
+        dashboardViewComponent: dashboardViewComponent
+
+        // Handle global keyboard events
+        Keys.onPressed: event => {
+            if (event.key === Qt.Key_Escape && (GlobalStates.launcherOpen || GlobalStates.dashboardOpen)) {
+                GlobalStates.launcherOpen = false;
+                GlobalStates.dashboardOpen = false;
+                event.accepted = true;
+            }
+        }
     }
 
-    // Listen for launcher state changes
+    // Listen for launcher and dashboard state changes
     Connections {
         target: GlobalStates
         function onLauncherOpenChanged() {
@@ -101,13 +161,19 @@ PanelWindow {
                 }
             }
         }
-    }
 
-    // Handle global keyboard events
-    Keys.onPressed: event => {
-        if (event.key === Qt.Key_Escape && GlobalStates.launcherOpen) {
-            GlobalStates.launcherOpen = false;
-            event.accepted = true;
+        function onDashboardOpenChanged() {
+            if (GlobalStates.dashboardOpen) {
+                notchContainer.stackView.push(dashboardViewComponent);
+                Qt.callLater(() => {
+                    notchPanel.requestActivate();
+                    notchPanel.forceActiveFocus();
+                });
+            } else {
+                if (notchContainer.stackView.depth > 1) {
+                    notchContainer.stackView.pop();
+                }
+            }
         }
     }
 }
