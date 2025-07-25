@@ -1,9 +1,6 @@
 import Qt5Compat.GraphicalEffects
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Wayland
 import "../globals"
 import "../theme"
@@ -37,6 +34,7 @@ PanelWindow {
             height: 28
 
             MouseArea {
+                id: userHostArea
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
@@ -48,7 +46,7 @@ PanelWindow {
                 Rectangle {
                     anchors.fill: parent
                     radius: 14
-                    color: parent.pressed ? Colors.surfaceContainerHighest : (parent.containsMouse ? Colors.surfaceContainerHigh : "transparent")
+                    color: "transparent"
 
                     Behavior on color {
                         ColorAnimation {
@@ -62,10 +60,16 @@ PanelWindow {
                 id: userHostText
                 anchors.centerIn: parent
                 text: `${Quickshell.env("USER")}@${Quickshell.env("HOSTNAME")}`
-                color: Colors.foreground
+                color: userHostArea.pressed ? Colors.foreground : (userHostArea.containsMouse ? Colors.primary : Colors.foreground)
                 font.family: Styling.defaultFont
                 font.pixelSize: 14
                 font.weight: Font.Bold
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 150
+                    }
+                }
             }
         }
     }

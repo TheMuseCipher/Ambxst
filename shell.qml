@@ -7,9 +7,24 @@ import "./modules/notifications/"
 import "./modules/wallpaper/"
 import "./modules/notch/"
 import "./modules/services/"
+import "./modules/corners/"
 
 ShellRoot {
     id: root
+
+    // Multi-monitor support - create corners for each screen
+    Variants {
+        model: Quickshell.screens
+        
+        Loader {
+            id: cornersLoader
+            active: true
+            required property ShellScreen modelData
+            sourceComponent: ScreenCorners {
+                screen: cornersLoader.modelData
+            }
+        }
+    }
 
     // Wallpaper for all screens
     Variants {
