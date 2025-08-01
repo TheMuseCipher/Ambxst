@@ -20,6 +20,10 @@ Rectangle {
         searchInput.forceActiveFocus();
     }
 
+    function focusSearchInput() {
+        searchInput.forceActiveFocus();
+    }
+
     implicitWidth: 500
     implicitHeight: mainLayout.implicitHeight + 32
     color: "transparent"

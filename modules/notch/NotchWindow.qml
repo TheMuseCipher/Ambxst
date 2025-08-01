@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import Quickshell.Hyprland
 import qs.modules.globals
 import qs.modules.theme
 import qs.modules.launcher
@@ -20,6 +21,17 @@ PanelWindow {
     color: "transparent"
 
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+
+    HyprlandFocusGrab {
+        id: focusGrab
+        windows: [notchPanel]
+        active: GlobalStates.launcherOpen || GlobalStates.dashboardOpen
+        
+        onCleared: {
+            GlobalStates.launcherOpen = false;
+            GlobalStates.dashboardOpen = false;
+        }
+    }
 
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Top
@@ -113,7 +125,7 @@ PanelWindow {
                 Component.onCompleted: {
                     clearSearch();
                     Qt.callLater(() => {
-                        forceActiveFocus();
+                        focusSearchInput();
                     });
                 }
             }
@@ -186,6 +198,11 @@ PanelWindow {
                 Qt.callLater(() => {
                     notchPanel.requestActivate();
                     notchPanel.forceActiveFocus();
+                    // Additional focus to ensure search input gets focus
+                    let currentItem = notchContainer.stackView.currentItem;
+                    if (currentItem && currentItem.children[0] && currentItem.children[0].focusSearchInput) {
+                        currentItem.children[0].focusSearchInput();
+                    }
                 });
             } else {
                 if (notchContainer.stackView.depth > 1) {
