@@ -24,21 +24,11 @@ PanelWindow {
     property string fallbackDir: Quickshell.env("PWD") + "/assets/wallpapers_example"
     property list<string> wallpaperPaths: []
     property int currentIndex: 0
-    property string currentWallpaper: ""
-    property string previousWallpaper: ""
-    property bool bufferToggle: false
+    property string currentWallpaper: wallpaperPaths.length > 0 ? wallpaperPaths[currentIndex] : ""
 
     function setWallpaper(path) {
         console.log("setWallpaper called with:", path);
-        console.log("Current bufferToggle:", bufferToggle);
-        
-        previousWallpaper = currentWallpaper;
         currentWallpaper = path;
-        bufferToggle = !bufferToggle;
-        
-        console.log("New bufferToggle:", bufferToggle);
-        console.log("Previous wallpaper:", previousWallpaper);
-        console.log("Current wallpaper:", currentWallpaper);
         
         const process = Qt.createQmlObject(`
             import Quickshell.Io
@@ -52,19 +42,16 @@ PanelWindow {
     function nextWallpaper() {
         if (wallpaperPaths.length === 0) return;
         currentIndex = (currentIndex + 1) % wallpaperPaths.length;
-        setWallpaper(wallpaperPaths[currentIndex]);
     }
 
     function previousWallpaper() {
         if (wallpaperPaths.length === 0) return;
         currentIndex = currentIndex === 0 ? wallpaperPaths.length - 1 : currentIndex - 1;
-        setWallpaper(wallpaperPaths[currentIndex]);
     }
 
     function setWallpaperByIndex(index) {
         if (index >= 0 && index < wallpaperPaths.length) {
             currentIndex = index;
-            setWallpaper(wallpaperPaths[currentIndex]);
         }
     }
 
@@ -85,8 +72,8 @@ PanelWindow {
                     scanFallback.running = true;
                 } else {
                     wallpaperPaths = files.sort();
-                    if (currentWallpaper === "" && wallpaperPaths.length > 0) {
-                        setWallpaper(wallpaperPaths[0]);
+                    if (wallpaperPaths.length > 0) {
+                        currentIndex = 0;
                     }
                 }
             }
@@ -110,44 +97,36 @@ PanelWindow {
             onStreamFinished: {
                 const files = text.trim().split("\n").filter(f => f.length > 0);
                 wallpaperPaths = files.sort();
-                if (currentWallpaper === "" && wallpaperPaths.length > 0) {
-                    setWallpaper(wallpaperPaths[0]);
+                if (wallpaperPaths.length > 0) {
+                    currentIndex = 0;
                 }
             }
         }
     }
 
-    WallpaperImage {
-        id: wallpaper1
-        anchors.fill: parent
-        source: bufferToggle ? 
-            (currentWallpaper ? "file://" + currentWallpaper : "file://" + Quickshell.env("HOME") + "/.current.wall") :
-            (previousWallpaper ? "file://" + previousWallpaper : "file://" + Quickshell.env("HOME") + "/.current.wall")
-        active: bufferToggle
-        z: bufferToggle ? 1 : 0
-    }
-
-    WallpaperImage {
-        id: wallpaper2
-        anchors.fill: parent
-        source: !bufferToggle ? 
-            (currentWallpaper ? "file://" + currentWallpaper : "file://" + Quickshell.env("HOME") + "/.current.wall") :
-            (previousWallpaper ? "file://" + previousWallpaper : "file://" + Quickshell.env("HOME") + "/.current.wall")
-        active: !bufferToggle
-        z: !bufferToggle ? 1 : 0
-    }
-
     Rectangle {
+        id: background
         anchors.fill: parent
         color: "#000000"
-        visible: wallpaper1.status !== Image.Ready && wallpaper2.status !== Image.Ready
-        z: -1
+
+        WallpaperImage {
+            id: wallpaper1
+            anchors.fill: parent
+            source: wallpaper.currentWallpaper
+            active: wallpaper.currentIndex % 2 === 0
+        }
+
+        WallpaperImage {
+            id: wallpaper2
+            anchors.fill: parent
+            source: wallpaper.currentWallpaper
+            active: wallpaper.currentIndex % 2 === 1
+        }
     }
 
     component WallpaperImage: Item {
         property string source
         property bool active: false
-        property alias status: img.status
 
         opacity: active ? 1.0 : 0.0
         scale: active ? 1.0 : 0.95
@@ -167,25 +146,11 @@ PanelWindow {
         }
 
         Image {
-            id: img
             anchors.fill: parent
-            source: parent.source
+            source: parent.source ? "file://" + parent.source : ""
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
-            cache: false
             smooth: true
-
-            onStatusChanged: {
-                if (status === Image.Error) {
-                    console.warn("Wallpaper: Failed to load image from", source);
-                } else if (status === Image.Ready) {
-                    console.log("Wallpaper: Successfully loaded", source);
-                }
-            }
-
-            onSourceChanged: {
-                console.log("Wallpaper: Source changed to", source);
-            }
         }
     }
 }
