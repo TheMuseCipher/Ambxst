@@ -1,5 +1,5 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import qs.modules.theme
 import qs.config
 
@@ -10,12 +10,11 @@ Rectangle {
     border.width: 0
 
     layer.enabled: true
-    layer.effect: DropShadow {
-        horizontalOffset: 0
-        verticalOffset: 0
-        radius: 8
-        samples: 16
-        color: Qt.rgba(Colors.adapter.shadow.r, Colors.adapter.shadow.g, Colors.adapter.shadow.b, 0.5)
-        transparentBorder: true
+    layer.effect: MultiEffect {
+        shadowEnabled: true
+        shadowHorizontalOffset: 0
+        shadowVerticalOffset: 0
+        shadowBlur: 0.5
+        shadowColor: Qt.rgba(Colors.adapter.shadow.r, Colors.adapter.shadow.g, Colors.adapter.shadow.b, 0.5)
     }
 }

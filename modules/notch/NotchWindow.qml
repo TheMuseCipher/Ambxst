@@ -1,5 +1,5 @@
-import Qt5Compat.GraphicalEffects
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -166,13 +166,12 @@ PanelWindow {
         anchors.top: parent.top
 
         layer.enabled: true
-        layer.effect: DropShadow {
-            horizontalOffset: 0
-            verticalOffset: 0
-            radius: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen) ? 16 : 8
-            samples: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen) ? 32 : 16
-            color: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen) ? Qt.rgba(Colors.adapter.shadow.r, Colors.adapter.shadow.g, Colors.adapter.shadow.b, 0.7) : Qt.rgba(Colors.adapter.shadow.r, Colors.adapter.shadow.g, Colors.adapter.shadow.b, 0.5)
-            transparentBorder: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 0
+            shadowBlur: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen) ? 1.0 : 0.5
+            shadowColor: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen) ? Qt.rgba(Colors.adapter.shadow.r, Colors.adapter.shadow.g, Colors.adapter.shadow.b, 0.7) : Qt.rgba(Colors.adapter.shadow.r, Colors.adapter.shadow.g, Colors.adapter.shadow.b, 0.5)
         }
 
         defaultViewComponent: defaultViewComponent
