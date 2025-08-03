@@ -26,7 +26,7 @@ Rectangle {
     }
 
     implicitWidth: 500
-    implicitHeight: mainLayout.implicitHeight + 32
+    implicitHeight: mainLayout.implicitHeight
     color: "transparent"
 
     Behavior on height {
@@ -39,7 +39,6 @@ Rectangle {
     ColumnLayout {
         id: mainLayout
         anchors.fill: parent
-        anchors.margins: 16
         spacing: 8
 
         // Search input
@@ -48,7 +47,7 @@ Rectangle {
             Layout.fillWidth: true
             implicitHeight: 48
             color: Colors.adapter.surfaceContainerHigh
-            radius: Configuration.roundness
+            radius: Configuration.roundness > 0 ? Configuration.roundness + 4 : 0
             border.color: searchInput.activeFocus ? Colors.adapter.primary : Colors.adapter.outline
             border.width: 0
 
@@ -246,7 +245,7 @@ Rectangle {
             highlight: Rectangle {
                 color: Colors.adapter.primary
                 opacity: 0.2
-                radius: Configuration.roundness
+                radius: Configuration.roundness > 0 ? Configuration.roundness + 4 : 0
                 visible: root.selectedIndex >= 0
             }
 

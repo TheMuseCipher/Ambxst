@@ -105,7 +105,7 @@ PanelWindow {
         id: launcherViewComponent
         Item {
             width: 480
-            height: Math.min(launcherSearch.implicitHeight, 400)
+            height: Math.min(launcherSearch.implicitHeight, 368)
 
             LauncherSearch {
                 id: launcherSearch
