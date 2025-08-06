@@ -21,7 +21,9 @@ Item {
     property real workspacePadding: 8
     property color activeBorderColor: Colors.adapter.primary
 
-    readonly property var monitor: Hyprland.focusedMonitor
+    // Use the screen's monitor instead of focused monitor for multi-monitor support
+    property var currentScreen: null  // This will be set from parent
+    readonly property var monitor: currentScreen ? Hyprland.monitorFor(currentScreen) : Hyprland.focusedMonitor
     readonly property int workspaceGroup: Math.floor((monitor?.activeWorkspace?.id - 1 || 0) / workspacesShown)
     readonly property var windowList: HyprlandData.windowList
     readonly property var windowByAddress: HyprlandData.windowByAddress
@@ -186,6 +188,7 @@ Item {
                     scale: overviewRoot.scale
                     availableWorkspaceWidth: overviewRoot.workspaceImplicitWidth
                     availableWorkspaceHeight: overviewRoot.workspaceImplicitHeight
+                    monitorData: overviewRoot.monitorData
 
                     property int workspaceColIndex: (windowData?.workspace.id - 1) % overviewRoot.columns
                     property int workspaceRowIndex: Math.floor((windowData?.workspace.id - 1) % overviewRoot.workspacesShown / overviewRoot.columns)

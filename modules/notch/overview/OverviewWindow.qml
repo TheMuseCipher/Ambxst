@@ -14,6 +14,7 @@ Item {
 
     property var windowData
     property var toplevel
+    property var monitorData: null  // Monitor data passed from Overview
     property real scale
     property real availableWorkspaceWidth
     property real availableWorkspaceHeight
@@ -24,8 +25,8 @@ Item {
     property bool pressed: false
     property bool atInitPosition: (initX == x && initY == y)
 
-    property real initX: Math.max((windowData?.at[0] || 0) * scale, 0) + xOffset
-    property real initY: Math.max((windowData?.at[1] || 0) * scale, 0) + yOffset
+    property real initX: Math.max(((windowData?.at[0] || 0) - (monitorData?.x || 0)) * scale, 0) + xOffset
+    property real initY: Math.max(((windowData?.at[1] || 0) - (monitorData?.y || 0)) * scale, 0) + yOffset
     property real targetWindowWidth: (windowData?.size[0] || 100) * scale
     property real targetWindowHeight: (windowData?.size[1] || 100) * scale
 

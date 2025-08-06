@@ -168,6 +168,7 @@ PanelWindow {
             Overview {
                 id: overviewItem
                 anchors.centerIn: parent
+                currentScreen: notchPanel.screen
 
                 Keys.onPressed: event => {
                     if (event.key === Qt.Key_Escape) {
