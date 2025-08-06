@@ -1,4 +1,6 @@
+pragma ComponentBehavior: Bound
 import QtQuick
+import Qt5Compat.GraphicalEffects
 import QtQuick.Controls
 import QtQuick.Effects
 import Quickshell
@@ -93,7 +95,7 @@ Item {
         Rectangle {
             id: previewBackground
             anchors.fill: parent
-            radius: Config.roundness - 4
+            radius: Math.max(0, Config.roundness - workspaceSpacing)
             color: pressed ? Colors.adapter.surfaceContainerHighest : hovered ? Colors.adapter.surfaceContainer : Colors.adapter.surface
             border.color: Colors.adapter.surfaceContainerHighest
             border.width: 2
@@ -145,7 +147,7 @@ Item {
                 font.family: Styling.defaultFont
                 font.pixelSize: Math.max(8, Math.min(12, root.targetWindowHeight * 0.1))
                 font.weight: Font.Medium
-                color: Colors.adapter.onSurface
+                color: Colors.adapter.overSurface
                 opacity: root.compactMode ? 0 : 0.8
                 width: Math.min(implicitWidth, root.targetWindowWidth - 8)
                 elide: Text.ElideRight
@@ -163,8 +165,8 @@ Item {
         Rectangle {
             id: previewOverlay
             anchors.fill: parent
-            radius: Config.roundness - 4
-            color: pressed ? Qt.rgba(Colors.adapter.surfaceContainerHighest.r, Colors.adapter.surfaceContainerHighest.g, Colors.adapter.surfaceContainerHighest.b, 0.3) : hovered ? Qt.rgba(Colors.adapter.surfaceContainer.r, Colors.adapter.surfaceContainer.g, Colors.adapter.surfaceContainer.b, 0.2) : "transparent"
+            radius: Math.max(0, Config.roundness - workspaceSpacing)
+            color: pressed ? Qt.rgba(Colors.adapter.surfaceContainerHighest.r, Colors.adapter.surfaceContainerHighest.g, Colors.adapter.surfaceContainerHighest.b, 0.5) : hovered ? Qt.rgba(Colors.adapter.surfaceContainer.r, Colors.adapter.surfaceContainer.g, Colors.adapter.surfaceContainer.b, 0.2) : "transparent"
             border.color: Colors.adapter.surfaceContainerHighest
             border.width: 2
             visible: windowPreview.hasContent
