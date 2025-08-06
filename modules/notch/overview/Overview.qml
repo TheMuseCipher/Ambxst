@@ -24,10 +24,7 @@ Item {
     // Use the screen's monitor instead of focused monitor for multi-monitor support
     property var currentScreen: null  // This will be set from parent
     readonly property var monitor: {
-        console.log("DEBUG: Looking for monitor for screen:", currentScreen?.name);
         const foundMonitor = currentScreen ? Hyprland.monitorFor(currentScreen) : Hyprland.focusedMonitor;
-        console.log("DEBUG: Found monitor name:", foundMonitor?.name);
-        console.log("DEBUG: Found monitor ID:", foundMonitor?.id);
         return foundMonitor;
     }
     readonly property int workspaceGroup: Math.floor((monitor?.activeWorkspace?.id - 1 || 0) / workspacesShown)
@@ -35,29 +32,16 @@ Item {
     readonly property var windowByAddress: HyprlandData.windowByAddress
     readonly property var monitors: HyprlandData.monitors
     readonly property var monitorData: {
-        console.log("DEBUG: Available monitors:", monitors.map(m => `${m.name} (ID: ${m.id})`));
         const found = monitors.find(m => m.id === monitor?.id);
-        console.log("DEBUG: Selected monitorData:", found?.name, "dimensions:", found?.width, "x", found?.height);
         return found;
     }
     readonly property var toplevels: ToplevelManager.toplevels
 
     property real workspaceImplicitWidth: {
-        console.log("DEBUG: currentScreen:", currentScreen?.name);
-        console.log("DEBUG: monitor:", monitor?.name);
-        console.log("DEBUG: monitor.width:", monitor?.width);
-        console.log("DEBUG: monitor.height:", monitor?.height);
-        console.log("DEBUG: monitor.scale:", monitor?.scale);
-        console.log("DEBUG: config scale:", scale);
-        console.log("DEBUG: monitorData:", monitorData?.name);
-        console.log("DEBUG: monitorData.transform:", monitorData?.transform);
-        console.log("DEBUG: monitorData.scale:", monitorData?.scale);
-        
         const isRotated = (monitorData?.transform % 2 === 1);
         const monitorScale = monitorData?.scale || 1.0;  // Use monitor's scale, not config scale
         const width = isRotated ? (monitor?.height || 1920) : (monitor?.width || 1920);
         const scaledWidth = (width / monitorScale) * scale;  // Apply monitor scale then config scale
-        console.log("DEBUG: calculated width:", scaledWidth);
         return scaledWidth;
     }
     property real workspaceImplicitHeight: {
@@ -65,7 +49,6 @@ Item {
         const monitorScale = monitorData?.scale || 1.0;  // Use monitor's scale, not config scale
         const height = isRotated ? (monitor?.width || 1080) : (monitor?.height || 1080);
         const scaledHeight = (height / monitorScale) * scale;  // Apply monitor scale then config scale
-        console.log("DEBUG: calculated height:", scaledHeight);
         return scaledHeight;
     }
 
