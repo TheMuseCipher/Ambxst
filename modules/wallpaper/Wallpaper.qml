@@ -25,9 +25,10 @@ PanelWindow {
     property list<string> wallpaperPaths: []
     property int currentIndex: 0
     property string currentWallpaper: wallpaperPaths.length > 0 ? wallpaperPaths[currentIndex] : ""
+    property bool initialLoadCompleted: false
 
     onCurrentWallpaperChanged: {
-        if (currentWallpaper) {
+        if (currentWallpaper && initialLoadCompleted) {
             console.log("Wallpaper changed to:", currentWallpaper);
             matugenProcess.command = ["matugen", "image", currentWallpaper, "-c", Qt.resolvedUrl("../../assets/matugen/config.toml").toString().replace("file://", "")];
             matugenProcess.running = true;
@@ -36,6 +37,7 @@ PanelWindow {
 
     function setWallpaper(path) {
         console.log("setWallpaper called with:", path);
+        initialLoadCompleted = true;
         currentWallpaper = path;
         const pathIndex = wallpaperPaths.indexOf(path);
         if (pathIndex !== -1) {
@@ -47,6 +49,7 @@ PanelWindow {
     function nextWallpaper() {
         if (wallpaperPaths.length === 0)
             return;
+        initialLoadCompleted = true;
         currentIndex = (currentIndex + 1) % wallpaperPaths.length;
         currentWallpaper = wallpaperPaths[currentIndex];
         wallpaperConfig.adapter.currentWall = wallpaperPaths[currentIndex];
@@ -55,6 +58,7 @@ PanelWindow {
     function previousWallpaper() {
         if (wallpaperPaths.length === 0)
             return;
+        initialLoadCompleted = true;
         currentIndex = currentIndex === 0 ? wallpaperPaths.length - 1 : currentIndex - 1;
         currentWallpaper = wallpaperPaths[currentIndex];
         wallpaperConfig.adapter.currentWall = wallpaperPaths[currentIndex];
@@ -62,6 +66,7 @@ PanelWindow {
 
     function setWallpaperByIndex(index) {
         if (index >= 0 && index < wallpaperPaths.length) {
+            initialLoadCompleted = true;
             currentIndex = index;
             currentWallpaper = wallpaperPaths[currentIndex];
             wallpaperConfig.adapter.currentWall = wallpaperPaths[currentIndex];

@@ -10,7 +10,7 @@
     "borderless": false,
     "launcherIcon": "",
     "overviewIcon": "",
-    "showBackground": true,
+    "showBackground": false,
     "verbose": true,
     "screenList": []
   },
