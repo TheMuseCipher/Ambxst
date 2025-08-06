@@ -78,7 +78,7 @@ Item {
         implicitWidth: workspaceColumnLayout.implicitWidth + workspaceSpacing * 2
         implicitHeight: workspaceColumnLayout.implicitHeight + workspaceSpacing * 2
         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
-        color: Colors.adapter.surfaceContainer
+        color: Colors.surfaceContainer
 
         ColumnLayout {
             id: workspaceColumnLayout
@@ -99,7 +99,7 @@ Item {
                             property int colIndex: index
                             property int workspaceValue: overviewRoot.workspaceGroup * workspacesShown + rowIndex * overviewRoot.columns + colIndex + 1
                             property color defaultWorkspaceColor: Colors.background
-                            property color hoveredWorkspaceColor: Colors.adapter.surfaceContainer
+                            property color hoveredWorkspaceColor: Colors.surfaceContainer
                             property color hoveredBorderColor: Colors.adapter.outline
                             property bool hoveredWhileDragging: false
 
@@ -115,7 +115,7 @@ Item {
                                 text: workspaceValue
                                 font.pixelSize: Math.min(parent.width, parent.height) * 0.25
                                 font.weight: Font.Bold
-                                color: Colors.adapter.surfaceContainerHigh
+                                color: Colors.surfaceContainerHigh
                                 opacity: 1
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter

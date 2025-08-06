@@ -18,6 +18,7 @@ Singleton {
             property JsonObject theme: JsonObject {
                 property bool oledMode: false
                 property real opacity: 1.0
+                property real shadowOpacity: 0.5
                 property int roundness: 16
                 property string defaultFont: "Roboto Condensed"
                 property int animDuration: 300
@@ -28,6 +29,7 @@ Singleton {
                 property string launcherIcon: ""
                 property string overviewIcon: ""
                 property bool showBackground: false
+                property real bgOpacity: 1.0
                 property bool verbose: true
                 property list<string> screenList: []
             }
@@ -49,14 +51,16 @@ Singleton {
     }
 
     // Theme configuration
-    property bool oledMode: loader.adapter.theme.oledMode
-    property real opacity: Math.min(Math.max(loader.adapter.theme.opacity, 0.1), 1.0)
-    property int roundness: loader.adapter.theme.roundness
-    property string defaultFont: loader.adapter.theme.defaultFont
-    property int animDuration: loader.adapter.theme.animDuration
+    property QtObject theme: loader.adapter.theme
+    property bool oledMode: theme.oledMode
+    property real opacity: Math.min(Math.max(theme.opacity, 0.1), 1.0)
+    property int roundness: theme.roundness
+    property string defaultFont: theme.defaultFont
+    property int animDuration: theme.animDuration
 
     // Bar configuration
     property QtObject bar: loader.adapter.bar
+    property real bgOpacity: Math.min(Math.max(bar.opacity, 0.1), 1.0)
 
     // Workspace configuration
     property QtObject workspaces: loader.adapter.workspaces

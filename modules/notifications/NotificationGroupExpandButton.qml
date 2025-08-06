@@ -13,7 +13,7 @@ Button {
     height: 20
 
     background: Rectangle {
-        color: root.pressed ? Colors.adapter.primary : (root.hovered ? Colors.adapter.surfaceBright : Colors.adapter.surfaceContainerHigh)
+        color: root.pressed ? Colors.adapter.primary : (root.hovered ? Colors.surfaceBright : Colors.surfaceContainerHigh)
         radius: 10
 
         Behavior on color {

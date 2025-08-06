@@ -226,7 +226,7 @@ PanelWindow {
             shadowVerticalOffset: 0
             shadowBlur: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview) ? 2.0 : 1.0
             shadowColor: Colors.adapter.shadow
-            shadowOpacity: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview) ? 0.75 : 0.5
+            shadowOpacity: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview) ? Math.min(Config.theme.shadowOpacity + 0.25, 1.0) : Config.theme.shadowOpacity
 
             Behavior on shadowBlur {
                 NumberAnimation {

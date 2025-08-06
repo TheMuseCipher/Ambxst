@@ -44,7 +44,7 @@ NotchAnimationBehavior {
                     implicitWidth: (tabs.width - tabs.spacing * 3) / 4
 
                     background: Rectangle {
-                        color: root.state.currentTab === index ? Qt.rgba(Qt.color(Colors.adapter.surfaceContainer).r, Qt.color(Colors.adapter.surfaceContainer).g, Qt.color(Colors.adapter.surfaceContainer).b, Math.max(0.1, Config.opacity)) : "transparent"
+                        color: root.state.currentTab === index ? Qt.rgba(Qt.color(Colors.surfaceContainer).r, Qt.color(Colors.surfaceContainer).g, Qt.color(Colors.surfaceContainer).b, Math.max(0.1, Config.opacity)) : "transparent"
                         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                         Behavior on color {
@@ -278,7 +278,7 @@ NotchAnimationBehavior {
                         width: wallpaperGrid.cellWidth - 8
                         height: wallpaperGrid.cellHeight - 8
                         radius: 8
-                        color: Colors.adapter.surface
+                        color: Colors.surface
                         border.color: isCurrentWallpaper ? Colors.adapter.primary : Colors.adapter.outline
                         border.width: isCurrentWallpaper ? 2 : 1
 
@@ -316,12 +316,12 @@ NotchAnimationBehavior {
 
                             onEntered: {
                                 if (!parent.isCurrentWallpaper) {
-                                    parent.color = Colors.adapter.surfaceContainerHigh;
+                                    parent.color = Colors.surfaceContainerHigh;
                                 }
                             }
                             onExited: {
                                 if (!parent.isCurrentWallpaper) {
-                                    parent.color = Colors.adapter.surface;
+                                    parent.color = Colors.surface;
                                 }
                             }
                             onPressed: parent.scale = 0.95

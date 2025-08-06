@@ -111,7 +111,7 @@ Item {
                 topRightRadius: radiusRight
                 bottomRightRadius: radiusRight
 
-                color: Colors.adapter.surfaceContainerHighest
+                color: Colors.surfaceContainerHighest
                 opacity: (workspaceOccupied[index] && !(!activeWindow?.activated && monitor?.activeWorkspace?.id === index + 1)) ? Config.opacity : 0
 
                 Behavior on opacity {

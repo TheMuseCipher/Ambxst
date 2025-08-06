@@ -6,7 +6,7 @@ import qs.config
 Rectangle {
     color: Colors.background
     radius: Config.roundness
-    border.color: Colors.adapter.surfaceBright
+    border.color: Colors.surfaceBright
     border.width: 0
 
     layer.enabled: true
@@ -16,6 +16,6 @@ Rectangle {
         shadowVerticalOffset: 0
         shadowBlur: 1
         shadowColor: Colors.adapter.shadow
-        shadowOpacity: 0.5
+        shadowOpacity: Config.theme.shadowOpacity
     }
 }

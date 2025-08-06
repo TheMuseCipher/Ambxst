@@ -4,9 +4,9 @@ import qs.modules.theme
 import qs.config
 
 Rectangle {
-    color: Colors.adapter.surfaceContainer
+    color: Colors.surfaceContainer
     radius: Config.roundness
-    border.color: Colors.adapter.surfaceBright
+    border.color: Colors.surfaceBright
     border.width: 0
 
     layer.enabled: false
@@ -16,6 +16,6 @@ Rectangle {
         shadowVerticalOffset: 0
         shadowBlur: 1
         shadowColor: Colors.adapter.shadow
-        shadowOpacity: 0.5
+        shadowOpacity: Config.theme.shadowOpacity
     }
 }

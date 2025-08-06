@@ -96,8 +96,8 @@ Item {
             id: previewBackground
             anchors.fill: parent
             radius: Math.max(0, Config.roundness - workspaceSpacing)
-            color: pressed ? Colors.adapter.surfaceContainerHighest : hovered ? Colors.adapter.surfaceContainer : Colors.adapter.surface
-            border.color: Colors.adapter.surfaceContainerHighest
+            color: pressed ? Colors.surfaceContainerHighest : hovered ? Colors.surfaceContainer : Colors.surface
+            border.color: Colors.surfaceContainerHighest
             border.width: 2
             visible: !windowPreview.hasContent
             clip: true
@@ -166,8 +166,8 @@ Item {
             id: previewOverlay
             anchors.fill: parent
             radius: Math.max(0, Config.roundness - workspaceSpacing)
-            color: pressed ? Qt.rgba(Colors.adapter.surfaceContainerHighest.r, Colors.adapter.surfaceContainerHighest.g, Colors.adapter.surfaceContainerHighest.b, 0.5) : hovered ? Qt.rgba(Colors.adapter.surfaceContainer.r, Colors.adapter.surfaceContainer.g, Colors.adapter.surfaceContainer.b, 0.2) : "transparent"
-            border.color: Colors.adapter.surfaceContainerHighest
+            color: pressed ? Qt.rgba(Colors.surfaceContainerHighest.r, Colors.surfaceContainerHighest.g, Colors.surfaceContainerHighest.b, 0.5) : hovered ? Qt.rgba(Colors.surfaceContainer.r, Colors.surfaceContainer.g, Colors.surfaceContainer.b, 0.2) : "transparent"
+            border.color: Colors.surfaceContainerHighest
             border.width: 2
             visible: windowPreview.hasContent
             z: 5

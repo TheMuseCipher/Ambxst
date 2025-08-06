@@ -1,7 +1,8 @@
 {
   "theme": {
     "oledMode": false,
-    "opacity": 0.5,
+    "opacity": 1.0,
+    "shadowOpacity": 1.0,
     "roundness": 16,
     "defaultFont": "Roboto Condensed",
     "animDuration": 300
@@ -10,7 +11,8 @@
     "bottom": false,
     "launcherIcon": "",
     "overviewIcon": "",
-    "showBackground": false,
+    "showBackground": true,
+    "bgOpacity": 0.5,
     "verbose": true,
     "screenList": []
   },
