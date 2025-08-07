@@ -3,7 +3,7 @@
 import QtQuick
 import Quickshell
 import qs.modules.bar
-import qs.modules.workspaces
+import qs.modules.bar.workspaces
 import qs.modules.notifications
 import qs.modules.widgets.wallpapers
 import qs.modules.widgets.notch

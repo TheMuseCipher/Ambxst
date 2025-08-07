@@ -6,10 +6,10 @@ import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
-import qs.modules.workspaces
+import qs.modules.bar.workspaces
 import qs.modules.theme
-import qs.modules.clock
-import qs.modules.systray
+import qs.modules.bar.clock
+import qs.modules.bar.systray
 import qs.modules.widgets.launcher
 import qs.modules.corners
 import qs.config
