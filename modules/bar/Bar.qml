@@ -10,7 +10,7 @@ import qs.modules.workspaces
 import qs.modules.theme
 import qs.modules.clock
 import qs.modules.systray
-import qs.modules.launcher
+import qs.modules.widgets.launcher
 import qs.modules.corners
 import qs.config
 

@@ -6,9 +6,10 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.modules.globals
 import qs.modules.theme
-import qs.modules.launcher
+import qs.modules.widgets.launcher
 import qs.modules.services
-import qs.modules.notch.overview
+import qs.modules.widgets.overview
+import qs.modules.widgets.dashboard
 import qs.config
 
 PanelWindow {

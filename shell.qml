@@ -5,8 +5,8 @@ import Quickshell
 import qs.modules.bar
 import qs.modules.workspaces
 import qs.modules.notifications
-import qs.modules.wallpaper
-import qs.modules.notch
+import qs.modules.widgets.wallpapers
+import qs.modules.widgets.notch
 import qs.modules.services
 import qs.modules.corners
 import qs.config
