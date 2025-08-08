@@ -265,9 +265,20 @@ Item {
                 return;
 
             if (mouse.button === Qt.LeftButton) {
-                root.windowClicked();
+                // Single click just focuses the window without closing overview
+                Hyprland.dispatch(`focuswindow address:${windowData.address}`);
             } else if (mouse.button === Qt.MiddleButton) {
                 root.windowClosed();
+            }
+        }
+
+        onDoubleClicked: mouse => {
+            if (!root.windowData)
+                return;
+
+            if (mouse.button === Qt.LeftButton) {
+                // Double click closes overview and focuses window
+                root.windowClicked();
             }
         }
     }

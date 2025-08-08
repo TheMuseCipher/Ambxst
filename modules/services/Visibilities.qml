@@ -36,7 +36,7 @@ Singleton {
         delete panels[screenName];
     }
 
-    function setActiveModule(moduleName) {
+    function setActiveModule(moduleName, skipFocusRestore) {
         if (!Hyprland.focusedMonitor) return;
         
         let focusedScreenName = Hyprland.focusedMonitor.name;
@@ -62,10 +62,12 @@ Singleton {
         } else {
             currentActiveModule = "";
             
-            // Restore focus when closing any module
-            if (isClosingModule) {
+            // Restore focus when closing any module (unless explicitly skipped)
+            if (isClosingModule && !skipFocusRestore) {
                 Qt.callLater(() => {
-                    Hyprland.dispatch("focuswindow", "");
+                    // Focus a window in the current workspace
+                    // Using cyclenext to focus any window in current workspace
+                    Hyprland.dispatch("cyclenext");
                 });
             }
         }

@@ -137,6 +137,13 @@ Item {
                                 acceptedButtons: Qt.LeftButton
                                 onClicked: {
                                     if (overviewRoot.draggingTargetWorkspace === -1) {
+                                        // Only switch workspace, don't close overview
+                                        Hyprland.dispatch(`workspace ${workspaceValue}`);
+                                    }
+                                }
+                                onDoubleClicked: {
+                                    if (overviewRoot.draggingTargetWorkspace === -1) {
+                                        // Double click closes overview and switches workspace
                                         Visibilities.setActiveModule("");
                                         Hyprland.dispatch(`workspace ${workspaceValue}`);
                                     }
@@ -214,8 +221,12 @@ Item {
                         }
                     }
                     onWindowClicked: {
-                        Visibilities.setActiveModule("");
-                        Hyprland.dispatch(`focuswindow address:${windowData.address}`);
+                        // Close overview and focus the specific clicked window
+                        // Skip generic focus restoration since we're handling it specifically
+                        Visibilities.setActiveModule("", true);
+                        Qt.callLater(() => {
+                            Hyprland.dispatch(`focuswindow address:${windowData.address}`);
+                        });
                     }
                     onWindowClosed: {
                         Hyprland.dispatch(`closewindow address:${windowData.address}`);
