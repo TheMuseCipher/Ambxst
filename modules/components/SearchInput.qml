@@ -17,6 +17,8 @@ PaneRect {
     signal escapePressed
     signal downPressed
     signal upPressed
+    signal leftPressed
+    signal rightPressed
     signal pageDownPressed
     signal pageUpPressed
     signal homePressed
@@ -75,6 +77,12 @@ PaneRect {
                     event.accepted = true;
                 } else if (event.key === Qt.Key_Up) {
                     root.upPressed();
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Left) {
+                    root.leftPressed();
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Right) {
+                    root.rightPressed();
                     event.accepted = true;
                 } else if (event.key === Qt.Key_PageDown) {
                     root.pageDownPressed();

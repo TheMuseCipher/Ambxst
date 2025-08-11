@@ -118,17 +118,8 @@ Rectangle {
                         wallpaperGrid.currentIndex = -1;
                     }
                 }
-                onAccepted: {
-                    if (selectedIndex >= 0 && selectedIndex < filteredWallpapers.length) {
-                        let selectedWallpaper = filteredWallpapers[selectedIndex];
-                        if (selectedWallpaper && GlobalStates.wallpaperManager) {
-                            GlobalStates.wallpaperManager.setWallpaper(selectedWallpaper);
-                        }
-                    }
-                }
-
-                Keys.onPressed: event => {
-                    if (event.key === Qt.Key_Left && filteredWallpapers.length > 0) {
+                onLeftPressed: {
+                    if (filteredWallpapers.length > 0) {
                         if (selectedIndex > 0) {
                             GlobalStates.wallpaperSelectedIndex = selectedIndex - 1;
                             selectedIndex = selectedIndex - 1;
@@ -138,8 +129,10 @@ Rectangle {
                             selectedIndex = 0;
                             wallpaperGrid.currentIndex = 0;
                         }
-                        event.accepted = true;
-                    } else if (event.key === Qt.Key_Right && filteredWallpapers.length > 0) {
+                    }
+                }
+                onRightPressed: {
+                    if (filteredWallpapers.length > 0) {
                         if (selectedIndex < filteredWallpapers.length - 1) {
                             GlobalStates.wallpaperSelectedIndex = selectedIndex + 1;
                             selectedIndex = selectedIndex + 1;
@@ -149,17 +142,14 @@ Rectangle {
                             selectedIndex = 0;
                             wallpaperGrid.currentIndex = 0;
                         }
-                        event.accepted = true;
-                    } else if (event.key === Qt.Key_Home && filteredWallpapers.length > 0) {
-                        GlobalStates.wallpaperSelectedIndex = 0;
-                        selectedIndex = 0;
-                        wallpaperGrid.currentIndex = 0;
-                        event.accepted = true;
-                    } else if (event.key === Qt.Key_End && filteredWallpapers.length > 0) {
-                        GlobalStates.wallpaperSelectedIndex = filteredWallpapers.length - 1;
-                        selectedIndex = filteredWallpapers.length - 1;
-                        wallpaperGrid.currentIndex = selectedIndex;
-                        event.accepted = true;
+                    }
+                }
+                onAccepted: {
+                    if (selectedIndex >= 0 && selectedIndex < filteredWallpapers.length) {
+                        let selectedWallpaper = filteredWallpapers[selectedIndex];
+                        if (selectedWallpaper && GlobalStates.wallpaperManager) {
+                            GlobalStates.wallpaperManager.setWallpaper(selectedWallpaper);
+                        }
                     }
                 }
             }
