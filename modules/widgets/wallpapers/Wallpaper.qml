@@ -1,4 +1,5 @@
 import QtQuick
+import QtMultimedia
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -36,6 +37,8 @@ PanelWindow {
             return 'image';
         } else if (['gif'].includes(extension)) {
             return 'gif';
+        } else if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(extension)) {
+            return 'video';
         }
         return 'unknown';
     }
@@ -52,19 +55,50 @@ PanelWindow {
         if (currentWallpaper && initialLoadCompleted) {
             console.log("Wallpaper changed to:", currentWallpaper);
 
+            var fileType = getFileType(currentWallpaper);
+            var matugenSource = currentWallpaper;
+            
+            // Si es un video, usar su thumbnail para matugen
+            if (fileType === 'video') {
+                matugenSource = getThumbnailPath(currentWallpaper);
+            }
+
             // Ejecutar matugen con configuración específica
-            matugenProcessWithConfig.command = ["matugen", "image", currentWallpaper, "-c", Qt.resolvedUrl("../../../assets/matugen/config.toml").toString().replace("file://", "")];
+            matugenProcessWithConfig.command = ["matugen", "image", matugenSource, "-c", Qt.resolvedUrl("../../../assets/matugen/config.toml").toString().replace("file://", "")];
             matugenProcessWithConfig.running = true;
         }
     }
 
-    function generateThumbnail(sourcePath, thumbnailPath, callback) {
+    function generateThumbnail(sourcePath, callback) {
+        var fileType = getFileType(sourcePath);
+        if (fileType !== 'video') {
+            // Para imágenes y GIFs, no necesitamos cache
+            if (callback) callback(sourcePath);
+            return;
+        }
+        
+        // Para videos, generar thumbnail
+        var fileName = sourcePath.split('/').pop();
+        var baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+        var thumbnailPath = Quickshell.cachePath("video_thumbnails/" + baseName + ".jpg");
+        
         // Verificar si la miniatura ya existe
         checkThumbnailExists.sourcePath = sourcePath;
         checkThumbnailExists.thumbnailPath = thumbnailPath;
         checkThumbnailExists.callback = callback;
         checkThumbnailExists.command = ["test", "-f", thumbnailPath];
         checkThumbnailExists.running = true;
+    }
+
+    function getThumbnailPath(sourcePath) {
+        var fileType = getFileType(sourcePath);
+        if (fileType !== 'video') {
+            return sourcePath;
+        }
+        
+        var fileName = sourcePath.split('/').pop();
+        var baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+        return Quickshell.cachePath("video_thumbnails/" + baseName + ".jpg");
     }
 
     function setWallpaper(path) {
@@ -191,7 +225,15 @@ PanelWindow {
         onExited: {
             // Cuando termina el primer proceso, ejecutar el segundo sin configuración
             console.log("Matugen with config finished, running normal matugen...");
-            matugenProcessNormal.command = ["matugen", "image", currentWallpaper];
+            var fileType = getFileType(currentWallpaper);
+            var matugenSource = currentWallpaper;
+            
+            // Si es un video, usar su thumbnail para matugen
+            if (fileType === 'video') {
+                matugenSource = getThumbnailPath(currentWallpaper);
+            }
+            
+            matugenProcessNormal.command = ["matugen", "image", matugenSource];
             matugenProcessNormal.running = true;
         }
     }
@@ -222,6 +264,90 @@ PanelWindow {
         }
     }
 
+    // Proceso para verificar si existe una miniatura
+    Process {
+        id: checkThumbnailExists
+        running: false
+        command: []
+
+        property string sourcePath: ""
+        property string thumbnailPath: ""
+        property var callback: null
+
+        onExited: function(exitCode) {
+            if (exitCode === 0) {
+                // El archivo existe
+                console.log("Thumbnail exists:", thumbnailPath);
+                if (callback) callback(thumbnailPath);
+            } else {
+                // El archivo no existe, generarlo
+                console.log("Generating thumbnail for:", sourcePath);
+                generateThumbnailProcess.sourcePath = sourcePath;
+                generateThumbnailProcess.thumbnailPath = thumbnailPath;
+                generateThumbnailProcess.callback = callback;
+                
+                // Crear directorio si no existe
+                createThumbnailDir.command = ["mkdir", "-p", Quickshell.cachePath("video_thumbnails")];
+                createThumbnailDir.running = true;
+            }
+        }
+    }
+
+    // Proceso para crear el directorio de thumbnails
+    Process {
+        id: createThumbnailDir
+        running: false
+        command: []
+
+        onExited: {
+            // Generar thumbnail con FFmpeg
+            generateThumbnailProcess.command = [
+                "ffmpeg", "-i", generateThumbnailProcess.sourcePath,
+                "-vf", "thumbnail,scale=320:180",
+                "-frames:v", "1", "-update", "1", "-y", generateThumbnailProcess.thumbnailPath
+            ];
+            generateThumbnailProcess.running = true;
+        }
+    }
+
+    // Proceso para generar miniaturas con FFmpeg
+    Process {
+        id: generateThumbnailProcess
+        running: false
+        command: []
+
+        property string sourcePath: ""
+        property string thumbnailPath: ""
+        property var callback: null
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0) {
+                    console.log("FFmpeg output:", text);
+                }
+            }
+        }
+
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0) {
+                    console.log("FFmpeg stderr:", text);
+                }
+            }
+        }
+
+        onExited: function(exitCode) {
+            if (exitCode === 0) {
+                console.log("Thumbnail generated successfully:", thumbnailPath);
+                if (callback) callback(thumbnailPath);
+            } else {
+                console.warn("Failed to generate thumbnail for:", sourcePath);
+                // Fallback: usar el video original
+                if (callback) callback(sourcePath);
+            }
+        }
+    }
+
     // Directory watcher using FileView to monitor the wallpaper directory
     FileView {
         id: directoryWatcher
@@ -240,7 +366,7 @@ PanelWindow {
     Process {
         id: scanWallpapers
         running: false
-        command: ["find", wallpaperDir, "-type", "f", "(", "-name", "*.jpg", "-o", "-name", "*.jpeg", "-o", "-name", "*.png", "-o", "-name", "*.webp", "-o", "-name", "*.tif", "-o", "-name", "*.tiff", "-o", "-name", "*.gif", ")"]
+        command: ["find", wallpaperDir, "-type", "f", "(", "-name", "*.jpg", "-o", "-name", "*.jpeg", "-o", "-name", "*.png", "-o", "-name", "*.webp", "-o", "-name", "*.tif", "-o", "-name", "*.tiff", "-o", "-name", "*.gif", "-o", "-name", "*.mp4", "-o", "-name", "*.webm", "-o", "-name", "*.mov", "-o", "-name", "*.avi", "-o", "-name", "*.mkv", ")"]
 
         stdout: StdioCollector {
             onStreamFinished: {
@@ -304,7 +430,7 @@ PanelWindow {
     Process {
         id: scanFallback
         running: false
-        command: ["find", fallbackDir, "-type", "f", "(", "-name", "*.jpg", "-o", "-name", "*.jpeg", "-o", "-name", "*.png", "-o", "-name", "*.webp", "-o", "-name", "*.tif", "-o", "-name", "*.tiff", "-o", "-name", "*.gif", ")"]
+        command: ["find", fallbackDir, "-type", "f", "(", "-name", "*.jpg", "-o", "-name", "*.jpeg", "-o", "-name", "*.png", "-o", "-name", "*.webp", "-o", "-name", "*.tif", "-o", "-name", "*.tiff", "-o", "-name", "*.gif", "-o", "-name", "*.mp4", "-o", "-name", "*.webm", "-o", "-name", "*.mov", "-o", "-name", "*.avi", "-o", "-name", "*.mkv", ")"]
 
         stdout: StdioCollector {
             onStreamFinished: {
@@ -401,6 +527,8 @@ PanelWindow {
                     return staticImageComponent;
                 } else if (fileType === 'gif') {
                     return animatedImageComponent;
+                } else if (fileType === 'video') {
+                    return videoComponent;
                 }
                 return staticImageComponent; // fallback
             }
@@ -426,6 +554,66 @@ PanelWindow {
                 asynchronous: true
                 smooth: true
                 playing: true
+            }
+        }
+
+        Component {
+            id: videoComponent
+            VideoOutput {
+                fillMode: VideoOutput.PreserveAspectCrop
+                property string videoSource: parent.sourceFile || ""
+                
+                MediaPlayer {
+                    id: mediaPlayer
+                    source: ""
+                    loops: MediaPlayer.Infinite
+                    audioOutput: AudioOutput {
+                        muted: true
+                    }
+                    autoPlay: false
+                    
+                    onMediaStatusChanged: {
+                        console.log("MediaPlayer status changed:", mediaStatus, "for:", source);
+                        if (mediaStatus === MediaPlayer.LoadedMedia) {
+                            console.log("Video loaded, starting playback");
+                            play();
+                        } else if (mediaStatus === MediaPlayer.InvalidMedia) {
+                            console.warn("Invalid media:", source);
+                        }
+                    }
+                    
+                    onErrorOccurred: function(error, errorString) {
+                        console.warn("MediaPlayer error:", error, errorString);
+                    }
+                }
+                
+                onVideoSourceChanged: {
+                    if (videoSource) {
+                        var newSource = "file://" + videoSource;
+                        console.log("Video source changed, loading:", newSource);
+                        mediaPlayer.stop();
+                        mediaPlayer.source = newSource;
+                    }
+                }
+                
+                Component.onCompleted: {
+                    console.log("VideoOutput created for:", videoSource);
+                    mediaPlayer.videoOutput = this;
+                    
+                    if (videoSource) {
+                        var initialSource = "file://" + videoSource;
+                        console.log("Initial video load:", initialSource);
+                        mediaPlayer.source = initialSource;
+                    }
+                }
+                
+                Component.onDestruction: {
+                    console.log("VideoOutput destroyed, stopping playback");
+                    if (mediaPlayer) {
+                        mediaPlayer.stop();
+                        mediaPlayer.source = "";
+                    }
+                }
             }
         }
     }

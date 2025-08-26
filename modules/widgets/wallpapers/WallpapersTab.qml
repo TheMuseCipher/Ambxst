@@ -329,7 +329,7 @@ Rectangle {
 
                                         SequentialAnimation {
                                             id: scrollAnimation
-                                            running: labelText.needsScroll && parent.visible && !parent.isCurrentWallpaper
+                                            running: labelText.needsScroll && labelText.parent && labelText.parent.visible && !labelText.parent.isCurrentWallpaper
                                             loops: Animation.Infinite
 
                                             PauseAnimation {
@@ -398,6 +398,8 @@ Rectangle {
                                     return staticImageComponent;
                                 } else if (fileType === 'gif') {
                                     return animatedImageComponent;
+                                } else if (fileType === 'video') {
+                                    return videoThumbnailComponent;
                                 }
                                 return staticImageComponent; // Fallback
                             }
@@ -425,6 +427,66 @@ Rectangle {
                                 asynchronous: true
                                 smooth: true
                                 playing: parent.parent.isSelected // Solo se anima cuando está seleccionado
+                            }
+                        }
+
+                        // Componente para thumbnails de video.
+                        Component {
+                            id: videoThumbnailComponent
+                            Item {
+                                property string thumbnailSource: ""
+                                property bool thumbnailLoaded: false
+                                property bool thumbnailError: false
+
+                                Component.onCompleted: {
+                                    if (GlobalStates.wallpaperManager) {
+                                        GlobalStates.wallpaperManager.generateThumbnail(parent.sourceFile, function(thumbnailPath) {
+                                            console.log("Thumbnail callback received:", thumbnailPath);
+                                            
+                                            // Limpiar el path para evitar duplicación de file://
+                                            var cleanPath = thumbnailPath;
+                                            if (cleanPath.startsWith("file://")) {
+                                                cleanPath = cleanPath.substring(7);
+                                            }
+                                            
+                                            thumbnailSource = cleanPath;
+                                            thumbnailLoaded = true;
+                                            console.log("Final thumbnail source:", thumbnailSource);
+                                        });
+                                    }
+                                }
+
+                                // Placeholder mientras se carga el thumbnail
+                                Rectangle {
+                                    anchors.fill: parent
+                                    color: Colors.surfaceContainerHigh
+                                    visible: !thumbnailLoaded || thumbnailError
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: thumbnailError ? "❌" : "📹"
+                                        font.pixelSize: 24
+                                        color: Colors.adapter.overSurfaceVariant
+                                    }
+                                }
+
+                                // Thumbnail generado
+                                Image {
+                                    anchors.fill: parent
+                                    source: thumbnailLoaded && !thumbnailError && thumbnailSource ? "file://" + thumbnailSource : ""
+                                    fillMode: Image.PreserveAspectCrop
+                                    asynchronous: true
+                                    smooth: true
+                                    visible: thumbnailLoaded && !thumbnailError && status === Image.Ready
+                                    
+                                    onStatusChanged: {
+                                        console.log("Thumbnail image status:", status, "for source:", source);
+                                        if (status === Image.Error) {
+                                            console.warn("Failed to load thumbnail image:", source);
+                                            thumbnailError = true;
+                                        }
+                                    }
+                                }
                             }
                         }
 
