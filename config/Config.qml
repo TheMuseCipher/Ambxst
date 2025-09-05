@@ -22,6 +22,7 @@ Singleton {
                 property int roundness: 16
                 property string font: "Roboto Condensed"
                 property int fontSize: 14
+                property bool fillIcons: false
                 property int animDuration: 300
             }
 

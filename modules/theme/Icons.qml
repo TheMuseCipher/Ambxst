@@ -1,10 +1,11 @@
 pragma Singleton
 
 import QtQuick
+import qs.config
 
 QtObject {
     // Icon font
-    readonly property string font: "Phosphor-Bold"
+    readonly property string font: Config.theme.fillIcons ? "Phosphor-Fill" : "Phosphor-Bold"
     // Overview button icon
     readonly property string overview: ""
     // Powermenu icons
