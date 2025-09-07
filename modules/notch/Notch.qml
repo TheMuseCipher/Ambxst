@@ -65,15 +65,7 @@ Item {
         bottomRightRadius: Config.roundness > 0 ? (screenNotchOpen ? Config.roundness + 20 : Config.roundness + 4) : 0
         clip: true
 
-        Behavior on bottomLeftRadius {
-            NumberAnimation {
-                duration: Config.animDuration
-                easing.type: screenNotchOpen ? Easing.OutBack : Easing.OutQuart
-                easing.overshoot: screenNotchOpen ? 1.2 : 1.0
-            }
-        }
-
-        Behavior on bottomRightRadius {
+        Behavior on radius {
             NumberAnimation {
                 duration: Config.animDuration
                 easing.type: screenNotchOpen ? Easing.OutBack : Easing.OutQuart
