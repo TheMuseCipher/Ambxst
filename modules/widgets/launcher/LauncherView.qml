@@ -165,6 +165,11 @@ Item {
                 // Función para navegar a un tab específico
                 function navigateToTab(index) {
                     if (index >= 0 && index < components.length && index !== root.state.currentTab) {
+                        // Cancelar modo eliminar en tmux tab si está activo
+                        if (root.state.currentTab === 1 && stack.currentItem && stack.currentItem.cancelDeleteModeFromExternal) {
+                            stack.currentItem.cancelDeleteModeFromExternal();
+                        }
+                        
                         let targetComponent = components[index];
 
                         // Determinar dirección de la transición

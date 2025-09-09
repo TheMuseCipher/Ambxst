@@ -11,12 +11,18 @@ import qs.config
 
 Rectangle {
     id: root
+    focus: true
 
     property string searchText: ""
     property bool showResults: searchText.length > 0
     property int selectedIndex: -1
     property var tmuxSessions: []
     property alias filteredSessions: listModel.sessions
+    
+    // Delete mode state
+    property bool deleteMode: false
+    property string sessionToDelete: ""
+    property int originalSelectedIndex: -1
     
     signal itemSelected
 
@@ -52,12 +58,19 @@ Rectangle {
         searchInput.focusInput();
     }
 
+    function cancelDeleteModeFromExternal() {
+        if (deleteMode) {
+            console.log("DEBUG: Canceling delete mode from external source (tab change)");
+            cancelDeleteMode();
+        }
+    }
+
     function updateFilteredSessions() {
         console.log("DEBUG: updateFilteredSessions called. searchText:", searchText, "tmuxSessions.length:", tmuxSessions.length);
         
         var newFilteredSessions = [];
         
-        // Filtrar sesiones que coincidan con el texto de búsqueda
+        // Filtrar sesiones que coincidan con el texto de búsqueda (sin considerar deleteMode aquí)
         if (searchText.length === 0) {
             newFilteredSessions = tmuxSessions.slice(); // Copia del array
         } else {
@@ -83,8 +96,8 @@ Rectangle {
         
         console.log("DEBUG: newFilteredSessions after filter:", newFilteredSessions.length);
         
-        // Solo agregar el botón "Create new session" cuando NO hay texto de búsqueda
-        if (searchText.length === 0) {
+        // Solo agregar el botón "Create new session" cuando NO hay texto de búsqueda y NO estamos en modo eliminar
+        if (searchText.length === 0 && !deleteMode) {
             newFilteredSessions.push({
                 name: "Create new session",
                 isCreateButton: true,
@@ -97,16 +110,48 @@ Rectangle {
         // Actualizar el modelo
         listModel.updateSessions(newFilteredSessions);
         
-        // Auto-highlight first item when text is entered
-        if (searchText.length > 0 && newFilteredSessions.length > 0) {
-            selectedIndex = 0;
-            resultsList.currentIndex = 0;
-        } else if (searchText.length === 0) {
-            selectedIndex = -1;
-            resultsList.currentIndex = -1;
+        // Auto-highlight first item when text is entered, pero NO en modo eliminar
+        if (!deleteMode) {
+            if (searchText.length > 0 && newFilteredSessions.length > 0) {
+                selectedIndex = 0;
+                resultsList.currentIndex = 0;
+            } else if (searchText.length === 0) {
+                selectedIndex = -1;
+                resultsList.currentIndex = -1;
+            }
         }
         
         console.log("DEBUG: Final selectedIndex:", selectedIndex, "resultsList will have count:", newFilteredSessions.length);
+    }
+
+    function enterDeleteMode(sessionName) {
+        console.log("DEBUG: Entering delete mode for session:", sessionName);
+        originalSelectedIndex = selectedIndex; // Store the current index
+        deleteMode = true;
+        sessionToDelete = sessionName;
+        // Quitar focus del SearchInput para que el componente root pueda capturar Y/N
+        root.forceActiveFocus();
+        // No necesito llamar updateFilteredSessions porque el delegate se actualiza automáticamente
+    }
+
+    function cancelDeleteMode() {
+        console.log("DEBUG: Canceling delete mode");
+        deleteMode = false;
+        sessionToDelete = "";
+        // Devolver focus al SearchInput
+        searchInput.focusInput();
+        updateFilteredSessions();
+        // Restore the original selectedIndex
+        selectedIndex = originalSelectedIndex;
+        resultsList.currentIndex = originalSelectedIndex;
+        originalSelectedIndex = -1;
+    }
+
+    function confirmDeleteSession() {
+        console.log("DEBUG: Confirming delete for session:", sessionToDelete);
+        killProcess.command = ["tmux", "kill-session", "-t", sessionToDelete];
+        killProcess.running = true;
+        cancelDeleteMode();
     }
 
     function refreshTmuxSessions() {
@@ -195,9 +240,23 @@ Rectangle {
     Process {
         id: attachProcess
         running: false
-
-        onStarted: function () {
+        
+        onStarted: function() {
             root.itemSelected();
+        }
+    }
+
+    // Proceso para eliminar sesiones de tmux
+    Process {
+        id: killProcess
+        running: false
+        
+        onExited: function(code) {
+            console.log("DEBUG: Kill session completed with code:", code);
+            if (code === 0) {
+                // Sesión eliminada exitosamente, refrescar la lista
+                root.refreshTmuxSessions();
+            }
         }
     }
 
@@ -219,34 +278,58 @@ Rectangle {
             }
 
             onAccepted: {
-                console.log("DEBUG: Enter pressed! searchText:", root.searchText, "selectedIndex:", root.selectedIndex, "resultsList.count:", resultsList.count);
-                
-                if (root.selectedIndex >= 0 && root.selectedIndex < resultsList.count) {
-                    let selectedSession = root.filteredSessions[root.selectedIndex];
-                    console.log("DEBUG: Selected session:", selectedSession);
-                    if (selectedSession) {
-                        if (selectedSession.isCreateSpecificButton) {
-                            console.log("DEBUG: Creating specific session:", selectedSession.sessionNameToCreate);
-                            root.createTmuxSession(selectedSession.sessionNameToCreate);
-                        } else if (selectedSession.isCreateButton) {
-                            console.log("DEBUG: Creating new session via create button");
-                            root.createTmuxSession();
-                        } else {
-                            console.log("DEBUG: Attaching to existing session:", selectedSession.name);
-                            root.attachToSession(selectedSession.name);
-                        }
-                    }
+                if (root.deleteMode) {
+                    // En modo eliminar, Enter equivale a "N" (no eliminar)
+                    console.log("DEBUG: Enter in delete mode - canceling");
+                    root.cancelDeleteMode();
                 } else {
-                    console.log("DEBUG: No action taken - selectedIndex:", root.selectedIndex, "count:", resultsList.count);
+                    console.log("DEBUG: Enter pressed! searchText:", root.searchText, "selectedIndex:", root.selectedIndex, "resultsList.count:", resultsList.count);
+                    
+                    if (root.selectedIndex >= 0 && root.selectedIndex < resultsList.count) {
+                        let selectedSession = root.filteredSessions[root.selectedIndex];
+                        console.log("DEBUG: Selected session:", selectedSession);
+                        if (selectedSession) {
+                            if (selectedSession.isCreateSpecificButton) {
+                                console.log("DEBUG: Creating specific session:", selectedSession.sessionNameToCreate);
+                                root.createTmuxSession(selectedSession.sessionNameToCreate);
+                            } else if (selectedSession.isCreateButton) {
+                                console.log("DEBUG: Creating new session via create button");
+                                root.createTmuxSession();
+                            } else {
+                                console.log("DEBUG: Attaching to existing session:", selectedSession.name);
+                                root.attachToSession(selectedSession.name);
+                            }
+                        }
+                    } else {
+                        console.log("DEBUG: No action taken - selectedIndex:", root.selectedIndex, "count:", resultsList.count);
+                    }
+                }
+            }
+
+            onShiftAccepted: {
+                console.log("DEBUG: Shift+Enter pressed! selectedIndex:", root.selectedIndex, "deleteMode:", root.deleteMode);
+                
+                if (!root.deleteMode && root.selectedIndex >= 0 && root.selectedIndex < resultsList.count) {
+                    let selectedSession = root.filteredSessions[root.selectedIndex];
+                    console.log("DEBUG: Selected session for deletion:", selectedSession);
+                    if (selectedSession && !selectedSession.isCreateButton && !selectedSession.isCreateSpecificButton) {
+                        // Solo permitir eliminar sesiones reales, no botones de crear
+                        root.enterDeleteMode(selectedSession.name);
+                    }
                 }
             }
 
             onEscapePressed: {
-                root.itemSelected();
+                if (!root.deleteMode) {
+                    // Solo cerrar el notch si NO estamos en modo eliminar
+                    root.itemSelected();
+                }
+                // Si estamos en modo eliminar, no hacer nada aquí
+                // El handler global del root se encargará
             }
 
             onDownPressed: {
-                if (resultsList.count > 0) {
+                if (!root.deleteMode && resultsList.count > 0) {
                     if (root.selectedIndex === -1) {
                         root.selectedIndex = 0;
                         resultsList.currentIndex = 0;
@@ -258,12 +341,14 @@ Rectangle {
             }
 
             onUpPressed: {
-                if (root.selectedIndex > 0) {
-                    root.selectedIndex--;
-                    resultsList.currentIndex = root.selectedIndex;
-                } else if (root.selectedIndex === 0 && root.searchText.length === 0) {
-                    root.selectedIndex = -1;
-                    resultsList.currentIndex = -1;
+                if (!root.deleteMode) {
+                    if (root.selectedIndex > 0) {
+                        root.selectedIndex--;
+                        resultsList.currentIndex = root.selectedIndex;
+                    } else if (root.selectedIndex === 0 && root.searchText.length === 0) {
+                        root.selectedIndex = -1;
+                        resultsList.currentIndex = -1;
+                    }
                 }
             }
 
@@ -362,15 +447,45 @@ Rectangle {
                     Rectangle {
                         Layout.preferredWidth: 32
                         Layout.preferredHeight: 32
-                        color: modelData.isCreateButton ? Colors.adapter.primary : Colors.adapter.surface
+                        color: {
+                            if (root.deleteMode && modelData.name === root.sessionToDelete) {
+                                return Colors.adapter.error;
+                            } else if (modelData.isCreateButton) {
+                                return Colors.adapter.primary;
+                            } else {
+                                return Colors.adapter.surface;
+                            }
+                        }
                         radius: 6
+                        
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Config.animDuration / 2
+                                easing.type: Easing.OutQuart
+                            }
+                        }
 
                         Text {
                             anchors.centerIn: parent
                             text: ""  // Icono de terminal
-                            color: modelData.isCreateButton ? Colors.background : Colors.adapter.overSurface
+                            color: {
+                                if (root.deleteMode && modelData.name === root.sessionToDelete) {
+                                    return Colors.adapter.errorContainer;
+                                } else if (modelData.isCreateButton) {
+                                    return Colors.background;
+                                } else {
+                                    return Colors.adapter.overSurface;
+                                }
+                            }
                             font.family: Icons.font
                             font.pixelSize: 16
+                            
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutQuart
+                                }
+                            }
                         }
                     }
 
@@ -381,12 +496,26 @@ Rectangle {
 
                         Text {
                             Layout.fillWidth: true
-                            text: modelData.name
-                            color: Colors.adapter.overBackground
+                            text: {
+                                // Si estamos en modo eliminar y este es el item seleccionado
+                                if (root.deleteMode && modelData.name === root.sessionToDelete) {
+                                    return `Exit "${root.sessionToDelete}"? (y/N)`;
+                                } else {
+                                    return modelData.name;
+                                }
+                            }
+                            color: (root.deleteMode && modelData.name === root.sessionToDelete) ? Colors.adapter.errorContainer : Colors.adapter.overBackground
                             font.family: Config.theme.font
                             font.pixelSize: Config.theme.fontSize
                             font.weight: modelData.isCreateButton ? Font.Medium : Font.Bold
                             elide: Text.ElideRight
+                            
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutQuart
+                                }
+                            }
                         }
 
                         Text {
@@ -404,10 +533,24 @@ Rectangle {
             }
 
             highlight: Rectangle {
-                color: Colors.adapter.primary
-                opacity: 0.2
+                color: root.deleteMode ? Colors.adapter.error : Colors.adapter.primary
+                opacity: root.deleteMode ? 1.0 : 0.2
                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                 visible: root.selectedIndex >= 0
+                
+                Behavior on color {
+                    ColorAnimation {
+                        duration: Config.animDuration / 2
+                        easing.type: Easing.OutQuart
+                    }
+                }
+                
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Config.animDuration / 2
+                        easing.type: Easing.OutQuart
+                    }
+                }
             }
 
             highlightMoveDuration: Config.animDuration / 2
@@ -421,5 +564,35 @@ Rectangle {
         Qt.callLater(() => {
             focusSearchInput();
         });
+    }
+
+    // Handler de teclas global para manejar Y/N/Enter/Escape en modo eliminar
+    Keys.onPressed: event => {
+        if (root.deleteMode) {
+            if (event.key === Qt.Key_Y) {
+                console.log("DEBUG: Y pressed - confirming delete");
+                root.confirmDeleteSession();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_N) {
+                console.log("DEBUG: N pressed - canceling delete");
+                root.cancelDeleteMode();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                console.log("DEBUG: Enter pressed in delete mode - defaulting to N (cancel)");
+                root.cancelDeleteMode();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Escape) {
+                console.log("DEBUG: Escape pressed in delete mode - canceling without closing notch");
+                root.cancelDeleteMode();
+                event.accepted = true;
+            }
+        }
+    }
+
+    // Monitor cambios en deleteMode para cancelar al cambiar tabs
+    onDeleteModeChanged: {
+        if (!deleteMode) {
+            console.log("DEBUG: Delete mode ended");
+        }
     }
 }

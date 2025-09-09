@@ -14,6 +14,7 @@ PaneRect {
 
     signal searchTextChanged(string text)
     signal accepted
+    signal shiftAccepted
     signal escapePressed
     signal downPressed
     signal upPressed
@@ -66,7 +67,14 @@ PaneRect {
             }
 
             Keys.onPressed: event => {
-                if (event.key === Qt.Key_Escape) {
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                    if (event.modifiers & Qt.ShiftModifier) {
+                        root.shiftAccepted();
+                    } else {
+                        root.accepted();
+                    }
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Escape) {
                     if (root.clearOnEscape) {
                         clear();
                     }
