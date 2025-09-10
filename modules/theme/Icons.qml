@@ -35,4 +35,5 @@ QtObject {
     readonly property string cancel: ""
     readonly property string add: ""
     readonly property string alert: ""
+    readonly property string edit: ""
 }

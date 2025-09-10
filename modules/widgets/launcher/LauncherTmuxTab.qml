@@ -938,6 +938,8 @@ Rectangle {
                         color: {
                             if (isInDeleteMode) {
                                 return Colors.adapter.overError;
+                            } else if (isInRenameMode) {
+                                return Colors.adapter.overPrimary;
                             } else if (modelData.isCreateButton) {
                                 return Colors.adapter.primary;
                             } else {
@@ -958,6 +960,8 @@ Rectangle {
                             text: {
                                 if (isInDeleteMode) {
                                     return Icons.alert;
+                                } else if (isInRenameMode) {
+                                    return Icons.edit;
                                 } else if (modelData.isCreateButton || modelData.isCreateSpecificButton) {
                                     return Icons.add;
                                 } else {
@@ -967,6 +971,8 @@ Rectangle {
                             color: {
                                 if (isInDeleteMode) {
                                     return Colors.adapter.error;
+                                } else if (isInRenameMode) {
+                                    return Colors.adapter.primary;
                                 } else if (modelData.isCreateButton) {
                                     return Colors.background;
                                 } else {
