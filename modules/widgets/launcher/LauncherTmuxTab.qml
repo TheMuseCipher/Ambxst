@@ -194,7 +194,7 @@ Rectangle {
         renameMode = true;
         sessionToRename = sessionName;
         newSessionName = sessionName; // Start with the current name
-        renameButtonIndex = 0; // Start with cancel button selected
+        renameButtonIndex = 1; // Start with accept button selected
         // Quitar focus del SearchInput para que el componente root pueda capturar teclas
         root.forceActiveFocus();
         // Force focus to the TextInput after the loader switches components
@@ -209,7 +209,7 @@ Rectangle {
         renameMode = false;
         sessionToRename = "";
         newSessionName = "";
-        renameButtonIndex = 0;
+        renameButtonIndex = 1;
         // Only clear pending selection if we're not waiting for a rename result
         if (pendingRenamedSession === "") {
             // Devolver focus al SearchInput
@@ -849,7 +849,6 @@ Rectangle {
                                 onClicked: root.cancelRenameMode()
                                 onEntered: {
                                     root.renameButtonIndex = 0;
-                                    parent.color = Colors.adapter.surfaceVariant;
                                 }
                                 onExited: parent.color = "transparent"
                             }
@@ -887,7 +886,6 @@ Rectangle {
                                 onClicked: root.confirmRenameSession()
                                 onEntered: {
                                     root.renameButtonIndex = 1;
-                                    parent.color = Qt.darker(Colors.adapter.primary, 1.1);
                                 }
                                 onExited: parent.color = "transparent"
                             }
@@ -923,7 +921,15 @@ Rectangle {
                     id: mainContent
                     anchors.fill: parent
                     anchors.margins: 8
+                    anchors.rightMargin: isInRenameMode ? 84 : 8 // 68 (ancho botones) + 16 (padding extra)
                     spacing: 12
+
+                    Behavior on anchors.rightMargin {
+                        NumberAnimation {
+                            duration: Config.animDuration
+                            easing.type: Easing.OutQuart
+                        }
+                    }
 
                     // Icono
                     Rectangle {
