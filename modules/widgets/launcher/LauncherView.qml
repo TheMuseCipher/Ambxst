@@ -122,7 +122,7 @@ Item {
 
                         contentItem: Text {
                             text: parent.text
-                            color: root.state.currentTab === index ? Colors.background : Colors.adapter.overBackground
+                            color: root.state.currentTab === index ? Colors.adapter.overPrimary : Colors.adapter.overBackground
                             font.family: Icons.font
                             font.pixelSize: 20
                             font.weight: Font.Medium

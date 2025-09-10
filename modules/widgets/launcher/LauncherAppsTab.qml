@@ -229,18 +229,24 @@ Rectangle {
                     Text {
                         Layout.fillWidth: true
                         text: modelData.name
-                        color: Colors.adapter.overBackground
+                        color: root.selectedIndex === index ? Colors.adapter.overPrimary : Colors.adapter.overBackground
                         font.family: Config.theme.font
                         font.pixelSize: Config.theme.fontSize
                         font.weight: Font.Bold
                         elide: Text.ElideRight
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Config.animDuration / 2
+                                easing.type: Easing.OutCubic
+                            }
+                        }
                     }
                 }
             }
 
             highlight: Rectangle {
                 color: Colors.adapter.primary
-                opacity: 0.2
                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                 visible: root.selectedIndex >= 0
             }

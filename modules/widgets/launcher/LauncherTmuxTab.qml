@@ -856,7 +856,7 @@ Rectangle {
                             Text {
                                 anchors.centerIn: parent
                                 text: Icons.cancel
-                                color: renameCancelButton.isHighlighted ? Colors.adapter.primary : Colors.adapter.overPrimary
+                                color: renameCancelButton.isHighlighted ? Colors.adapter.secondary : Colors.adapter.overSecondary
                                 font.pixelSize: 14
                                 font.family: Icons.font
 
@@ -893,7 +893,7 @@ Rectangle {
                             Text {
                                 anchors.centerIn: parent
                                 text: Icons.accept
-                                color: renameConfirmButton.isHighlighted ? Colors.adapter.primary : Colors.adapter.overPrimary
+                                color: renameConfirmButton.isHighlighted ? Colors.adapter.secondary : Colors.adapter.overSecondary
                                 font.pixelSize: 14
                                 font.family: Icons.font
 
@@ -939,6 +939,8 @@ Rectangle {
                             if (isInDeleteMode) {
                                 return Colors.adapter.overError;
                             } else if (isInRenameMode) {
+                                return Colors.adapter.overSecondary;
+                            } else if (root.selectedIndex === index) {
                                 return Colors.adapter.overPrimary;
                             } else if (modelData.isCreateButton) {
                                 return Colors.adapter.primary;
@@ -972,6 +974,8 @@ Rectangle {
                                 if (isInDeleteMode) {
                                     return Colors.adapter.error;
                                 } else if (isInRenameMode) {
+                                    return Colors.adapter.secondary;
+                                } else if (root.selectedIndex === index) {
                                     return Colors.adapter.primary;
                                 } else if (modelData.isCreateButton) {
                                     return Colors.background;
@@ -1019,7 +1023,7 @@ Rectangle {
                                         return modelData.name;
                                     }
                                 }
-                                color: isInDeleteMode ? Colors.adapter.overError : Colors.adapter.overBackground
+                                color: isInDeleteMode ? Colors.adapter.overError : (root.selectedIndex === index ? Colors.adapter.overPrimary : Colors.adapter.overBackground)
                                 font.family: Config.theme.font
                                 font.pixelSize: Config.theme.fontSize
                                 font.weight: isInDeleteMode ? Font.Bold : (modelData.isCreateButton ? Font.Medium : Font.Bold)
@@ -1039,9 +1043,9 @@ Rectangle {
                             id: renameTextInput
                             TextField {
                                 text: root.newSessionName
-                                color: Colors.adapter.overPrimary
-                                selectionColor: Colors.adapter.overPrimary
-                                selectedTextColor: Colors.adapter.primary
+                                color: Colors.adapter.overSecondary
+                                selectionColor: Colors.adapter.overSecondary
+                                selectedTextColor: Colors.adapter.secondary
                                 font.family: Config.theme.font
                                 font.pixelSize: Config.theme.fontSize
                                 font.weight: Font.Bold
@@ -1237,12 +1241,11 @@ Rectangle {
                     if (root.deleteMode) {
                         return Colors.adapter.error;
                     } else if (root.renameMode) {
-                        return Colors.adapter.primary;
+                        return Colors.adapter.secondary;
                     } else {
                         return Colors.adapter.primary;
                     }
                 }
-                opacity: (root.deleteMode || root.renameMode) ? 1.0 : 0.2
                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                 visible: root.selectedIndex >= 0
 
