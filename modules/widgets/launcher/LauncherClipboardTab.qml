@@ -763,169 +763,6 @@ Rectangle {
                                 }
                             }
 
-                            // Botones de acción que aparecen desde abajo - MOVIDO FUERA DEL MOUSEAREA
-                            Rectangle {
-                                id: imageActionContainer
-                                anchors.bottom: parent.bottom
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.bottomMargin: 4
-                                width: 68 // 32 + 4 + 32
-                                height: 32
-                                color: "transparent"
-                                opacity: (root.imageDeleteMode && modelData.id === root.imageToDelete) ? 1.0 : 0.0
-                                visible: opacity > 0
-                                z: 10 // Asegurar que esté por encima
-
-                                transform: Translate {
-                                    y: (root.imageDeleteMode && modelData.id === root.imageToDelete) ? 0 : 40
-
-                                    Behavior on y {
-                                        NumberAnimation {
-                                            duration: Config.animDuration
-                                            easing.type: Easing.OutQuart
-                                        }
-                                    }
-                                }
-
-                                Behavior on opacity {
-                                    NumberAnimation {
-                                        duration: Config.animDuration / 2
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
-
-                                // Fondo del menu
-                                Rectangle {
-                                    anchors.fill: parent
-                                    anchors.margins: -4
-                                    anchors.topMargin: 0
-                                    // color: Colors.adapter.error
-                                    color: "transparent"
-                                }
-
-                                // Highlight elástico que se estira entre botones
-                                Rectangle {
-                                    id: imageDeleteHighlight
-                                    color: Colors.adapter.overError
-                                    radius: Config.roundness > 0 ? Config.roundness - 4 : 0
-                                    visible: (root.imageDeleteMode && modelData.id === root.imageToDelete)
-
-                                    property real activeButtonMargin: 2
-                                    property real idx1X: root.imageDeleteButtonIndex
-                                    property real idx2X: root.imageDeleteButtonIndex
-
-                                    // Posición y tamaño con efecto elástico
-                                    x: {
-                                        let minX = Math.min(idx1X, idx2X) * 36 + activeButtonMargin; // 32 + 4 spacing
-                                        return minX;
-                                    }
-
-                                    y: activeButtonMargin
-
-                                    width: {
-                                        let stretchX = Math.abs(idx1X - idx2X) * 36 + 32 - activeButtonMargin * 2; // 32 + 4 spacing
-                                        return stretchX;
-                                    }
-
-                                    height: 32 - activeButtonMargin * 2
-
-                                    Behavior on idx1X {
-                                        NumberAnimation {
-                                            duration: Config.animDuration / 3
-                                            easing.type: Easing.OutSine
-                                        }
-                                    }
-                                    Behavior on idx2X {
-                                        NumberAnimation {
-                                            duration: Config.animDuration
-                                            easing.type: Easing.OutSine
-                                        }
-                                    }
-                                }
-
-                                Row {
-                                    id: imageActionButtons
-                                    anchors.fill: parent
-                                    spacing: 4
-
-                                    // Botón cancelar (cruz)
-                                    Rectangle {
-                                        id: imageCancelButton
-                                        width: 32
-                                        height: 32
-                                        color: "transparent"
-                                        radius: Config.roundness
-                                        border.width: 0
-                                        border.color: Colors.adapter.outline
-                                        z: 10
-
-                                        property bool isHighlighted: root.imageDeleteButtonIndex === 0
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            onClicked: root.cancelImageDeleteMode()
-                                            onEntered: {
-                                                root.imageDeleteButtonIndex = 0;
-                                            }
-                                            onExited: parent.color = "transparent"
-                                        }
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: Icons.cancel
-                                            color: imageCancelButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
-                                            font.pixelSize: 16
-                                            font.family: Icons.font
-
-                                            Behavior on color {
-                                                ColorAnimation {
-                                                    duration: Config.animDuration / 2
-                                                    easing.type: Easing.OutQuart
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    // Botón confirmar (trash)
-                                    Rectangle {
-                                        id: imageConfirmButton
-                                        width: 32
-                                        height: 32
-                                        color: "transparent"
-                                        radius: Config.roundness
-                                        z: 10
-
-                                        property bool isHighlighted: root.imageDeleteButtonIndex === 1
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            onClicked: root.confirmDeleteImage()
-                                            onEntered: {
-                                                root.imageDeleteButtonIndex = 1;
-                                            }
-                                            onExited: parent.color = "transparent"
-                                        }
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: Icons.trash
-                                            color: imageConfirmButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
-                                            font.pixelSize: 16
-                                            font.family: Icons.font
-
-                                            Behavior on color {
-                                                ColorAnimation {
-                                                    duration: Config.animDuration / 2
-                                                    easing.type: Easing.OutQuart
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
                             // Highlight cuando está seleccionado
                             Rectangle {
                                 anchors.fill: parent
@@ -952,7 +789,7 @@ Rectangle {
                             Rectangle {
                                 anchors.fill: parent
                                 anchors.margins: -32
-                                anchors.bottomMargin: root.imageDeleteMode ? -4 : -32
+                                anchors.bottomMargin: root.imageDeleteMode ? 0 : -32
                                 color: "transparent"
                                 border.color: root.imageDeleteMode ? Colors.adapter.error : Colors.adapter.primary
                                 border.width: 36
@@ -969,6 +806,157 @@ Rectangle {
                                     ColorAnimation {
                                         duration: Config.animDuration / 2
                                         easing.type: Easing.OutQuart
+                                    }
+                                }
+
+                                // Botones de acción de delete que aparecen desde abajo
+                                Rectangle {
+                                    id: imageActionContainer
+                                    anchors.bottom: parent.bottom
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.bottomMargin: 4
+                                    width: 68 // 32 + 4 + 32
+                                    height: 32
+                                    color: "transparent"
+                                    opacity: root.imageDeleteMode ? 1.0 : 0.0
+                                    visible: opacity > 0
+
+                                    transform: Translate {
+                                        y: root.imageDeleteMode ? 0 : 40
+
+                                        Behavior on y {
+                                            NumberAnimation {
+                                                duration: Config.animDuration
+                                                easing.type: Easing.OutQuart
+                                            }
+                                        }
+                                    }
+
+                                    Behavior on opacity {
+                                        NumberAnimation {
+                                            duration: Config.animDuration / 2
+                                            easing.type: Easing.OutQuart
+                                        }
+                                    }
+
+                                    // Highlight elástico que se estira entre botones
+                                    Rectangle {
+                                        id: imageDeleteHighlight
+                                        color: Colors.adapter.overError
+                                        radius: Config.roundness > 0 ? Config.roundness - 4 : 0
+                                        visible: root.imageDeleteMode
+
+                                        property real activeButtonMargin: 2
+                                        property real idx1X: root.imageDeleteButtonIndex
+                                        property real idx2X: root.imageDeleteButtonIndex
+
+                                        // Posición y tamaño con efecto elástico
+                                        x: {
+                                            let minX = Math.min(idx1X, idx2X) * 36 + activeButtonMargin; // 32 + 4 spacing
+                                            return minX;
+                                        }
+
+                                        y: activeButtonMargin
+
+                                        width: {
+                                            let stretchX = Math.abs(idx1X - idx2X) * 36 + 32 - activeButtonMargin * 2; // 32 + 4 spacing
+                                            return stretchX;
+                                        }
+
+                                        height: 32 - activeButtonMargin * 2
+
+                                        Behavior on idx1X {
+                                            NumberAnimation {
+                                                duration: Config.animDuration / 3
+                                                easing.type: Easing.OutSine
+                                            }
+                                        }
+                                        Behavior on idx2X {
+                                            NumberAnimation {
+                                                duration: Config.animDuration
+                                                easing.type: Easing.OutSine
+                                            }
+                                        }
+                                    }
+
+                                    Row {
+                                        id: imageActionButtons
+                                        anchors.fill: parent
+                                        spacing: 4
+
+                                        // Botón cancelar (cruz)
+                                        Rectangle {
+                                            id: imageCancelButton
+                                            width: 32
+                                            height: 32
+                                            color: "transparent"
+                                            radius: Config.roundness
+                                            border.width: 0
+                                            border.color: Colors.adapter.outline
+
+                                            property bool isHighlighted: root.imageDeleteButtonIndex === 0
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                onClicked: root.cancelImageDeleteMode()
+                                                onEntered: {
+                                                    root.imageDeleteButtonIndex = 0;
+                                                }
+                                                onExited: parent.color = "transparent"
+                                            }
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: Icons.cancel
+                                                color: imageCancelButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
+                                                font.pixelSize: 16
+                                                font.family: Icons.font
+
+                                                Behavior on color {
+                                                    ColorAnimation {
+                                                        duration: Config.animDuration / 2
+                                                        easing.type: Easing.OutQuart
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // Botón confirmar (trash)
+                                        Rectangle {
+                                            id: imageConfirmButton
+                                            width: 32
+                                            height: 32
+                                            color: "transparent"
+                                            radius: Config.roundness
+
+                                            property bool isHighlighted: root.imageDeleteButtonIndex === 1
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                onClicked: root.confirmDeleteImage()
+                                                onEntered: {
+                                                    root.imageDeleteButtonIndex = 1;
+                                                }
+                                                onExited: parent.color = "transparent"
+                                            }
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: Icons.trash
+                                                color: imageConfirmButton.isHighlighted ? Colors.adapter.error : Colors.adapter.overError
+                                                font.pixelSize: 16
+                                                font.family: Icons.font
+
+                                                Behavior on color {
+                                                    ColorAnimation {
+                                                        duration: Config.animDuration / 2
+                                                        easing.type: Easing.OutQuart
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
