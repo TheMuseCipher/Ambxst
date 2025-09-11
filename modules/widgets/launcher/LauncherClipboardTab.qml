@@ -945,7 +945,7 @@ Rectangle {
 
                         highlight: ClippingRectangle {
                             color: "transparent"
-                            z: 100
+                            z: 5
                             radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                             visible: root.isImageSectionFocused
 
@@ -957,6 +957,13 @@ Rectangle {
                                 border.color: root.imageDeleteMode ? Colors.adapter.error : Colors.adapter.primary
                                 border.width: 36
                                 radius: Config.roundness > 0 ? Config.roundness + 36 : 0
+
+                                Behavior on anchors.bottomMargin {
+                                    NumberAnimation {
+                                        duration: Config.animDuration
+                                        easing.type: Easing.OutQuart
+                                    }
+                                }
 
                                 Behavior on border.color {
                                     ColorAnimation {
