@@ -5,9 +5,9 @@ import qs.config
 
 MultiEffect {
     shadowEnabled: true
-    shadowHorizontalOffset: Config.theme.currentTheme === "sticker" ? 2 : 0
-    shadowVerticalOffset: Config.theme.currentTheme === "sticker" ? 2 : 0
-    shadowBlur: Config.theme.currentTheme === "sticker" ? 0 : 1
+    shadowHorizontalOffset: Config.theme.shadowXOffset
+    shadowVerticalOffset: Config.theme.shadowYOffset
+    shadowBlur: Config.theme.shadowBlur
     shadowColor: Colors.adapter.shadow
-    shadowOpacity: Config.theme.currentTheme === "sticker" ? 1 : Config.theme.shadowOpacity
+    shadowOpacity: Config.theme.shadowOpacity
 }

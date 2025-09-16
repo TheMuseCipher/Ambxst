@@ -12,6 +12,7 @@ import qs.modules.widgets.overview
 import qs.modules.widgets.dashboard
 import qs.modules.widgets.powermenu
 import qs.modules.services
+import qs.modules.components
 import qs.config
 
 PanelWindow {
@@ -108,28 +109,7 @@ PanelWindow {
         anchors.topMargin: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? 4 : 0)
 
         layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: Config.theme.shadowOpacity > 0
-            shadowHorizontalOffset: Config.theme.currentTheme === "sticker" ? 2 : 0
-            shadowVerticalOffset: Config.theme.currentTheme === "sticker" ? 2 : 0
-            shadowBlur: Config.theme.currentTheme === "sticker" ? 0 : (screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu) ? 2.0 : 1.0)
-            shadowColor: Colors.adapter.shadow
-            shadowOpacity: Config.theme.currentTheme === "sticker" ? 1 : (screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu) ? Math.min(Config.theme.shadowOpacity + 0.25, 1.0) : Config.theme.shadowOpacity)
-
-            Behavior on shadowBlur {
-                NumberAnimation {
-                    duration: Config.animDuration
-                    easing.type: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu) ? Easing.OutBack : Easing.OutQuart
-                }
-            }
-
-            Behavior on shadowOpacity {
-                NumberAnimation {
-                    duration: Config.animDuration
-                    easing.type: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu) ? Easing.OutBack : Easing.OutQuart
-                }
-            }
-        }
+        layer.effect: Shadow {}
 
         defaultViewComponent: defaultViewComponent
         launcherViewComponent: launcherViewComponent

@@ -21,13 +21,18 @@ Singleton {
                 property bool oledMode: false
                 property bool lightMode: false
                 property real opacity: 1.0
-                property real shadowOpacity: 0.5
                 property int roundness: 16
+                property int borderSize: 0
+                property string borderColor: "background"
                 property string font: "Roboto Condensed"
                 property int fontSize: 14
                 property bool fillIcons: false
                 property string currentTheme: "default"
                 property int animDuration: 300
+                property real shadowOpacity: 0.5
+                property int shadowXOffset: 0
+                property int shadowYOffset: 0
+                property real shadowBlur: 1
             }
 
             property JsonObject bar: JsonObject {
@@ -63,6 +68,8 @@ Singleton {
                 property int borderSize: 2
                 property int rounding: 16
                 property bool syncRoundness: true
+                property bool syncBorderWidth: false
+                property bool syncBorderColor: false
             }
 
             property JsonObject performance: JsonObject {
@@ -93,11 +100,13 @@ Singleton {
 
     // Notch configuration
     property QtObject notch: loader.adapter.notch
-    property string notchTheme: currentTheme === "sticker" ? "island" : notch.theme
+    property string notchTheme: theme.borderSize > 0 ? "island" : notch.theme
 
     // Hyprland configuration
     property QtObject hyprland: loader.adapter.hyprland
-    property int hyprlandRounding: hyprland.syncRoundness ? Math.max(0, roundness - hyprland.borderSize) : Math.max(0, hyprland.rounding - hyprland.borderSize)
+    property int hyprlandRounding: hyprland.syncRoundness ? Math.max(0, roundness - hyprlandBorderSize) : Math.max(0, hyprland.rounding - hyprland.borderSize)
+    property int hyprlandBorderSize: hyprland.syncBorderWidth ? theme.borderSize : hyprland.borderSize
+    property string hyprlandBorderColor: hyprland.syncBorderColor ? theme.borderColor : hyprland.activeBorderColor
 
     // Performance configuration
     property QtObject performance: loader.adapter.performance

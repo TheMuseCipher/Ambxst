@@ -7,8 +7,8 @@ import qs.modules.components
 ClippingRectangle {
     color: Colors.background
     radius: Config.roundness
-    border.color: Colors.adapter.overBackground
-    border.width: Config.theme.currentTheme === "sticker" ? 2 : 0
+    border.color: Colors.adapter[Config.theme.borderColor] || Colors.adapter.surfaceBright
+    border.width: Config.theme.borderSize
 
     layer.enabled: true
     layer.effect: Shadow {}
