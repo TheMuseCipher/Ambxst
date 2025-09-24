@@ -275,13 +275,16 @@ Item {
                                     "notification": Notifications.popupList[0]
                                 });
                                 root.currentIndex = 0;
+                                return;
                             }
 
-                            // Ajustar el índice si es necesario
+                            // Ajustar el índice y navegar siempre para asegurar consistencia
                             if (root.currentIndex >= Notifications.popupList.length) {
                                 root.currentIndex = Math.max(0, Notifications.popupList.length - 1);
-                                notificationStack.navigateToNotification(root.currentIndex);
                             }
+                            
+                            // Siempre navegar a la notificación actual para asegurar que se muestra la correcta
+                            notificationStack.navigateToNotification(root.currentIndex);
                         }
                     }
 

@@ -260,13 +260,22 @@ Item {
     Connections {
         target: Notifications
         function onPopupListChanged() {
-            if (hasActiveNotifications && !screenNotchOpen) {
-                if (stackViewInternal.depth === 1 && stackViewInternal.currentItem !== notificationViewComponent) {
-                    stackViewInternal.replace(notificationViewComponent)
-                }
-            } else if (!hasActiveNotifications && !screenNotchOpen) {
-                if (stackViewInternal.depth === 1 && stackViewInternal.currentItem !== defaultViewComponent) {
-                    stackViewInternal.replace(defaultViewComponent)
+            // Solo cambiar vista si no hay vista activa (launcher, dashboard, etc.)
+            if (!screenNotchOpen) {
+                if (hasActiveNotifications) {
+                    // Solo cambiar a notificationView si no estamos ya mostrando notificaciones
+                    if (stackViewInternal.depth === 1 && 
+                        stackViewInternal.currentItem && 
+                        stackViewInternal.currentItem.toString().indexOf("NotchNotificationView") === -1) {
+                        stackViewInternal.replace(notificationViewComponent)
+                    }
+                } else {
+                    // Solo cambiar a defaultView si no la estamos ya mostrando
+                    if (stackViewInternal.depth === 1 && 
+                        stackViewInternal.currentItem &&
+                        stackViewInternal.currentItem.toString().indexOf("DefaultView") === -1) {
+                        stackViewInternal.replace(defaultViewComponent)
+                    }
                 }
             }
         }
