@@ -133,7 +133,7 @@ Singleton {
 
     FileView {
         id: notifFileView
-        path: StandardPaths.writableLocation(StandardPaths.ConfigLocation) + "/ambyst/notifications.json"
+        path: StandardPaths.writableLocation(StandardPaths.CacheLocation) + "/quickshell/Ambyst/notifications.json"
         onLoaded: loadNotifications()
     }
 
