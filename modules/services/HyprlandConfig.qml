@@ -44,7 +44,7 @@ QtObject {
         const inactiveColorFormatted = formatColorForHyprland(inactiveColorWithFullOpacity);
 
         // Usar batch para aplicar todos los comandos de una vez
-        const batchCommand = `keyword general:col.active_border ${activeColorFormatted} ; keyword general:col.inactive_border ${inactiveColorFormatted} ; keyword general:border_size ${Config.hyprlandBorderSize} ; keyword decoration:rounding ${Config.hyprlandRounding}`;
+        const batchCommand = `keyword general:col.active_border ${activeColorFormatted} ; keyword general:col.inactive_border ${inactiveColorFormatted} ; keyword general:border_size ${Config.hyprlandBorderSize} ; keyword decoration:rounding ${Config.hyprlandRounding} ; keyword general:gaps_in ${Config.hyprland.gapsIn} ; keyword general:gaps_out ${Config.hyprland.gapsOut}`;
 
         console.log("HyprlandConfig: Aplicando configuración:", batchCommand);
         hyprctlProcess.command = ["hyprctl", "--batch", batchCommand];

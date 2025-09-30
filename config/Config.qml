@@ -73,6 +73,8 @@ Singleton {
                 property bool syncRoundness: true
                 property bool syncBorderWidth: false
                 property bool syncBorderColor: false
+                property int gapsIn: 2
+                property int gapsOut: 4
             }
 
             property JsonObject performance: JsonObject {
