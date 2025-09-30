@@ -224,7 +224,7 @@ Item {
                             id: timeText
                             Layout.rightMargin: 10
                             horizontalAlignment: Text.AlignLeft
-                            text: NotificationUtils.getFriendlyNotifTimeString(notificationGroup?.time)
+                            text: root.multipleNotifications ? qsTr("%1 notifications").arg(root.notificationCount) : NotificationUtils.getFriendlyNotifTimeString(notificationGroup?.time)
                             font.family: Config.theme.font
                             font.pixelSize: Config.theme.fontSize
                             color: Colors.adapter.overBackground
@@ -258,16 +258,17 @@ Item {
                         }
                     }
 
-                    model: expanded ? root.groupedNotifications : root.groupedNotifications.slice(0, 2)
+                    model: expanded ? root.groupedNotifications : [{ notifications: root.validNotifications, isCompactGroup: true }]
 
                     delegate: NotificationSummaryGroup {
                         required property int index
                         required property var modelData
-                        notifications: modelData.notifications
+                        notifications: modelData.notifications || modelData
+                        summary: modelData.summary || ""
                         expanded: root.expanded
-                        onlyNotification: (modelData.notifications.length === 1)
-                        opacity: (!root.expanded && index == 1 && root.groupedNotifications.length > 2) ? 0.5 : 1
-                        visible: root.expanded || (index < 2)
+                        onlyNotification: root.expanded ? (modelData.notifications ? modelData.notifications.length === 1 : modelData.length === 1) : false
+                        opacity: 1
+                        visible: true
                         anchors.left: parent?.left
                         anchors.right: parent?.right
 

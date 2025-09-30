@@ -12,6 +12,7 @@ import "./notification_utils.js" as NotificationUtils
 Item {
     id: root
     property var notifications: []
+    property string summary: ""
     property bool expanded: false
     property real fontSize: Config.theme.fontSize
     property real padding: onlyNotification || expanded ? 8 : 0
@@ -336,14 +337,16 @@ Item {
                             spacing: 4
                             visible: !expanded
 
-                            Text {
-                                text: latestNotification ? latestNotification.summary : ""
-                                font.family: Config.theme.font
-                                font.pixelSize: Config.theme.fontSize
-                                font.weight: Font.Bold
-                                color: Colors.adapter.primary
-                                elide: Text.ElideRight
-                            }
+                             Text {
+                                 text: (!expanded && notifications.length > 1) ?
+                                       qsTr("%1 • %2").arg(notifications.length).arg(latestNotification ? latestNotification.summary : "") :
+                                       (root.summary || (latestNotification ? latestNotification.summary : ""))
+                                 font.family: Config.theme.font
+                                 font.pixelSize: Config.theme.fontSize
+                                 font.weight: Font.Bold
+                                 color: Colors.adapter.primary
+                                 elide: Text.ElideRight
+                             }
 
                             Text {
                                 text: "•"
