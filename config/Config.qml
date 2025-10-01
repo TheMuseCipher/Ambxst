@@ -32,10 +32,11 @@ Singleton {
                 property string currentTheme: "default"
                 property bool enableCorners: true
                 property int animDuration: 300
-                property real shadowOpacity: 0.5
-                property int shadowXOffset: 0
-                property int shadowYOffset: 0
-                property real shadowBlur: 1
+                 property real shadowOpacity: 0.5
+                 property string shadowColor: "shadow"
+                 property int shadowXOffset: 0
+                 property int shadowYOffset: 0
+                 property real shadowBlur: 1
             }
 
             property JsonObject bar: JsonObject {
@@ -73,6 +74,8 @@ Singleton {
                  property bool syncRoundness: true
                  property bool syncBorderWidth: false
                  property bool syncBorderColor: false
+                 property bool syncShadowOpacity: false
+                 property bool syncShadowColor: false
                  property int gapsIn: 2
                  property int gapsOut: 4
                  property bool shadowEnabled: true
@@ -80,8 +83,8 @@ Singleton {
                  property int shadowRenderPower: 3
                  property bool shadowSharp: false
                  property bool shadowIgnoreWindow: true
-                 property string shadowColor: "background"
-                 property string shadowColorInactive: "background"
+                 property string shadowColor: "shadow"
+                 property string shadowColorInactive: "shadow"
                  property real shadowOpacity: 0.5
                  property string shadowOffset: "0 0"
                  property real shadowScale: 1.0
@@ -138,10 +141,12 @@ Singleton {
     property string notchTheme: theme.borderSize > 0 ? "island" : notch.theme
 
     // Hyprland configuration
-    property QtObject hyprland: loader.adapter.hyprland
-    property int hyprlandRounding: hyprland.syncRoundness ? Math.max(0, roundness - hyprlandBorderSize) : Math.max(0, hyprland.rounding - hyprland.borderSize)
-    property int hyprlandBorderSize: hyprland.syncBorderWidth ? theme.borderSize : hyprland.borderSize
-    property string hyprlandBorderColor: hyprland.syncBorderColor ? theme.borderColor : hyprland.activeBorderColor
+     property QtObject hyprland: loader.adapter.hyprland
+     property int hyprlandRounding: hyprland.syncRoundness ? Math.max(0, roundness - hyprlandBorderSize) : Math.max(0, hyprland.rounding - hyprland.borderSize)
+     property int hyprlandBorderSize: hyprland.syncBorderWidth ? theme.borderSize : hyprland.borderSize
+     property string hyprlandBorderColor: hyprland.syncBorderColor ? theme.borderColor : hyprland.activeBorderColor
+     property real hyprlandShadowOpacity: hyprland.syncShadowOpacity ? theme.shadowOpacity : hyprland.shadowOpacity
+     property string hyprlandShadowColor: hyprland.syncShadowColor ? theme.shadowColor : hyprland.shadowColor
 
     // Performance configuration
     property QtObject performance: loader.adapter.performance

@@ -113,7 +113,7 @@ PanelWindow {
                 shadowHorizontalOffset: 0
                 shadowVerticalOffset: 0
                 shadowBlur: 1
-                shadowColor: Colors.shadow
+                 shadowColor: Colors[Config.theme.shadowColor] || Colors.shadow
                 shadowOpacity: Config.theme.shadowOpacity
             }
 

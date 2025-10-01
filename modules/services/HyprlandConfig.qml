@@ -44,10 +44,10 @@ QtObject {
          const inactiveColorFormatted = formatColorForHyprland(inactiveColorWithFullOpacity);
 
          // Colores para sombras
-         const shadowColor = getColorValue(Config.hyprland.shadowColor);
+         const shadowColor = getColorValue(Config.hyprlandShadowColor);
          const shadowColorInactive = getColorValue(Config.hyprland.shadowColorInactive);
-         const shadowColorWithOpacity = Qt.rgba(shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a * Config.hyprland.shadowOpacity);
-         const shadowColorInactiveWithOpacity = Qt.rgba(shadowColorInactive.r, shadowColorInactive.g, shadowColorInactive.b, shadowColorInactive.a * Config.hyprland.shadowOpacity);
+         const shadowColorWithOpacity = Qt.rgba(shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a * Config.hyprlandShadowOpacity);
+         const shadowColorInactiveWithOpacity = Qt.rgba(shadowColorInactive.r, shadowColorInactive.g, shadowColorInactive.b, shadowColorInactive.a * Config.hyprlandShadowOpacity);
          const shadowColorFormatted = formatColorForHyprland(shadowColorWithOpacity);
          const shadowColorInactiveFormatted = formatColorForHyprland(shadowColorInactiveWithOpacity);
 
