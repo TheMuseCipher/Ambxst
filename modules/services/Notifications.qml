@@ -391,7 +391,7 @@ Singleton {
         });
     }
 
-    function attemptInvokeAction(id, notifIdentifier) {
+    function attemptInvokeAction(id, notifIdentifier, autoDiscard = true) {
         const notifServerIndex = notifServer.trackedNotifications.values.findIndex(notif => notif.id + root.idOffset === id);
         if (notifServerIndex !== -1) {
             const notifServerNotif = notifServer.trackedNotifications.values[notifServerIndex];
@@ -399,7 +399,9 @@ Singleton {
             action.invoke();
         } else {
         }
-        root.discardNotification(id);
+        if (autoDiscard) {
+            root.discardNotification(id);
+        }
     }
 
     function pauseGroupTimers(appName) {
