@@ -61,7 +61,8 @@ Item {
 
     BgRect {
         id: notchRect
-        anchors.centerIn: parent
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
         width: parent.implicitWidth - 40
         height: parent.implicitHeight
         layer.enabled: false
@@ -98,7 +99,8 @@ Item {
 
         Item {
             id: stackContainer
-            anchors.centerIn: parent
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
             width: stackViewInternal.currentItem ? stackViewInternal.currentItem.implicitWidth + (screenNotchOpen ? 32 : 0) : 32
             height: stackViewInternal.currentItem ? stackViewInternal.currentItem.implicitHeight + (screenNotchOpen ? 32 : 0) : 32
             clip: true
