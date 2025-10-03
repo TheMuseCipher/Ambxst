@@ -237,7 +237,7 @@ Item {
                             active: compactPlayer.isPlaying
                             sourceComponent: WavyLine {
                                 id: wavyFill
-                                frequency: 6
+                                frequency: 8
                                 color: Colors.primary
                                 amplitudeMultiplier: 0.8
                                 height: positionControl.height * 8
