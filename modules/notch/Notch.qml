@@ -64,10 +64,10 @@ Item {
         // HoverHandler para detectar hover sin bloquear eventos
         HoverHandler {
             id: notchHoverHandler
-            enabled: hasActiveNotifications
+            enabled: true
 
             onHoveredChanged: {
-                if (hasActiveNotifications && stackViewInternal.currentItem && stackViewInternal.currentItem.hasOwnProperty("notchHovered")) {
+                if (stackViewInternal.currentItem && stackViewInternal.currentItem.hasOwnProperty("notchHovered")) {
                     stackViewInternal.currentItem.notchHovered = hovered;
                 }
             }

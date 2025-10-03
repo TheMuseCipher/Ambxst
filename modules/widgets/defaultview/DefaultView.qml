@@ -31,6 +31,7 @@ Item {
 
     readonly property bool hasActiveNotifications: Notifications.popupList.length > 0
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
+    property bool notchHovered: false
 
     HoverHandler {
         id: notificationHoverHandler
@@ -131,7 +132,7 @@ Item {
                         anchors.leftMargin: 4
                         anchors.verticalCenter: parent.verticalCenter
                         active: (compactPlayer.player?.trackArtUrl ?? "") !== ""
-                        width: active ? 24 : 0
+                        width: (active && (playerHover.hovered || root.notchHovered)) ? 24 : 0
                         height: 24
 
                         Behavior on width {
@@ -158,10 +159,24 @@ Item {
 
                     Row {
                         id: controlButtons
-                        anchors.left: artworkLoader.right
-                        anchors.leftMargin: artworkLoader.active ? 8 : 4
+                        anchors.left: parent.left
+                        anchors.leftMargin: (artworkLoader.active && (playerHover.hovered || root.notchHovered)) ? (4 + 24 + 8) : 4
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 4
+                        spacing: (playerHover.hovered || root.notchHovered) ? 4 : 0
+                        
+                        Behavior on anchors.leftMargin {
+                            NumberAnimation {
+                                duration: Config.animDuration
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                        
+                        Behavior on spacing {
+                            NumberAnimation {
+                                duration: Config.animDuration
+                                easing.type: Easing.OutQuart
+                            }
+                        }
 
                         Text {
                             id: previousBtn
@@ -173,7 +188,7 @@ Item {
                             font.family: Icons.font
                             opacity: compactPlayer.player?.canGoPrevious ?? false ? 1.0 : 0.3
                             visible: opacity > 0
-                            width: playerHover.hovered ? implicitWidth : 0
+                            width: (playerHover.hovered || root.notchHovered) ? implicitWidth : 0
                             clip: true
                             scale: 1.0
 
@@ -281,7 +296,7 @@ Item {
                             font.family: Icons.font
                             opacity: compactPlayer.player?.canGoNext ?? false ? 1.0 : 0.3
                             visible: opacity > 0
-                            width: playerHover.hovered ? implicitWidth : 0
+                            width: (playerHover.hovered || root.notchHovered) ? implicitWidth : 0
                             clip: true
                             scale: 1.0
 
