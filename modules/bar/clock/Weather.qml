@@ -33,25 +33,16 @@ BgRect {
         spacing: 4
 
         Text {
-            id: dayDisplay
-            text: weatherContainer.currentDayAbbrev
-            color: Colors.overBackground
-            font.pixelSize: Config.theme.fontSize
-            font.family: Config.theme.font
-            font.bold: true
-        }
-
-        Separator {
-            id: separator
-        }
-
-        Text {
             id: symbolDisplay
             text: weatherContainer.weatherSymbol
             color: Colors.overBackground
             font.pixelSize: 16
             font.family: Config.theme.font
             font.bold: true
+        }
+
+        Separator {
+            id: separator
         }
 
         Text {
@@ -72,10 +63,10 @@ BgRect {
         Layout.alignment: Qt.AlignHCenter
 
         Text {
-            id: dayDisplayV
-            text: weatherContainer.currentDayAbbrev
+            id: symbolDisplayV
+            text: weatherContainer.weatherSymbol
             color: Colors.overBackground
-            font.pixelSize: Config.theme.fontSize
+            font.pixelSize: 16
             font.family: Config.theme.font
             font.bold: true
             horizontalAlignment: Text.AlignHCenter
@@ -86,18 +77,6 @@ BgRect {
         Separator {
             id: separatorV
             vert: true
-            Layout.alignment: Qt.AlignHCenter
-        }
-
-        Text {
-            id: symbolDisplayV
-            text: weatherContainer.weatherSymbol
-            color: Colors.overBackground
-            font.pixelSize: 16
-            font.family: Config.theme.font
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.NoWrap
             Layout.alignment: Qt.AlignHCenter
         }
 

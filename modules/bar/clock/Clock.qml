@@ -7,14 +7,15 @@ import qs.modules.components
 BgRect {
     id: clockContainer
 
-    // Time values
+    property string currentTime: ""
+    property string currentDayAbbrev: ""
     property string currentHours: ""
     property string currentMinutes: ""
 
     required property var bar
     property bool vertical: bar.orientation === "vertical"
 
-    Layout.preferredWidth: vertical ? 36 : (clockIndicator.implicitWidth + hoursDisplay.implicitWidth + minutesDisplay.implicitWidth + 28)
+    Layout.preferredWidth: vertical ? 36 : rowLayout.implicitWidth + 20
     implicitHeight: vertical ? columnLayout.implicitHeight + 24 : 36
     Layout.preferredHeight: implicitHeight
 
@@ -25,26 +26,21 @@ BgRect {
         spacing: 4
 
         Text {
-            id: hoursDisplay
-            text: clockContainer.currentHours
+            id: dayDisplay
+            text: clockContainer.currentDayAbbrev
             color: Colors.overBackground
             font.pixelSize: Config.theme.fontSize
             font.family: Config.theme.font
             font.bold: true
         }
 
-        Item {
-            Layout.preferredWidth: clockIndicator.implicitWidth
-            Layout.preferredHeight: hoursDisplay.height
-            ClockIndicator {
-                id: clockIndicator
-                anchors.centerIn: parent
-            }
+        Separator {
+            id: separator
         }
 
         Text {
-            id: minutesDisplay
-            text: clockContainer.currentMinutes
+            id: timeDisplay
+            text: clockContainer.currentTime
             color: Colors.overBackground
             font.pixelSize: Config.theme.fontSize
             font.family: Config.theme.font
@@ -60,8 +56,8 @@ BgRect {
         Layout.alignment: Qt.AlignHCenter
 
         Text {
-            id: hoursDisplayV
-            text: clockContainer.currentHours
+            id: dayDisplayV
+            text: clockContainer.currentDayAbbrev
             color: Colors.overBackground
             font.pixelSize: Config.theme.fontSize
             font.family: Config.theme.font
@@ -71,8 +67,21 @@ BgRect {
             Layout.alignment: Qt.AlignHCenter
         }
 
-        ClockIndicator {
-            id: clockIndicatorV
+        Separator {
+            id: separatorV
+            vert: true
+            Layout.alignment: Qt.AlignHCenter
+        }
+
+        Text {
+            id: hoursDisplayV
+            text: clockContainer.currentHours
+            color: Colors.overBackground
+            font.pixelSize: Config.theme.fontSize
+            font.family: Config.theme.font
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.NoWrap
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -89,6 +98,21 @@ BgRect {
         }
     }
 
+    function scheduleNextDayUpdate() {
+        var now = new Date();
+        var next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+        var ms = next - now;
+        dayUpdateTimer.interval = ms;
+        dayUpdateTimer.start();
+    }
+
+    function updateDay() {
+        var now = new Date();
+        var day = Qt.formatDateTime(now, Qt.locale(), "ddd");
+        clockContainer.currentDayAbbrev = day.slice(0, 3).charAt(0).toUpperCase() + day.slice(1, 3);
+        scheduleNextDayUpdate();
+    }
+
     Timer {
         interval: 1000
         running: true
@@ -97,16 +121,26 @@ BgRect {
             var now = new Date();
             var formatted = Qt.formatDateTime(now, "hh:mm");
             var parts = formatted.split(":");
+            clockContainer.currentTime = formatted;
             clockContainer.currentHours = parts[0];
             clockContainer.currentMinutes = parts[1];
         }
+    }
+
+    Timer {
+        id: dayUpdateTimer
+        repeat: false
+        running: false
+        onTriggered: updateDay()
     }
 
     Component.onCompleted: {
         var now = new Date();
         var formatted = Qt.formatDateTime(now, "hh:mm");
         var parts = formatted.split(":");
+        clockContainer.currentTime = formatted;
         clockContainer.currentHours = parts[0];
         clockContainer.currentMinutes = parts[1];
+        updateDay();
     }
 }
