@@ -38,24 +38,19 @@ Rectangle {
                     spacing: 8
 
                     PaneRect {
+                        id: player
                         Layout.fillWidth: true
                         Layout.preferredHeight: 150
-                        color: Colors.surface
-                        radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                     }
 
                     PaneRect {
                         Layout.fillWidth: true
                         Layout.preferredHeight: width
-                        color: Colors.surface
-                        radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                     }
 
                     PaneRect {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 150
-                        color: Colors.surface
-                        radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                     }
                 }
             }
@@ -64,8 +59,6 @@ Rectangle {
         PaneRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: Colors.surface
-            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
         }
     }
 }
