@@ -100,7 +100,7 @@ PaneRect {
                 Rectangle {
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40
-                    color: Colors.primaryFixed
+                    color: playPauseHover.hovered ? Colors.whiteSource : Colors.primaryFixed
                     radius: player.isPlaying ? Math.max(0, Config.roundness - 4) : Config.roundness > 0 ? Config.roundness + 4 : 0
                     opacity: MprisController.canTogglePlaying ? 1.0 : 0.3
 
