@@ -191,7 +191,18 @@ PaneRect {
                     Loader {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        active: player.isPlaying || !MprisController.activePlayer
+                        active: true
+                        asynchronous: false
+                        visible: player.isPlaying || !MprisController.activePlayer
+                        opacity: visible ? 1.0 : 0.0
+                        
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: Config.animDuration
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                        
                         sourceComponent: WavyLine {
                             id: wavyFill
                             frequency: 8
@@ -224,7 +235,18 @@ PaneRect {
                     }
 
                     Loader {
-                        active: !player.isPlaying && MprisController.activePlayer
+                        active: true
+                        asynchronous: false
+                        visible: !player.isPlaying && MprisController.activePlayer
+                        opacity: visible ? 1.0 : 0.0
+                        
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: Config.animDuration
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                        
                         sourceComponent: Rectangle {
                             anchors.left: parent.left
                             width: Math.max(0, positionControl.width * positionControl.progressRatio - positionControl.dragSeparation)

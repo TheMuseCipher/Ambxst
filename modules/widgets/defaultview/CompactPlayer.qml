@@ -331,7 +331,18 @@ Item {
             Loader {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                active: compactPlayer.isPlaying || !compactPlayer.player
+                active: true
+                asynchronous: false
+                visible: compactPlayer.isPlaying || !compactPlayer.player
+                opacity: visible ? 1.0 : 0.0
+                
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Config.animDuration
+                        easing.type: Easing.OutQuart
+                    }
+                }
+                
                 sourceComponent: WavyLine {
                     id: wavyFill
                     frequency: 8
@@ -364,7 +375,18 @@ Item {
             }
 
             Loader {
-                active: !compactPlayer.isPlaying && compactPlayer.player
+                active: true
+                asynchronous: false
+                visible: !compactPlayer.isPlaying && compactPlayer.player
+                opacity: visible ? 1.0 : 0.0
+                
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Config.animDuration
+                        easing.type: Easing.OutQuart
+                    }
+                }
+                
                 sourceComponent: Rectangle {
                     anchors.left: parent.left
                     width: Math.max(0, positionControl.width * positionControl.progressRatio - positionControl.dragSeparation)
