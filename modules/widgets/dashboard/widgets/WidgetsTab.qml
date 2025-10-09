@@ -4,6 +4,7 @@ import Quickshell.Widgets
 import qs.modules.theme
 import qs.modules.components
 import qs.config
+import "calendar"
 
 Rectangle {
     color: "transparent"
@@ -42,7 +43,7 @@ Rectangle {
                         // Layout.preferredHeight: 90
                     }
 
-                    PaneRect {
+                    Calendar {
                         Layout.fillWidth: true
                         Layout.preferredHeight: width
                     }
