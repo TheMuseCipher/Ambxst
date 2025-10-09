@@ -84,7 +84,7 @@ Item {
                 ClippingRectangle {
                     anchors.fill: parent
                     radius: compactPlayer.isPlaying ? (Config.roundness > 0 ? Math.max(Config.roundness - 8, 0) : 0) : (Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0)
-                    color: compactPlayer.hasArtwork && compactPlayer.playerColors ? compactPlayer.playerColors.overPrimary : Colors.overPrimaryFixed
+                    color: "transparent"
 
                     Behavior on radius {
                         NumberAnimation {
