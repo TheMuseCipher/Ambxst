@@ -14,7 +14,8 @@ PaneRect {
     property var calendarLayout: calendarLayoutData.calendar
     property int currentWeekRow: calendarLayoutData.currentWeekRow
     property int currentDayOfWeek: {
-        if (monthShift !== 0) return -1;
+        if (monthShift !== 0)
+            return -1;
         var now = new Date();
         return (now.getDay() + 6) % 7;
     }
@@ -48,8 +49,6 @@ PaneRect {
             today: 0
         }
     ]
-
-
 
     ColumnLayout {
         id: calendarColumn
@@ -165,6 +164,14 @@ PaneRect {
                             isCurrentDayOfWeek: index === root.currentDayOfWeek
                         }
                     }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 8
+                    Layout.rightMargin: 8
+                    Layout.preferredHeight: 2
+                    color: Colors.surface
                 }
 
                 Repeater {
