@@ -13,6 +13,7 @@ import qs.modules.widgets.powermenu
 import qs.modules.corners
 import qs.modules.components
 import qs.modules.services
+import qs.modules.bar
 import qs.config
 
 PanelWindow {
@@ -159,6 +160,15 @@ PanelWindow {
 
             RowLayout {
                 spacing: 4
+                BgRect {
+                    Layout.preferredWidth: 100
+                    Layout.fillHeight: true
+                    VolumeSlider {
+                        anchors.centerIn: parent
+                        width: parent.width - 8
+                        height: 4
+                    }
+                }
                 SysTray { bar: panel }
                 Weather { id: weatherComponent; bar: panel }
                 Clock { id: clockComponent; bar: panel }
@@ -199,6 +209,15 @@ PanelWindow {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 4
+                BgRect {
+                    Layout.preferredWidth: 100
+                    Layout.fillHeight: true
+                    VolumeSlider {
+                        anchors.centerIn: parent
+                        width: parent.width - 8
+                        height: 4
+                    }
+                }
                 SysTray {
                     bar: panel
                 }
