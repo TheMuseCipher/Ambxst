@@ -1,6 +1,6 @@
 [templates.ambxst]
 input_path = "colors.json"
-output_path = "../../modules/theme/colors.json"
+output_path = "~/.local/share/Ambxst/colors.json"
 
 [config.custom_colors.red]
 color = "#FF0000"

@@ -1,11 +1,12 @@
 pragma Singleton
 import QtQuick
+import Quickshell
 import Quickshell.Io
 import qs.config
 
 FileView {
     id: colors
-    path: Qt.resolvedUrl("./colors.json")
+    path: Quickshell.dataPath("colors.json")
     preload: true
     watchChanges: true
     onFileChanged: reload()
