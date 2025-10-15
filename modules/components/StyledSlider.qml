@@ -16,8 +16,8 @@ Item {
 
     Layout.fillHeight: vertical
     Layout.fillWidth: !vertical
-    implicitHeight: !vertical ? 4 : 100
-    implicitWidth: vertical ? 4 : 100
+    implicitHeight: vertical ? size : 4
+    implicitWidth: !vertical ? size : 4
 
     signal iconClicked
 
@@ -40,6 +40,7 @@ Item {
     property bool tooltip: true
     property bool updateOnRelease: false
     property string iconPos: "start"
+    property real size: 100
 
     Behavior on wavyAmplitude {
         NumberAnimation {

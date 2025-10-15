@@ -12,11 +12,11 @@ Item {
     // Orientación derivada de la barra
     property bool vertical: bar.orientation === "vertical"
 
-    // Ajustes de tamaño dinámicos según orientación
-    implicitWidth: root.vertical ? 4 : 128
-    implicitHeight: root.vertical ? 128 : 4
-    Layout.preferredWidth: root.vertical ? 4 : 128
-    Layout.preferredHeight: root.vertical ? 128 : 4
+    // Tamaño derivado de StyledSlider
+    implicitWidth: root.vertical ? 4 : (volumeSlider.implicitWidth + 16)
+    implicitHeight: root.vertical ? (volumeSlider.implicitHeight + 16) : 4
+    Layout.preferredWidth: root.vertical ? 4 : (volumeSlider.implicitWidth + 16)
+    Layout.preferredHeight: root.vertical ? (volumeSlider.implicitHeight + 16) : 4
     Layout.fillWidth: root.vertical
     Layout.fillHeight: !root.vertical
 
@@ -41,10 +41,11 @@ Item {
             anchors.fill: parent
             anchors.margins: 8
             vertical: root.vertical
+            size: root.vertical ? 96 : 128
             value: 0
             wavy: true
-            wavyAmplitude: Audio.sink?.audio?.muted ? 0.5 : 1.5 * value
-            wavyFrequency: Audio.sink?.audio?.muted ? 1.0 : 8.0 * value
+            wavyAmplitude: Audio.sink?.audio?.muted ? 0.5 : 1.5 * value / (root.vertical ? 1.5 : 1)
+            wavyFrequency: Audio.sink?.audio?.muted ? 1.0 : 8.0 * value / (root.vertical ? 1.5 : 1)
             iconPos: root.vertical ? "end" : "start"
             icon: {
                 if (Audio.sink?.audio?.muted)
