@@ -571,28 +571,15 @@ Rectangle {
         }
     }
 
-    // Componente optimizado para wallpapers con lazy loading
-    Component {
-        id: wallpaperComponent
-
-        Loader {
-            sourceComponent: {
-                if (!GlobalStates.wallpaperManager)
-                    return null;
-
-                var fileType = GlobalStates.wallpaperManager.getFileType(parent.sourceFile);
-                if (fileType === 'image') {
-                    return staticImageComponent;
-                } else if (fileType === 'gif') {
-                    return animatedImageComponent;
-                } else if (fileType === 'video') {
-                    return videoThumbnailComponent;
-                }
-                return staticImageComponent; // Fallback
-            }
-            property string sourceFile: parent.sourceFile
-        }
-    }
+     // Componente optimizado para wallpapers con lazy loading
+     Component {
+         id: wallpaperComponent
+ 
+         Loader {
+             sourceComponent: staticImageComponent; // All thumbnails are now static images
+             property string sourceFile: parent.sourceFile
+         }
+     }
 
     // Componentes de imagen optimizados y reutilizables
     Component {
@@ -621,93 +608,5 @@ Rectangle {
         }
     }
 
-    Component {
-        id: animatedImageComponent
-        Item {
-            property string thumbnailPath: {
-                if (!parent.sourceFile)
-                    return "";
-                return GlobalStates.wallpaperManager.getThumbnailPath(parent.sourceFile);
-            }
 
-            // Para GIFs, usar thumbnail estático en el grid
-            Image {
-                anchors.fill: parent
-                source: parent.thumbnailPath ? "file://" + parent.thumbnailPath : "file://" + parent.sourceFile
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                smooth: true
-                cache: false
-
-                // Fallback a GIF original si el thumbnail falla
-                onStatusChanged: {
-                    if (status === Image.Error && source.toString().includes("/by-shell/Ambxst/gif_thumbnails/")) {
-                        console.log("GIF thumbnail failed, using original:", parent.sourceFile);
-                        source = "file://" + parent.sourceFile;
-                    }
-                }
-
-                // Placeholder mientras carga
-                Rectangle {
-                    anchors.fill: parent
-                    color: Colors.surface
-                    visible: parent.status !== Image.Ready
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: {
-                            if (parent.status === Image.Loading)
-                                return "⏳";
-                            if (parent.status === Image.Error)
-                                return "🖼️";
-                            return "🎞️";
-                        }
-                        font.pixelSize: 24
-                        color: Colors.overSurfaceVariant
-                    }
-                }
-            }
-        }
-    }
-
-    Component {
-        id: videoThumbnailComponent
-        Item {
-            property string thumbnailPath: {
-                if (!parent.sourceFile)
-                    return "";
-                return GlobalStates.wallpaperManager.getThumbnailPath(parent.sourceFile);
-            }
-
-            // Thumbnail pre-generado
-            Image {
-                anchors.fill: parent
-                source: parent.thumbnailPath ? "file://" + parent.thumbnailPath : ""
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                smooth: true
-                cache: false
-
-                // Placeholder mientras carga o si falla
-                Rectangle {
-                    anchors.fill: parent
-                    color: Colors.surface
-                    visible: parent.status !== Image.Ready
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: {
-                            if (parent.status === Image.Loading)
-                                return "⏳";
-                            if (parent.status === Image.Error)
-                                return "❌";
-                            return "📹";
-                        }
-                        font.pixelSize: 24
-                        color: Colors.overSurfaceVariant
-                    }
-                }
-            }
-        }
-    }
 }

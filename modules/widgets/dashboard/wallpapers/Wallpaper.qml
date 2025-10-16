@@ -49,24 +49,19 @@ PanelWindow {
     }
 
     function getThumbnailPath(filePath) {
-        var fileName = filePath.split('/').pop();
-        var fileType = getFileType(filePath);
-        var cacheDir = "";
-
-        if (fileType === 'video') {
-            cacheDir = "video_thumbnails";
-        } else if (fileType === 'image') {
-            cacheDir = "image_thumbnails";
-        } else if (fileType === 'gif') {
-            cacheDir = "gif_thumbnails";
-        } else {
-            return ""; // Unknown type
-        }
-
-        // Include original extension in thumbnail name to avoid collisions
-        // Format: originalname.ext.jpg (e.g., fire-skull.png.jpg)
+        // Compute relative path from wallpaperDir
+        var basePath = wallpaperDir.endsWith("/") ? wallpaperDir : wallpaperDir + "/";
+        var relativePath = filePath.replace(basePath, "");
+        
+        // Replace the filename with .jpg extension
+        var pathParts = relativePath.split('/');
+        var fileName = pathParts.pop();
         var thumbnailName = fileName + ".jpg";
-        return Quickshell.dataDir + "/" + cacheDir + "/" + thumbnailName;
+        var relativeDir = pathParts.join('/');
+        
+        // Build the proxy path
+        var thumbnailPath = Quickshell.dataDir + "/thumbnails/" + relativeDir + "/" + thumbnailName;
+        return thumbnailPath;
     }
 
     function getDisplaySource(filePath) {
