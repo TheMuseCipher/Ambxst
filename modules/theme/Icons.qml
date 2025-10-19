@@ -93,8 +93,8 @@ QtObject {
     readonly property string speakerLow: ""
     readonly property string speakerHigh: ""
 
-    readonly property string microphone: ""
-    readonly property string microphoneSlash: ""
+    readonly property string mic: ""
+    readonly property string micSlash: ""
 
     // Keyboard
     readonly property string keyboard: ""
