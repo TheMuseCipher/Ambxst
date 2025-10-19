@@ -165,10 +165,14 @@ PanelWindow {
                 bar: panel
             }
 
-            VolumeSlider {
-                id: volume
-                bar: panel
-            }
+             VolumeSlider {
+                 id: volume
+                 bar: panel
+             }
+
+             BrightnessSlider {
+                 bar: panel
+             }
             SysTray {
                 bar: panel
             }
@@ -215,9 +219,13 @@ PanelWindow {
                 bar: panel
             }
 
-            VolumeSlider {
-                bar: panel
-            }
+             VolumeSlider {
+                 bar: panel
+             }
+
+             BrightnessSlider {
+                 bar: panel
+             }
             SysTray {
                 bar: panel
             }
