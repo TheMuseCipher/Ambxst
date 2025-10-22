@@ -32,26 +32,26 @@ PaneRect {
         }
     }
 
-     Timer {
-         running: player.isPlaying
-         interval: 1000
-         repeat: true
-         onTriggered: {
-             if (!positionSlider.isDragging) {
-                 positionSlider.value = player.length > 0 ? Math.min(1.0, player.position / player.length) : 0;
-             }
-             MprisController.activePlayer?.positionChanged();
-         }
-     }
+    Timer {
+        running: player.isPlaying
+        interval: 1000
+        repeat: true
+        onTriggered: {
+            if (!positionSlider.isDragging) {
+                positionSlider.value = player.length > 0 ? Math.min(1.0, player.position / player.length) : 0;
+            }
+            MprisController.activePlayer?.positionChanged();
+        }
+    }
 
-     Connections {
-         target: MprisController.activePlayer
-         function onPositionChanged() {
-             if (!positionSlider.isDragging && MprisController.activePlayer) {
-                 positionSlider.value = player.length > 0 ? Math.min(1.0, player.position / player.length) : 0;
-             }
-         }
-     }
+    Connections {
+        target: MprisController.activePlayer
+        function onPositionChanged() {
+            if (!positionSlider.isDragging && MprisController.activePlayer) {
+                positionSlider.value = player.length > 0 ? Math.min(1.0, player.position / player.length) : 0;
+            }
+        }
+    }
 
     ClippingRectangle {
         anchors.fill: parent
@@ -147,7 +147,7 @@ PaneRect {
                         Layout.fillWidth: true
                         text: MprisController.activePlayer?.trackTitle ?? "No hay reproducción activa"
                         textFormat: Text.PlainText
-                        color: player.hasArtwork && player.playerColors ? player.playerColors.overBackground : Colors.whiteSource
+                        color: player.hasArtwork && player.playerColors ? player.playerColors.overBackground : Colors.overBackground
                         font.pixelSize: Config.theme.fontSize
                         font.weight: Font.Bold
                         font.family: Config.theme.font

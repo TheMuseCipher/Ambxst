@@ -20,26 +20,26 @@ Item {
     property bool hasArtwork: (player?.trackArtUrl ?? "") !== ""
     property var playerColors: hasArtwork ? PlayerColors.getColorsForPlayer(player) : null
 
-     Timer {
-         running: compactPlayer.isPlaying
-         interval: 1000
-         repeat: true
-         onTriggered: {
-             if (!positionSlider.isDragging) {
-                 positionSlider.value = compactPlayer.length > 0 ? Math.min(1.0, compactPlayer.position / compactPlayer.length) : 0;
-             }
-             compactPlayer.player?.positionChanged();
-         }
-     }
+    Timer {
+        running: compactPlayer.isPlaying
+        interval: 1000
+        repeat: true
+        onTriggered: {
+            if (!positionSlider.isDragging) {
+                positionSlider.value = compactPlayer.length > 0 ? Math.min(1.0, compactPlayer.position / compactPlayer.length) : 0;
+            }
+            compactPlayer.player?.positionChanged();
+        }
+    }
 
-     Connections {
-         target: compactPlayer.player
-         function onPositionChanged() {
-             if (!positionSlider.isDragging && compactPlayer.player) {
-                 positionSlider.value = compactPlayer.length > 0 ? Math.min(1.0, compactPlayer.position / compactPlayer.length) : 0;
-             }
-         }
-     }
+    Connections {
+        target: compactPlayer.player
+        function onPositionChanged() {
+            if (!positionSlider.isDragging && compactPlayer.player) {
+                positionSlider.value = compactPlayer.length > 0 ? Math.min(1.0, compactPlayer.position / compactPlayer.length) : 0;
+            }
+        }
+    }
 
     ClippingRectangle {
         anchors.fill: parent
