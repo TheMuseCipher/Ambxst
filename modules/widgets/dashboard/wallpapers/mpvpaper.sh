@@ -7,6 +7,6 @@ fi
 
 WALLPAPER="$1"
 
-pkill -f "mpvpaper -o" 2>/dev/null
+pkill -f "/mpvpaper(\.orig)?(\s|$)" 2>/dev/null
 
 nohup mpvpaper -o "no-audio loop hwdec=auto scale=bilinear interpolation=no video-sync=display-resample panscan=1.0 video-scale-x=1.0 video-scale-y=1.0 load-scripts=no" ALL "$WALLPAPER" >/dev/null 2>&1 &
