@@ -146,111 +146,121 @@ PanelWindow {
                 id: launcherButton
             }
 
-            ClippingRectangle {
-                id: leftRect
+            RowLayout {
+                id: leftSection
                 Layout.fillWidth: true
-                Layout.preferredHeight: 36
-                color: "transparent"
-                radius: Config.roundness
-                layer.enabled: Config.bar.showBackground
-                layer.effect: Shadow {}
 
-                Flickable {
-                    width: parent.width
-                    height: parent.height
-                    anchors.left: parent.left
-                    contentWidth: leftContent.width
-                    contentHeight: 36
-                    flickableDirection: Flickable.HorizontalFlick
+                ClippingRectangle {
+                    id: leftRect
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 36
+                    color: "transparent"
+                    radius: Config.roundness
+                    layer.enabled: Config.bar.showBackground
+                    layer.effect: Shadow {}
 
-                    RowLayout {
-                        id: leftContent
-                        spacing: 4
+                    Flickable {
+                        width: parent.width
+                        height: parent.height
+                        anchors.left: parent.left
+                        contentWidth: leftContent.width
+                        contentHeight: 36
+                        flickableDirection: Flickable.HorizontalFlick
 
                         RowLayout {
-                            id: leftWidgets
+                            id: leftContent
                             spacing: 4
 
-                            Workspaces {
-                                orientation: panel.orientation
-                                bar: QtObject {
-                                    property var screen: panel.screen
+                            RowLayout {
+                                id: leftWidgets
+                                spacing: 4
+
+                                Workspaces {
+                                    orientation: panel.orientation
+                                    bar: QtObject {
+                                        property var screen: panel.screen
+                                    }
+                                }
+                                OverviewButton {
+                                    id: overviewButton
                                 }
                             }
-                            OverviewButton {
-                                id: overviewButton
-                            }
-                        }
 
-                        Item {
-                            Layout.preferredWidth: leftRect.width - leftWidgets.width - 4
+                            Item {
+                                Layout.preferredWidth: leftRect.width - leftWidgets.width - 4
+                            }
                         }
                     }
                 }
             }
 
-            ClippingRectangle {
-                id: rightRect
+            RowLayout {
+                id: rightSection
                 Layout.fillWidth: true
-                Layout.preferredHeight: 36
-                Layout.alignment: Qt.AlignRight
-                color: "transparent"
-                radius: Config.roundness
-                layer.enabled: Config.bar.showBackground
-                layer.effect: Shadow {}
 
-                Flickable {
-                    width: parent.width
-                    height: parent.height
-                    anchors.right: parent.right
-                    contentWidth: rightContent.width
-                    contentHeight: 36
-                    contentX: rightContent.width
-                    flickableDirection: Flickable.HorizontalFlick
+                ClippingRectangle {
+                    id: rightRect
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 36
+                    Layout.alignment: Qt.AlignRight
+                    color: "transparent"
+                    radius: Config.roundness
+                    layer.enabled: Config.bar.showBackground
+                    layer.effect: Shadow {}
 
-                    RowLayout {
-                        id: rightContent
-                        spacing: 4
-
-                        Item {
-                            Layout.preferredWidth: rightRect.width - rightWidgets.width - 4
-                        }
+                    Flickable {
+                        width: parent.width
+                        height: parent.height
+                        anchors.right: parent.right
+                        contentWidth: rightContent.width
+                        contentHeight: 36
+                        contentX: rightContent.width
+                        flickableDirection: Flickable.HorizontalFlick
 
                         RowLayout {
-                            id: rightWidgets
+                            id: rightContent
                             spacing: 4
 
-                            MicSlider {
-                                bar: panel
-                                layerEnabled: Config.bar.showBackground
+                            Item {
+                                Layout.preferredWidth: rightRect.width - rightWidgets.width - 4
                             }
 
-                            VolumeSlider {
-                                id: volume
-                                bar: panel
-                                layerEnabled: Config.bar.showBackground
-                            }
+                            RowLayout {
+                                id: rightWidgets
+                                spacing: 4
 
-                            BrightnessSlider {
-                                bar: panel
-                                layerEnabled: Config.bar.showBackground
-                            }
+                                MicSlider {
+                                    bar: panel
+                                    layerEnabled: Config.bar.showBackground
+                                }
 
-                            SysTray {
-                                bar: panel
-                                layer.enabled: false
-                            }
+                                VolumeSlider {
+                                    id: volume
+                                    bar: panel
+                                    layerEnabled: Config.bar.showBackground
+                                }
 
-                            Weather {
-                                id: weatherComponent
-                                bar: panel
-                                layer.enabled: false
-                            }
+                                BrightnessSlider {
+                                    bar: panel
+                                    layerEnabled: Config.bar.showBackground
+                                }
 
-                            Clock {
-                                id: clockComponent
-                                bar: panel
-                                layer.enabled: false
+                                SysTray {
+                                    bar: panel
+                                    layer.enabled: false
+                                }
+
+                                Weather {
+                                    id: weatherComponent
+                                    bar: panel
+                                    layer.enabled: false
+                                }
+
+                                Clock {
+                                    id: clockComponent
+                                    bar: panel
+                                    layer.enabled: false
+                                }
                             }
                         }
                     }
@@ -274,110 +284,120 @@ PanelWindow {
                 Layout.preferredHeight: 36
             }
 
-            ClippingRectangle {
-                id: topRect
+            ColumnLayout {
+                id: topSection
                 Layout.fillHeight: true
-                Layout.preferredWidth: 36
-                color: "transparent"
-                radius: Config.roundness
-                layer.enabled: Config.bar.showBackground
-                layer.effect: Shadow {}
 
-                Flickable {
-                    width: parent.width
-                    height: parent.height
-                    anchors.top: parent.top
-                    contentWidth: 36
-                    contentHeight: topContent.height
-                    flickableDirection: Flickable.VerticalFlick
+                ClippingRectangle {
+                    id: topRect
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: 36
+                    color: "transparent"
+                    radius: Config.roundness
+                    layer.enabled: Config.bar.showBackground
+                    layer.effect: Shadow {}
 
-                    ColumnLayout {
-                        id: topContent
-                        spacing: 4
+                    Flickable {
+                        width: parent.width
+                        height: parent.height
+                        anchors.top: parent.top
+                        contentWidth: 36
+                        contentHeight: topContent.height
+                        flickableDirection: Flickable.VerticalFlick
 
                         ColumnLayout {
-                            id: topWidgets
+                            id: topContent
                             spacing: 4
 
-                            Workspaces {
-                                orientation: panel.orientation
-                                bar: QtObject {
-                                    property var screen: panel.screen
+                            ColumnLayout {
+                                id: topWidgets
+                                spacing: 4
+
+                                Workspaces {
+                                    orientation: panel.orientation
+                                    bar: QtObject {
+                                        property var screen: panel.screen
+                                    }
+                                }
+                                OverviewButton {
+                                    id: overviewButtonVert
+                                    Layout.preferredHeight: 36
                                 }
                             }
-                            OverviewButton {
-                                id: overviewButtonVert
-                                Layout.preferredHeight: 36
-                            }
-                        }
 
-                        Item {
-                            Layout.preferredHeight: topRect.height - topWidgets.height - 4
+                            Item {
+                                Layout.preferredHeight: topRect.height - topWidgets.height - 4
+                            }
                         }
                     }
                 }
             }
 
-            ClippingRectangle {
-                id: bottomRect
+            ColumnLayout {
+                id: bottomSection
                 Layout.fillHeight: true
-                Layout.preferredWidth: 36
-                color: "transparent"
-                radius: Config.roundness
-                layer.enabled: Config.bar.showBackground
-                layer.effect: Shadow {}
 
-                Flickable {
-                    width: parent.width
-                    height: parent.height
-                    anchors.bottom: parent.bottom
-                    contentWidth: 36
-                    contentHeight: bottomContent.height
-                    contentY: bottomContent.height
-                    flickableDirection: Flickable.VerticalFlick
+                ClippingRectangle {
+                    id: bottomRect
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: 36
+                    color: "transparent"
+                    radius: Config.roundness
+                    layer.enabled: Config.bar.showBackground
+                    layer.effect: Shadow {}
 
-                    ColumnLayout {
-                        id: bottomContent
-                        spacing: 4
-
-                        Item {
-                            Layout.preferredHeight: bottomRect.height - bottomWidgets.height - 4
-                        }
+                    Flickable {
+                        width: parent.width
+                        height: parent.height
+                        anchors.bottom: parent.bottom
+                        contentWidth: 36
+                        contentHeight: bottomContent.height
+                        contentY: bottomContent.height
+                        flickableDirection: Flickable.VerticalFlick
 
                         ColumnLayout {
-                            id: bottomWidgets
+                            id: bottomContent
                             spacing: 4
 
-                            MicSlider {
-                                bar: panel
-                                layerEnabled: Config.bar.showBackground
+                            Item {
+                                Layout.preferredHeight: bottomRect.height - bottomWidgets.height - 4
                             }
 
-                            VolumeSlider {
-                                bar: panel
-                                layerEnabled: Config.bar.showBackground
-                            }
+                            ColumnLayout {
+                                id: bottomWidgets
+                                spacing: 4
 
-                            BrightnessSlider {
-                                bar: panel
-                                layerEnabled: Config.bar.showBackground
-                            }
+                                MicSlider {
+                                    bar: panel
+                                    layerEnabled: Config.bar.showBackground
+                                }
 
-                            SysTray {
-                                bar: panel
-                                layer.enabled: false
-                            }
+                                VolumeSlider {
+                                    bar: panel
+                                    layerEnabled: Config.bar.showBackground
+                                }
 
-                            Weather {
-                                id: weatherComponentVert
-                                bar: panel
-                                layer.enabled: false
-                            }
+                                BrightnessSlider {
+                                    bar: panel
+                                    layerEnabled: Config.bar.showBackground
+                                }
 
-                            Clock {
-                                id: clockComponentVert
-                                bar: panel
-                                layer.enabled: false
+                                SysTray {
+                                    bar: panel
+                                    layer.enabled: false
+                                }
+
+                                Weather {
+                                    id: weatherComponentVert
+                                    bar: panel
+                                    layer.enabled: false
+                                }
+
+                                Clock {
+                                    id: clockComponentVert
+                                    bar: panel
+                                    layer.enabled: false
+                                }
                             }
                         }
                     }
