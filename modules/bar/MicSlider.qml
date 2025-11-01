@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.modules.services
 import qs.modules.components
 import qs.modules.theme
+import qs.config
 
 Item {
     id: root
@@ -28,10 +29,8 @@ Item {
     }
 
     // Tamaño basado en hover para BgRect con animación
-    implicitWidth: root.vertical ? 4 : 80
-    implicitHeight: root.vertical ? 80 : 4
-    Layout.preferredWidth: root.vertical ? 4 : 80
-    Layout.preferredHeight: root.vertical ? 80 : 4
+    Layout.preferredWidth: root.vertical ? 36 : 36
+    Layout.preferredHeight: root.vertical ? 36 : 36
 
     states: [
         State {
@@ -39,18 +38,16 @@ Item {
             when: root.isHovered || micSlider.isDragging
             PropertyChanges {
                 target: root
-                implicitWidth: root.vertical ? 4 : 128
-                implicitHeight: root.vertical ? 128 : 4
-                Layout.preferredWidth: root.vertical ? 4 : 128
-                Layout.preferredHeight: root.vertical ? 128 : 4
+                Layout.preferredWidth: root.vertical ? 36 : 150
+                Layout.preferredHeight: root.vertical ? 150 : 36
             }
         }
     ]
 
     transitions: Transition {
         NumberAnimation {
-            properties: "implicitWidth,implicitHeight,Layout.preferredWidth,Layout.preferredHeight"
-            duration: 200
+            properties: "Layout.preferredWidth,Layout.preferredHeight"
+            duration: Config.animDuration
             easing.type: Easing.OutCubic
         }
     }
@@ -95,6 +92,7 @@ Item {
             value: 0
             resizeParent: false
             wavy: true
+            sliderVisible: root.isHovered || micSlider.isDragging || root.externalVolumeChange
             wavyAmplitude: (root.isHovered || micSlider.isDragging || root.externalVolumeChange) ? (Audio.source?.audio?.muted ? 0.5 : 1.5 * value) : 0
             wavyFrequency: (root.isHovered || micSlider.isDragging || root.externalVolumeChange) ? (Audio.source?.audio?.muted ? 1.0 : 8.0 * value) : 0
             iconPos: root.vertical ? "end" : "start"

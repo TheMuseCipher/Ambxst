@@ -198,7 +198,7 @@ PanelWindow {
                 id: rightSection
                 Layout.fillWidth: true
 
-                ClippingRectangle {
+                Rectangle {
                     id: rightRect
                     Layout.fillWidth: true
                     Layout.preferredHeight: 36

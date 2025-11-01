@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.modules.services
 import qs.modules.components
 import qs.modules.theme
+import qs.config
 
 Item {
     id: root
@@ -50,10 +51,8 @@ Item {
         }
     }
 
-    implicitWidth: root.vertical ? 4 : 80
-    implicitHeight: root.vertical ? 80 : 4
-    Layout.preferredWidth: root.vertical ? 4 : 80
-    Layout.preferredHeight: root.vertical ? 80 : 4
+    Layout.preferredWidth: root.vertical ? 36 : 36
+    Layout.preferredHeight: root.vertical ? 36 : 36
 
     states: [
         State {
@@ -61,10 +60,8 @@ Item {
             when: root.isHovered || brightnessSlider.isDragging || root.externalBrightnessChange
             PropertyChanges {
                 target: root
-                implicitWidth: root.vertical ? 4 : 128
-                implicitHeight: root.vertical ? 128 : 4
-                Layout.preferredWidth: root.vertical ? 4 : 128
-                Layout.preferredHeight: root.vertical ? 128 : 4
+                Layout.preferredWidth: root.vertical ? 36 : 150
+                Layout.preferredHeight: root.vertical ? 150 : 36
             }
         }
     ]
@@ -121,6 +118,7 @@ Item {
             value: 0
             resizeParent: false
             wavy: true
+            sliderVisible: root.isHovered || isDragging || root.externalBrightnessChange
             wavyAmplitude: (root.isHovered || isDragging || root.externalBrightnessChange) ? (1.5 * value) : 0
             wavyFrequency: (root.isHovered || isDragging || root.externalBrightnessChange) ? (8.0 * value) : 0
             iconPos: root.vertical ? "end" : "start"

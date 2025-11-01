@@ -85,6 +85,15 @@
             imagemagick
             matugen
             ffmpeg
+
+            # MPRIS / DBus / Portals
+            playerctl
+            xdg-desktop-portal
+            xdg-desktop-portal-hyprland
+
+            # PipeWire stack
+            pipewire
+            wireplumber
           ];
         };
 

@@ -47,6 +47,7 @@ Item {
     property bool resizeParent: true
     property real iconRotation: 0
     property real iconScale: 1
+    property bool sliderVisible: true
 
     property real animatedProgress: progressRatio
     Behavior on animatedProgress {
@@ -96,6 +97,13 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 4
             Layout.alignment: Qt.AlignVCenter
+            opacity: root.sliderVisible ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Config.animDuration
+                    easing.type: Easing.OutQuart
+                }
+            }
 
             Rectangle {
                 id: hDragHandle
@@ -186,6 +194,13 @@ Item {
             Layout.fillHeight: true
             Layout.preferredWidth: 4
             Layout.alignment: Qt.AlignHCenter
+            opacity: root.sliderVisible ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Config.animDuration
+                    easing.type: Easing.OutQuart
+                }
+            }
 
             Rectangle {
                 id: vDragHandle
