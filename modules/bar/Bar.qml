@@ -149,6 +149,8 @@ PanelWindow {
             RowLayout {
                 id: leftSection
                 Layout.fillWidth: true
+                Layout.preferredWidth: 0
+                spacing: 4
 
                 ClippingRectangle {
                     id: leftRect
@@ -166,6 +168,7 @@ PanelWindow {
                         contentWidth: leftContent.width
                         contentHeight: 36
                         flickableDirection: Flickable.HorizontalFlick
+                        clip: true
 
                         RowLayout {
                             id: leftContent
@@ -187,7 +190,7 @@ PanelWindow {
                             }
 
                             Item {
-                                Layout.preferredWidth: leftRect.width - leftWidgets.width - 4
+                                Layout.preferredWidth: Math.max(0, leftRect.width - leftWidgets.width - 4)
                             }
                         }
                     }
@@ -197,12 +200,13 @@ PanelWindow {
             RowLayout {
                 id: rightSection
                 Layout.fillWidth: true
+                Layout.preferredWidth: 0
+                spacing: 4
 
-                Rectangle {
+                ClippingRectangle {
                     id: rightRect
                     Layout.fillWidth: true
                     Layout.preferredHeight: 36
-                    Layout.alignment: Qt.AlignRight
                     color: "transparent"
                     radius: Config.roundness
                     layer.enabled: Config.bar.showBackground
@@ -214,15 +218,16 @@ PanelWindow {
                         anchors.right: parent.right
                         contentWidth: rightContent.width
                         contentHeight: 36
-                        contentX: rightContent.width
+                        contentX: Math.max(0, rightContent.width - width)
                         flickableDirection: Flickable.HorizontalFlick
+                        clip: true
 
                         RowLayout {
                             id: rightContent
                             spacing: 4
 
                             Item {
-                                Layout.preferredWidth: rightRect.width - rightWidgets.width - 4
+                                Layout.preferredWidth: Math.max(0, rightRect.width - rightWidgets.width - 4)
                             }
 
                             RowLayout {
@@ -254,17 +259,17 @@ PanelWindow {
                         }
                     }
                 }
-            }
 
-            SysTray {
-                bar: panel
-                layer.enabled: false
-            }
+                SysTray {
+                    bar: panel
+                    layer.enabled: false
+                }
 
-            Clock {
-                id: clockComponent
-                bar: panel
-                layer.enabled: false
+                Clock {
+                    id: clockComponent
+                    bar: panel
+                    layer.enabled: false
+                }
             }
 
             PowerButton {
@@ -287,6 +292,8 @@ PanelWindow {
             ColumnLayout {
                 id: topSection
                 Layout.fillHeight: true
+                Layout.preferredHeight: 0
+                spacing: 4
 
                 ClippingRectangle {
                     id: topRect
@@ -304,6 +311,7 @@ PanelWindow {
                         contentWidth: 36
                         contentHeight: topContent.height
                         flickableDirection: Flickable.VerticalFlick
+                        clip: true
 
                         ColumnLayout {
                             id: topContent
@@ -326,7 +334,7 @@ PanelWindow {
                             }
 
                             Item {
-                                Layout.preferredHeight: topRect.height - topWidgets.height - 4
+                                Layout.preferredHeight: Math.max(0, topRect.height - topWidgets.height - 4)
                             }
                         }
                     }
@@ -336,6 +344,8 @@ PanelWindow {
             ColumnLayout {
                 id: bottomSection
                 Layout.fillHeight: true
+                Layout.preferredHeight: 0
+                spacing: 4
 
                 ClippingRectangle {
                     id: bottomRect
@@ -352,15 +362,16 @@ PanelWindow {
                         anchors.bottom: parent.bottom
                         contentWidth: 36
                         contentHeight: bottomContent.height
-                        contentY: bottomContent.height
+                        contentY: Math.max(0, bottomContent.height - height)
                         flickableDirection: Flickable.VerticalFlick
+                        clip: true
 
                         ColumnLayout {
                             id: bottomContent
                             spacing: 4
 
                             Item {
-                                Layout.preferredHeight: bottomRect.height - bottomWidgets.height - 4
+                                Layout.preferredHeight: Math.max(0, bottomRect.height - bottomWidgets.height - 4)
                             }
 
                             ColumnLayout {
@@ -391,17 +402,17 @@ PanelWindow {
                         }
                     }
                 }
-            }
 
-            SysTray {
-                bar: panel
-                layer.enabled: false
-            }
+                SysTray {
+                    bar: panel
+                    layer.enabled: false
+                }
 
-            Clock {
-                id: clockComponentVert
-                bar: panel
-                layer.enabled: false
+                Clock {
+                    id: clockComponentVert
+                    bar: panel
+                    layer.enabled: false
+                }
             }
 
             PowerButton {
