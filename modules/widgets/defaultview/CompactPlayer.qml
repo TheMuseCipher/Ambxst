@@ -53,9 +53,9 @@ Item {
             anchors.margins: -4
             frequency: 4
             color: Colors.surfaceBright
-            amplitudeMultiplier: 2
+            amplitudeMultiplier: 4
             height: 24
-            lineWidth: 4
+            lineWidth: 2
             fullLength: width
             visible: compactPlayer.player === null
             opacity: 1.0

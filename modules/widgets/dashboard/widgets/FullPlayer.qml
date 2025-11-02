@@ -71,9 +71,9 @@ PaneRect {
                 anchors.margins: -4
                 frequency: 4
                 color: Colors.surfaceBright
-                amplitudeMultiplier: 2
+                amplitudeMultiplier: 4
                 height: 24
-                lineWidth: 4
+                lineWidth: 2
                 fullLength: width
                 visible: true
                 opacity: 1.0
