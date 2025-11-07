@@ -7,15 +7,29 @@ import qs.modules.globals
 import qs.config
 
 Item {
+    id: root
     property bool schemeListExpanded: false
     readonly property var schemeDisplayNames: ["Content", "Expressive", "Fidelity", "Fruit Salad", "Monochrome", "Neutral", "Rainbow", "Tonal Spot"]
+    readonly property var schemeInternalNames: ["scheme-content", "scheme-expressive", "scheme-fidelity", "scheme-fruit-salad", "scheme-monochrome", "scheme-neutral", "scheme-rainbow", "scheme-tonal-spot"]
     property bool scrollBarPressed: false
+    property int selectedSchemeIndex: -1
 
     Connections {
         target: GlobalStates.wallpaperManager
         function onCurrentMatugenSchemeChanged() {
-        // Force re-evaluation of the text binding when scheme changes
+            // Update selected index to match current scheme
+            updateSelectedIndex();
         }
+    }
+
+    function updateSelectedIndex() {
+        if (GlobalStates.wallpaperManager && GlobalStates.wallpaperManager.currentMatugenScheme) {
+            selectedSchemeIndex = schemeInternalNames.indexOf(GlobalStates.wallpaperManager.currentMatugenScheme);
+        }
+    }
+
+    Component.onCompleted: {
+        updateSelectedIndex();
     }
 
     function getSchemeDisplayName(scheme) {
@@ -59,10 +73,51 @@ Item {
                 spacing: 4
 
                 Button {
+                    id: schemeButton
                     Layout.fillWidth: true
                     Layout.preferredHeight: 40
                     text: GlobalStates.wallpaperManager && GlobalStates.wallpaperManager.currentMatugenScheme ? getSchemeDisplayName(GlobalStates.wallpaperManager.currentMatugenScheme) : "Selecciona esquema"
-                    onClicked: schemeListExpanded = !schemeListExpanded
+                    focus: true
+                    
+                    onClicked: {
+                        schemeListExpanded = !schemeListExpanded;
+                        if (schemeListExpanded) {
+                            updateSelectedIndex();
+                        }
+                    }
+
+                    Keys.onPressed: event => {
+                        if (event.key === Qt.Key_Left) {
+                            Config.theme.lightMode = true;
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Right) {
+                            Config.theme.lightMode = false;
+                            event.accepted = true;
+                        } else if (!schemeListExpanded) {
+                            return;
+                        } else if (event.key === Qt.Key_Down) {
+                            if (selectedSchemeIndex < schemeInternalNames.length - 1) {
+                                selectedSchemeIndex++;
+                                schemeListView.currentIndex = selectedSchemeIndex;
+                            }
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Up) {
+                            if (selectedSchemeIndex > 0) {
+                                selectedSchemeIndex--;
+                                schemeListView.currentIndex = selectedSchemeIndex;
+                            }
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                            if (selectedSchemeIndex >= 0 && GlobalStates.wallpaperManager) {
+                                GlobalStates.wallpaperManager.setMatugenScheme(schemeInternalNames[selectedSchemeIndex]);
+                                schemeListExpanded = false;
+                            }
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Escape) {
+                            schemeListExpanded = false;
+                            event.accepted = true;
+                        }
+                    }
 
                     background: Rectangle {
                         color: Colors.background
@@ -147,46 +202,88 @@ Item {
                     radius: Config.roundness
                     opacity: schemeListExpanded ? 1 : 0
 
-                    Flickable {
-                        id: schemeFlickable
+                    ListView {
+                        id: schemeListView
                         anchors.fill: parent
-                        contentHeight: schemeColumn.height
                         clip: true
+                        model: schemeInternalNames
+                        currentIndex: selectedSchemeIndex
+                        interactive: true
+                        boundsBehavior: Flickable.StopAtBounds
+                        highlightFollowsCurrentItem: true
+                        highlightRangeMode: ListView.ApplyRange
+                        preferredHighlightBegin: 0
+                        preferredHighlightEnd: height
 
-                        Column {
-                            id: schemeColumn
-                            width: parent.width
-                            spacing: 0
+                        onCurrentIndexChanged: {
+                            if (currentIndex !== selectedSchemeIndex) {
+                                selectedSchemeIndex = currentIndex;
+                            }
+                        }
 
-                            Repeater {
-                                model: ["scheme-content", "scheme-expressive", "scheme-fidelity", "scheme-fruit-salad", "scheme-monochrome", "scheme-neutral", "scheme-rainbow", "scheme-tonal-spot"]
+                        delegate: Button {
+                            required property string modelData
+                            required property int index
 
-                                Button {
-                                    width: parent.width
-                                    height: 40
-                                    text: schemeDisplayNames[index]
-                                    onClicked: {
-                                        if (GlobalStates.wallpaperManager) {
-                                            GlobalStates.wallpaperManager.setMatugenScheme(modelData);
-                                            schemeListExpanded = false;
-                                        }
+                            width: schemeListView.width
+                            height: 40
+                            text: schemeDisplayNames[index]
+
+                            onClicked: {
+                                if (GlobalStates.wallpaperManager) {
+                                    GlobalStates.wallpaperManager.setMatugenScheme(modelData);
+                                    schemeListExpanded = false;
+                                }
+                            }
+
+                            background: Rectangle {
+                                color: "transparent"
+                            }
+
+                            contentItem: Text {
+                                text: parent.text
+                                color: selectedSchemeIndex === index ? Colors.overPrimary : Colors.overSurface
+                                font.family: Config.theme.font
+                                font.pixelSize: Config.theme.fontSize
+                                font.weight: selectedSchemeIndex === index ? Font.Bold : Font.Normal
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: 8
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: Config.animDuration / 2
+                                        easing.type: Easing.OutQuart
                                     }
+                                }
+                            }
 
-                                    background: Rectangle {
-                                        color: "transparent"
-                                    }
-
-                                    contentItem: Text {
-                                        text: parent.text
-                                        color: Colors.overSurface
-                                        font.family: Config.theme.font
-                                        font.pixelSize: Config.theme.fontSize
-                                        verticalAlignment: Text.AlignVCenter
-                                        leftPadding: 8
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onEntered: {
+                                    selectedSchemeIndex = index;
+                                    schemeListView.currentIndex = index;
+                                }
+                                onClicked: {
+                                    if (GlobalStates.wallpaperManager) {
+                                        GlobalStates.wallpaperManager.setMatugenScheme(modelData);
+                                        schemeListExpanded = false;
                                     }
                                 }
                             }
                         }
+
+                        highlight: Rectangle {
+                            color: Colors.primary
+                            radius: Config.roundness
+                            visible: selectedSchemeIndex >= 0
+                            z: -1
+                        }
+
+                        highlightMoveDuration: Config.animDuration / 2
+                        highlightMoveVelocity: -1
+                        highlightResizeDuration: Config.animDuration / 2
+                        highlightResizeVelocity: -1
                     }
 
                     // Animate topMargin for ClippingRectangle
@@ -217,10 +314,10 @@ Item {
                     Layout.preferredHeight: schemeListExpanded ? (40 * 3) - 32 : 0
                     Layout.alignment: Qt.AlignVCenter
                     orientation: Qt.Vertical
-                    visible: schemeFlickable.contentHeight > schemeFlickable.height
+                    visible: schemeListView.contentHeight > schemeListView.height
 
-                    position: schemeFlickable.contentY / schemeFlickable.contentHeight
-                    size: schemeFlickable.height / schemeFlickable.contentHeight
+                    position: schemeListView.contentY / schemeListView.contentHeight
+                    size: schemeListView.height / schemeListView.contentHeight
 
                     background: Rectangle {
                         color: Colors.background
@@ -237,8 +334,8 @@ Item {
                     }
 
                     onPositionChanged: {
-                        if (scrollBarPressed && schemeFlickable.contentHeight > schemeFlickable.height) {
-                            schemeFlickable.contentY = position * schemeFlickable.contentHeight;
+                        if (scrollBarPressed && schemeListView.contentHeight > schemeListView.height) {
+                            schemeListView.contentY = position * schemeListView.contentHeight;
                         }
                     }
                 }
