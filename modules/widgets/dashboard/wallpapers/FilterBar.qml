@@ -6,7 +6,7 @@ import qs.modules.globals
 import qs.config
 
 // Componente para la barra de filtros de tipo de archivo
-Item {
+FocusScope {
     id: root
 
     // Propiedades públicas
@@ -17,12 +17,125 @@ Item {
 
     // Señales
     signal filterToggled(string filterType)
+    signal escapePressedOnFilters()
+    signal shiftTabPressed()
+    signal tabPressed()
 
     // Propiedad para rastrear si el scrollbar está siendo presionado
     property bool scrollBarPressed: false
 
+    // Propiedad para navegación por teclado
+    property int focusedFilterIndex: -1
+    property int lastFocusedFilterIndex: 0
+    property bool keyboardNavigationActive: false
+
+    // Función para tomar el foco
+    function focusFilters() {
+        keyboardNavigationActive = true;
+        // Restaurar el último filtro que tuvo foco, o el primero si no hay historial
+        focusedFilterIndex = lastFocusedFilterIndex >= 0 && lastFocusedFilterIndex < filterModel.count 
+                             ? lastFocusedFilterIndex 
+                             : 0;
+        ensureVisible(focusedFilterIndex);
+        root.focus = true;
+    }
+
     // Configuración del Flickable
     height: 32 + 4 + scrollBar.implicitHeight
+
+    onActiveFocusChanged: {
+        if (!activeFocus) {
+            keyboardNavigationActive = false;
+            // Recordar el índice del filtro enfocado antes de perder el foco
+            if (focusedFilterIndex >= 0) {
+                lastFocusedFilterIndex = focusedFilterIndex;
+            }
+            focusedFilterIndex = -1;
+        }
+    }
+
+    Keys.onPressed: event => {
+        // Manejar Shift+Tab para volver al search
+        if (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier)) {
+            keyboardNavigationActive = false;
+            focusedFilterIndex = -1;
+            shiftTabPressed();
+            event.accepted = true;
+            return;
+        }
+        
+        // Manejar Tab para avanzar al siguiente elemento
+        if (event.key === Qt.Key_Tab) {
+            keyboardNavigationActive = false;
+            focusedFilterIndex = -1;
+            tabPressed();
+            event.accepted = true;
+            return;
+        }
+
+        if (!keyboardNavigationActive) return;
+
+        if (event.key === Qt.Key_Left) {
+            if (focusedFilterIndex > 0) {
+                focusedFilterIndex--;
+                ensureVisible(focusedFilterIndex);
+            }
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Right) {
+            if (focusedFilterIndex < filterModel.count - 1) {
+                focusedFilterIndex++;
+                ensureVisible(focusedFilterIndex);
+            }
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+            if (focusedFilterIndex >= 0 && focusedFilterIndex < filterModel.count) {
+                const filterType = filterModel.get(focusedFilterIndex).type;
+                const index = root.activeFilters.indexOf(filterType);
+                if (index > -1) {
+                    root.activeFilters.splice(index, 1);
+                } else {
+                    root.activeFilters.push(filterType);
+                }
+                root.activeFilters = root.activeFilters.slice();
+                root.filterToggled(filterType);
+            }
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Escape) {
+            keyboardNavigationActive = false;
+            focusedFilterIndex = -1;
+            escapePressedOnFilters();
+            event.accepted = true;
+        }
+    }
+
+    function ensureVisible(index) {
+        if (index < 0 || index >= filterRepeater.count) return;
+        
+        const item = filterRepeater.itemAt(index);
+        if (!item) return;
+
+        const itemX = item.x;
+        const itemWidth = item.width;
+        const viewportWidth = flickable.width;
+        const contentX = flickable.contentX;
+
+        // Calcular la posición de destino con scroll suave
+        let targetX = contentX;
+        
+        if (itemX < contentX) {
+            // El elemento está fuera del viewport por la izquierda
+            targetX = itemX;
+        } else if (itemX + itemWidth > contentX + viewportWidth) {
+            // El elemento está fuera del viewport por la derecha
+            targetX = itemX + itemWidth - viewportWidth;
+        }
+        
+        // Si necesitamos hacer scroll, animarlo
+        if (targetX !== contentX) {
+            scrollAnimation.to = targetX;
+            scrollAnimation.restart();
+        }
+    }
 
     Flickable {
         id: flickable
@@ -31,6 +144,13 @@ Item {
         contentWidth: filterRow.width
         flickableDirection: Flickable.HorizontalFlick
         clip: true
+
+        // Animación suave para el scroll programático
+        NumberAnimation on contentX {
+            id: scrollAnimation
+            duration: Config.animDuration / 2
+            easing.type: Easing.OutQuart
+        }
 
         // Modelo de filtros
         ListModel {
@@ -96,19 +216,34 @@ Item {
             spacing: 4
 
             Repeater {
+                id: filterRepeater
                 model: filterModel
                 delegate: Rectangle {
-                    property bool isActive: root.activeFilters.includes(model.type)
+                    required property string label
+                    required property string type
+                    required property int index
+                    
+                    property bool isActive: root.activeFilters.includes(type)
+                    property bool hasFocus: root.keyboardNavigationActive && root.focusedFilterIndex === index
 
                     // Ancho dinámico: incluye icono solo cuando está activo
                     width: filterText.width + 24 + (isActive ? filterIcon.width + 4 : 0)
                     height: 32
                     color: isActive ? Colors.surfaceBright : Colors.surface
                     radius: isActive ? (Config.roundness > 0 ? Config.roundness / 2 : 0) : Config.roundness
+                    border.color: Colors.outline
+                    border.width: hasFocus ? 2 : 0
 
                     Behavior on radius {
                         NumberAnimation {
                             duration: Config.animDuration / 2
+                            easing.type: Easing.OutQuart
+                        }
+                    }
+
+                    Behavior on border.width {
+                        NumberAnimation {
+                            duration: Config.animDuration / 3
                             easing.type: Easing.OutQuart
                         }
                     }
@@ -154,7 +289,7 @@ Item {
 
                             Text {
                                 id: filterText
-                                text: model.label
+                                text: label
                                 font.family: Config.theme.font
                                 font.pixelSize: Config.theme.fontSize
                                 color: isActive ? Colors.primary : Colors.overBackground
@@ -173,14 +308,17 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            const index = root.activeFilters.indexOf(model.type);
+                            root.keyboardNavigationActive = false;
+                            root.focusedFilterIndex = -1;
+                            
+                            const index = root.activeFilters.indexOf(type);
                             if (index > -1) {
                                 root.activeFilters.splice(index, 1);
                             } else {
-                                root.activeFilters.push(model.type);
+                                root.activeFilters.push(type);
                             }
                             root.activeFilters = root.activeFilters.slice();  // Trigger update
-                            root.filterToggled(model.type);
+                            root.filterToggled(type);
                         }
                     }
 

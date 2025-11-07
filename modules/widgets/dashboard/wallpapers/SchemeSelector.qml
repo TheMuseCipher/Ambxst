@@ -13,16 +13,22 @@ Item {
     readonly property var schemeInternalNames: ["scheme-content", "scheme-expressive", "scheme-fidelity", "scheme-fruit-salad", "scheme-monochrome", "scheme-neutral", "scheme-rainbow", "scheme-tonal-spot"]
     property bool scrollBarPressed: false
     property int selectedSchemeIndex: -1
+    property bool keyboardNavigationActive: false
 
     signal schemeSelectorClosed()
+    signal escapePressedOnScheme()
+    signal tabPressed()
+    signal shiftTabPressed()
 
     function openAndFocus() {
         schemeListExpanded = true;
         updateSelectedIndex();
+        keyboardNavigationActive = true;
         schemeButton.forceActiveFocus();
     }
 
     function closeAndSignal() {
+        keyboardNavigationActive = false;
         schemeListExpanded = false;
         schemeSelectorClosed();
     }
@@ -73,6 +79,15 @@ Item {
         color: Colors.surface
         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
         anchors.fill: parent
+        border.color: Colors.outline
+        border.width: keyboardNavigationActive && schemeButton.activeFocus ? 2 : 0
+
+        Behavior on border.width {
+            NumberAnimation {
+                duration: Config.animDuration / 3
+                easing.type: Easing.OutQuart
+            }
+        }
 
         ColumnLayout {
             id: mainLayout
@@ -92,7 +107,17 @@ Item {
                     text: GlobalStates.wallpaperManager && GlobalStates.wallpaperManager.currentMatugenScheme ? getSchemeDisplayName(GlobalStates.wallpaperManager.currentMatugenScheme) : "Selecciona esquema"
                     focus: true
                     
+                    onActiveFocusChanged: {
+                        if (!activeFocus) {
+                            keyboardNavigationActive = false;
+                            if (schemeListExpanded) {
+                                schemeListExpanded = false;
+                            }
+                        }
+                    }
+                    
                     onClicked: {
+                        keyboardNavigationActive = false;
                         schemeListExpanded = !schemeListExpanded;
                         if (schemeListExpanded) {
                             updateSelectedIndex();
@@ -100,7 +125,24 @@ Item {
                     }
 
                     Keys.onPressed: event => {
-                        if (event.key === Qt.Key_Left) {
+                        if (event.key === Qt.Key_Tab) {
+                            keyboardNavigationActive = false;
+                            if (schemeListExpanded) {
+                                schemeListExpanded = false;
+                            }
+                            if (event.modifiers & Qt.ShiftModifier) {
+                                shiftTabPressed();
+                            } else {
+                                tabPressed();
+                            }
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Space) {
+                            schemeListExpanded = !schemeListExpanded;
+                            if (schemeListExpanded) {
+                                updateSelectedIndex();
+                            }
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Left) {
                             Config.theme.lightMode = true;
                             event.accepted = true;
                         } else if (event.key === Qt.Key_Right) {
@@ -126,7 +168,12 @@ Item {
                             }
                             event.accepted = true;
                         } else if (event.key === Qt.Key_Escape) {
-                            closeAndSignal();
+                            if (schemeListExpanded) {
+                                schemeListExpanded = false;
+                            } else {
+                                keyboardNavigationActive = false;
+                                escapePressedOnScheme();
+                            }
                             event.accepted = true;
                         }
                     }
@@ -150,6 +197,8 @@ Item {
                     Layout.preferredWidth: 72
                     Layout.preferredHeight: 40
                     checked: Config.theme.lightMode
+                    focusPolicy: Qt.NoFocus
+                    
                     onCheckedChanged: {
                         Config.theme.lightMode = checked;
                     }

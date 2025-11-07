@@ -10,10 +10,8 @@ import qs.modules.services
 import qs.config
 
 // Componente principal para el selector de fondos de pantalla.
-Rectangle {
-    // Configuración de estilo y layout del componente.
-    color: "transparent"
-    radius: Config.roundness > 0 ? Config.roundness : 0
+FocusScope {
+    id: wallpapersTabRoot
 
     // Propiedades personalizadas para la funcionalidad del componente.
     property string searchText: ""
@@ -22,14 +20,53 @@ Rectangle {
     property int selectedIndex: GlobalStates.wallpaperSelectedIndex
     property var activeFilters: []  // Lista de tipos de archivo seleccionados para filtrar
 
-    // Función para enfocar el campo de búsqueda.
+    // Array de elementos focusables para navegación cíclica
+    property var focusableElements: [
+        { id: "filters", focusFunc: function() { filterBar.focusFilters(); } },
+        { id: "schemeSelector", focusFunc: function() { schemeSelector.openAndFocus(); } },
+        { id: "oledButton", focusFunc: function() { 
+            oledButton.keyboardNavigationActive = true;
+            oledButton.forceActiveFocus();
+        }}
+    ]
+
+    property int currentFocusIndex: -1
+
+    // Función para enfocar el campo de búsqueda
     function focusSearch() {
+        currentFocusIndex = -1;
         wallpaperSearchInput.focusInput();
     }
 
-    // Función para enfocar el scheme selector
-    function focusSchemeSelector() {
-        schemeSelector.openAndFocus();
+    // Función para enfocar los filtros
+    function focusFilters() {
+        currentFocusIndex = 0;
+        focusableElements[0].focusFunc();
+    }
+
+    // Función para navegar hacia adelante (Tab)
+    function focusNextElement() {
+        if (currentFocusIndex === -1) {
+            currentFocusIndex = 0;
+            focusableElements[currentFocusIndex].focusFunc();
+        } else if (currentFocusIndex === focusableElements.length - 1) {
+            // Si estamos en el último elemento, volver al search
+            focusSearch();
+        } else {
+            currentFocusIndex++;
+            focusableElements[currentFocusIndex].focusFunc();
+        }
+    }
+
+    // Función para navegar hacia atrás (Shift+Tab)
+    function focusPreviousElement() {
+        if (currentFocusIndex === -1 || currentFocusIndex === 0) {
+            // Si estamos en el search o en el primer elemento focusable, volver al search
+            focusSearch();
+        } else {
+            currentFocusIndex--;
+            focusableElements[currentFocusIndex].focusFunc();
+        }
     }
 
     // Función para encontrar el índice del wallpaper actual en la lista filtrada
@@ -105,7 +142,11 @@ Rectangle {
         return wallpapers;
     }
 
-    // Layout principal con una fila para la barra lateral y la cuadrícula.
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        radius: Config.roundness > 0 ? Config.roundness : 0
+
     RowLayout {
         anchors.fill: parent
         spacing: 8
@@ -143,6 +184,14 @@ Rectangle {
 
                 onEscapePressed: {
                     Visibilities.setActiveModule("");
+                }
+
+                onTabPressed: {
+                    focusFilters();
+                }
+
+                onShiftTabPressed: {
+                    // No hacer nada, ya estamos en el primer elemento
                 }
 
                 onDownPressed: {
@@ -211,27 +260,28 @@ Rectangle {
                         }
                     }
                 }
-
-                onShiftAccepted: {
-                    focusSchemeSelector();
-                }
             }
 
             // Barra de filtros usando el nuevo componente
             FilterBar {
                 id: filterBar
                 Layout.fillWidth: true
-
-                Component.onCompleted: {
-                    // Inicializar con los filtros del padre
-                    activeFilters = parent.parent.parent.activeFilters;
-                }
+                activeFilters: wallpapersTabRoot.activeFilters
 
                 onActiveFiltersChanged: {
-                    // Sincronizar cambios del componente al padre
-                    if (parent && parent.parent && parent.parent.parent) {
-                        parent.parent.parent.activeFilters = activeFilters;
-                    }
+                    wallpapersTabRoot.activeFilters = activeFilters;
+                }
+
+                onEscapePressedOnFilters: {
+                    wallpapersTabRoot.focusSearch();
+                }
+
+                onTabPressed: {
+                    wallpapersTabRoot.focusNextElement();
+                }
+
+                onShiftTabPressed: {
+                    wallpapersTabRoot.focusPreviousElement();
                 }
             }
 
@@ -256,7 +306,19 @@ Rectangle {
                             id: schemeSelector
 
                             onSchemeSelectorClosed: {
-                                focusSearch();
+                                wallpapersTabRoot.focusSearch();
+                            }
+
+                            onEscapePressedOnScheme: {
+                                wallpapersTabRoot.focusSearch();
+                            }
+
+                            onTabPressed: {
+                                wallpapersTabRoot.focusNextElement();
+                            }
+
+                            onShiftTabPressed: {
+                                wallpapersTabRoot.focusPreviousElement();
                             }
                         }
 
@@ -268,10 +330,39 @@ Rectangle {
                             enabled: !Config.theme.lightMode
 
                             property bool isActive: Config.theme.oledMode
+                            property bool keyboardNavigationActive: false
+
+                            onActiveFocusChanged: {
+                                if (!activeFocus) {
+                                    keyboardNavigationActive = false;
+                                }
+                            }
 
                             onClicked: {
+                                keyboardNavigationActive = false;
                                 if (enabled) {
                                     Config.theme.oledMode = !Config.theme.oledMode;
+                                }
+                            }
+
+                            Keys.onPressed: event => {
+                                if (event.key === Qt.Key_Tab) {
+                                    keyboardNavigationActive = false;
+                                    if (event.modifiers & Qt.ShiftModifier) {
+                                        wallpapersTabRoot.focusPreviousElement();
+                                    } else {
+                                        wallpapersTabRoot.focusNextElement();
+                                    }
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                                    if (enabled) {
+                                        Config.theme.oledMode = !Config.theme.oledMode;
+                                    }
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Escape) {
+                                    keyboardNavigationActive = false;
+                                    focusSearch();
+                                    event.accepted = true;
                                 }
                             }
 
@@ -279,6 +370,8 @@ Rectangle {
                                 color: oledButton.isActive ? Colors.primary : Colors.surface
                                 radius: oledButton.isActive ? (Config.roundness > 0 ? (Config.roundness + 4) / 2 : 0) : (Config.roundness > 0 ? Config.roundness + 4 : 0)
                                 opacity: oledButton.enabled ? 1.0 : 0.5
+                                border.color: Colors.outline
+                                border.width: oledButton.keyboardNavigationActive && oledButton.activeFocus ? 2 : 0
 
                                 Behavior on color {
                                     ColorAnimation {
@@ -297,6 +390,13 @@ Rectangle {
                                 Behavior on opacity {
                                     NumberAnimation {
                                         duration: Config.animDuration / 2
+                                        easing.type: Easing.OutQuart
+                                    }
+                                }
+
+                                Behavior on border.width {
+                                    NumberAnimation {
+                                        duration: Config.animDuration / 3
                                         easing.type: Easing.OutQuart
                                     }
                                 }
@@ -323,6 +423,7 @@ Rectangle {
                                 anchors.fill: parent
                                 cursorShape: oledButton.enabled ? Qt.PointingHandCursor : Qt.ForbiddenCursor
                                 onClicked: {
+                                    oledButton.keyboardNavigationActive = false;
                                     if (oledButton.enabled) {
                                         Config.theme.oledMode = !Config.theme.oledMode;
                                     }
@@ -701,5 +802,5 @@ Rectangle {
         }
     }
 
-
+    }
 }

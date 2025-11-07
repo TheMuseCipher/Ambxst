@@ -15,6 +15,8 @@ PaneRect {
     signal searchTextChanged(string text)
     signal accepted
     signal shiftAccepted
+    signal tabPressed
+    signal shiftTabPressed
     signal ctrlRPressed
     signal escapePressed
     signal downPressed
@@ -68,7 +70,14 @@ PaneRect {
             }
 
             Keys.onPressed: event => {
-                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                if (event.key === Qt.Key_Tab) {
+                    if (event.modifiers & Qt.ShiftModifier) {
+                        root.shiftTabPressed();
+                    } else {
+                        root.tabPressed();
+                    }
+                    event.accepted = true;
+                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                     if (event.modifiers & Qt.ShiftModifier) {
                         root.shiftAccepted();
                     } else {
