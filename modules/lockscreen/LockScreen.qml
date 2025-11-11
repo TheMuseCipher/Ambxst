@@ -50,7 +50,7 @@ PanelWindow {
 
         Behavior on blur {
             NumberAnimation {
-                duration: 800
+                duration: Config.animDuration
                 easing.type: Easing.OutCubic
             }
         }
@@ -60,7 +60,7 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         color: "black"
-        opacity: 0.3
+        opacity: 0.25
     }
 
     // Password input container
