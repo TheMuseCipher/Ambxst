@@ -10,6 +10,7 @@ import qs.modules.components
 import qs.modules.corners
 import qs.modules.theme
 import qs.modules.globals
+import qs.modules.widgets.dashboard.widgets
 import qs.config
 
 PanelWindow {
@@ -116,6 +117,35 @@ PanelWindow {
                 duration: Config.animDuration * 1.5
                 easing.type: Easing.OutCubic
             }
+        }
+    }
+
+    // Music player (slides from left)
+    Item {
+        id: playerContainer
+        anchors {
+            left: parent.left
+            leftMargin: 32
+            bottom: parent.bottom
+            bottomMargin: 32
+        }
+        width: 400
+        height: playerContent.height
+
+        transform: Translate {
+            x: (GlobalStates.lockscreenVisible && !unlocking) ? 0 : -(playerContainer.width + 32)
+
+            Behavior on x {
+                NumberAnimation {
+                    duration: Config.animDuration
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+
+        FullPlayer {
+            id: playerContent
+            width: parent.width
         }
     }
 
