@@ -13,35 +13,46 @@ import qs.modules.globals
 import qs.modules.widgets.dashboard.widgets
 import qs.config
 
-PanelWindow {
+// Lock surface UI - shown on each screen when locked
+Rectangle {
     id: root
 
+    property bool ready: false
+    property bool captureReady: false
     property bool unlocking: false
     property bool authenticating: false
     property string errorMessage: ""
     property int failLockSecondsLeft: 0
 
-    visible: GlobalStates.lockscreenVisible || unlocking
-    anchors {
-        top: true
-        bottom: true
-        left: true
-        right: true
+    // Hide everything until capture is ready to prevent white flash
+    // Keep black during unlock animation
+    color: (captureReady && !unlocking) ? "transparent" : "black"
+    
+    Behavior on color {
+        ColorAnimation {
+            duration: 150
+            easing.type: Easing.OutCubic
+        }
     }
-
-    focusable: true
-    mask: null
-    color: "transparent"
-    exclusionMode: ExclusionMode.Ignore
-
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "ambxst-lockscreen"
 
     // Screen capture background
     ScreencopyView {
         id: screencopyBackground
         anchors.fill: parent
-        captureSource: root.screen
+        captureSource: {
+            // Try to get screen from Window attached property
+            if (Window.window && Window.window.screen) {
+                console.log("Using Window.window.screen");
+                return Window.window.screen;
+            }
+            // Fallback to first screen if available
+            if (Quickshell.screens && Quickshell.screens.length > 0) {
+                console.log("Fallback to Quickshell.screens[0]");
+                return Quickshell.screens[0];
+            }
+            console.warn("No screen available for capture");
+            return null;
+        }
         live: false
         paintCursor: false
         visible: false
@@ -56,10 +67,10 @@ PanelWindow {
         blurEnabled: true
         blur: 0
         blurMax: 64
-        visible: false
-        opacity: (GlobalStates.lockscreenVisible && !unlocking) ? 1 : 0
+        visible: captureReady
+        opacity: (ready && !unlocking) ? 1 : 0
 
-        property real zoomScale: (GlobalStates.lockscreenVisible && !unlocking) ? 1.1 : 1.0
+        property real zoomScale: (ready && !unlocking) ? 1.1 : 1.0
 
         transform: Scale {
             origin.x: blurEffect.width / 2
@@ -93,10 +104,10 @@ PanelWindow {
     // Overlay for dimming
     Rectangle {
         anchors.fill: parent
-        color: "transparent"
-        opacity: (GlobalStates.lockscreenVisible && !unlocking) ? 0.25 : 0
+        color: "black"
+        opacity: (ready && !unlocking) ? 0.25 : 0
 
-        property real zoomScale: (GlobalStates.lockscreenVisible && !unlocking) ? 1.1 : 1.0
+        property real zoomScale: (ready && !unlocking) ? 1.1 : 1.0
 
         transform: Scale {
             origin.x: parent.width / 2
@@ -133,7 +144,7 @@ PanelWindow {
         height: playerContent.height
 
         transform: Translate {
-            x: (GlobalStates.lockscreenVisible && !unlocking) ? 0 : -(playerContainer.width + 32)
+            x: (ready && !unlocking) ? 0 : -(playerContainer.width + 32)
 
             Behavior on x {
                 NumberAnimation {
@@ -161,7 +172,7 @@ PanelWindow {
         height: 96
 
         transform: Translate {
-            y: (GlobalStates.lockscreenVisible && !unlocking) ? 0 : passwordContainer.height + 32
+            y: (ready && !unlocking) ? 0 : passwordContainer.height + 32
 
             Behavior on y {
                 NumberAnimation {
@@ -259,7 +270,7 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     color: passwordInputBox.showError ? Colors.errorContainer : Colors.surface
                     radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
-
+                    
                     Behavior on color {
                         ColorAnimation {
                             duration: Config.animDuration
@@ -304,8 +315,8 @@ PanelWindow {
                             }
 
                             onTextChanged: {
-                                if (text === Icons.user) {
-                                    rotation = 0;
+                                if (userIcon.text === Icons.user) {
+                                    userIcon.rotation = 0;
                                 }
                             }
                         }
@@ -340,27 +351,15 @@ PanelWindow {
                             }
 
                             onAccepted: {
-                                if (passwordInput.text.trim() === "")
-                                    return;
-
+                                if (passwordInput.text.trim() === "") return;
+                                
                                 // Guardar contraseña y limpiar campo inmediatamente
                                 authPasswordHolder.password = passwordInput.text;
                                 passwordInput.text = "";
-
+                                
                                 authenticating = true;
                                 errorMessage = "";
                                 pamAuth.running = true;
-                            }
-
-                            Keys.onPressed: event => {
-                                if (event.key === Qt.Key_Escape) {
-                                    unlocking = true;
-                                    unlockResetTimer.start();
-                                    GlobalStates.lockscreenVisible = false;
-                                    passwordInput.text = "";
-                                    errorMessage = "";
-                                    event.accepted = true;
-                                }
                             }
 
                             Component.onCompleted: {
@@ -434,25 +433,8 @@ PanelWindow {
         interval: Config.animDuration
         onTriggered: {
             unlocking = false;
-        }
-    }
-
-    // Focus the input when lockscreen becomes visible
-    onVisibleChanged: {
-        if (visible && GlobalStates.lockscreenVisible) {
-            blurEffect.blur = 0;
-            screencopyBackground.captureFrame();
-            blurEffect.visible = true;
-            blurAnimTimer.start();
-            passwordInput.forceActiveFocus();
-        } else if (!visible) {
-            blurAnimTimer.stop();
-            unlockResetTimer.stop();
-            failLockCountdown.stop();
-            blurEffect.visible = false;
-            blurEffect.blur = 0;
-            errorMessage = "";
-            failLockSecondsLeft = 0;
+            // Now actually unlock
+            GlobalStates.lockscreenVisible = false;
         }
     }
 
@@ -493,11 +475,11 @@ PanelWindow {
 
         stdout: StdioCollector {
             id: failLockCollector
-
+            
             onStreamFinished: {
                 const output = text.trim();
                 const seconds = parseInt(output);
-
+                
                 if (!isNaN(seconds) && seconds > 0) {
                     failLockSecondsLeft = seconds;
                     failLockCountdown.start();
@@ -542,59 +524,62 @@ PanelWindow {
             if (exitCode === 0) {
                 // Autenticación exitosa
                 unlocking = true;
+                ready = false; // Trigger exit animation
+                
+                // Wait for exit animation, then unlock
                 unlockResetTimer.start();
-                GlobalStates.lockscreenVisible = false;
+                
                 errorMessage = "";
                 authenticating = false;
             } else {
                 // Error de autenticación
                 let msg = "";
                 switch (exitCode) {
-                case 10:
-                    msg = "Usuario no encontrado";
-                    break;
-                case 11:
-                    msg = "Contraseña incorrecta";
-                    break;
-                case 12:
-                    msg = "Error de autenticación";
-                    break;
-                case 20:
-                    msg = "Cuenta expirada";
-                    break;
-                case 21:
-                    msg = "Debe cambiar su contraseña";
-                    break;
-                case 22:
-                    msg = "Cuenta bloqueada";
-                    break;
-                case 23:
-                    msg = "Error de estado de cuenta";
-                    break;
-                case 30:
-                    // Faillock detectado - verificar tiempo restante
-                    failLockCheck.running = true;
-                    msg = "Cuenta bloqueada por intentos fallidos";
-                    break;
-                case 100:
-                    msg = "Error: parámetro inválido";
-                    break;
-                case 101:
-                    msg = "Error leyendo contraseña";
-                    break;
-                case 102:
-                    msg = "Error inicializando PAM";
-                    break;
-                case 103:
-                    msg = "Timeout esperando contraseña";
-                    break;
-                case 104:
-                    msg = "Error interno";
-                    break;
-                default:
-                    msg = `Error desconocido (${exitCode})`;
+                    case 10:
+                        msg = "Usuario no encontrado";
+                        break;
+                    case 11:
+                        msg = "Contraseña incorrecta";
+                        break;
+                    case 12:
+                        msg = "Error de autenticación";
+                        break;
+                    case 20:
+                        msg = "Cuenta expirada";
+                        break;
+                    case 21:
+                        msg = "Debe cambiar su contraseña";
+                        break;
+                    case 22:
+                        msg = "Cuenta bloqueada";
+                        break;
+                    case 23:
+                        msg = "Error de estado de cuenta";
+                        break;
+                    case 30:
+                        // Faillock detectado - verificar tiempo restante
+                        failLockCheck.running = true;
+                        msg = "Cuenta bloqueada por intentos fallidos";
+                        break;
+                    case 100:
+                        msg = "Error: parámetro inválido";
+                        break;
+                    case 101:
+                        msg = "Error leyendo contraseña";
+                        break;
+                    case 102:
+                        msg = "Error inicializando PAM";
+                        break;
+                    case 103:
+                        msg = "Timeout esperando contraseña";
+                        break;
+                    case 104:
+                        msg = "Error interno";
+                        break;
+                    default:
+                        msg = `Error desconocido (${exitCode})`;
                 }
-
+                
                 errorMessage = msg;
                 console.warn("PAM auth failed:", exitCode, msg);
                 wrongPasswordAnim.start();
@@ -635,14 +620,26 @@ PanelWindow {
         corner: RoundCorner.CornerEnum.BottomRight
     }
 
-    // Capture all keyboard input
-    Keys.onPressed: event => {
-        if (event.key === Qt.Key_Escape) {
-            unlocking = true;
-            unlockResetTimer.start();
-            GlobalStates.lockscreenVisible = false;
-            passwordInput.text = "";
-            event.accepted = true;
-        }
+    // Initialize when component is created (when lock becomes active)
+    Component.onCompleted: {
+        console.log("LockScreenSurface: Component created");
+        console.log("LockScreenSurface: Capturing screen...");
+        
+        // Capture screen immediately
+        blurEffect.blur = 0;
+        screencopyBackground.captureFrame();
+        
+        // Wait a moment for capture to complete, then show with animation
+        Qt.callLater(() => {
+            captureReady = true;
+            console.log("LockScreenSurface: Capture ready, starting animations");
+            
+            // Small delay before starting animations for smoother appearance
+            Qt.callLater(() => {
+                ready = true;
+                blurAnimTimer.start();
+                passwordInput.forceActiveFocus();
+            });
+        });
     }
 }

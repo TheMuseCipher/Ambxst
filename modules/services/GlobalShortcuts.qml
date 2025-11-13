@@ -179,10 +179,10 @@ Item {
     GlobalShortcut {
         appid: root.appId
         name: "lockscreen"
-        description: "Toggle lockscreen"
+        description: "Lock screen securely"
 
         onPressed: {
-            GlobalStates.lockscreenVisible = !GlobalStates.lockscreenVisible;
+            GlobalStates.lockscreenVisible = true;
         }
     }
 }

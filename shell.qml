@@ -5,6 +5,7 @@
 
 import QtQuick
 import Quickshell
+import Quickshell.Wayland
 import qs.modules.bar
 import qs.modules.bar.workspaces
 import qs.modules.notifications
@@ -15,6 +16,7 @@ import qs.modules.corners
 import qs.modules.components
 import qs.modules.desktop
 import qs.modules.lockscreen
+import qs.modules.globals
 import qs.config
 
 ShellRoot {
@@ -103,14 +105,14 @@ ShellRoot {
         }
     }
 
-    Variants {
-        model: Quickshell.screens
+    // Secure lockscreen using WlSessionLock
+    WlSessionLock {
+        id: sessionLock
+        locked: GlobalStates.lockscreenVisible
 
-        Loader {
-            id: lockscreenLoader
-            active: true
-            required property ShellScreen modelData
-            sourceComponent: LockScreen {
+        WlSessionLockSurface {
+            LockScreenSurface {
+                anchors.fill: parent
             }
         }
     }
