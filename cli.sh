@@ -17,8 +17,8 @@ Usage: ambxst [COMMAND]
 
 Commands:
     (none)      Launch Ambxst desktop shell
-    update      Update Ambxst (pulls from remote)
-    refresh     Refresh local/dev profile (pulls from local, for developers)
+    update      Update Ambxst
+    refresh     Refresh local/dev profile (for developers)
     lock        Activate lockscreen
     help        Show this help message
 
