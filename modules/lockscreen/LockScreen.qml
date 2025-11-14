@@ -25,51 +25,30 @@ WlSessionLockSurface {
     // Always transparent - blur background handles the visuals
     color: "transparent"
 
-    // Wallpaper background (for videos/GIFs) or screen capture fallback
-    Item {
-        id: backgroundContainer
+    // Wallpaper background
+    Image {
+        id: wallpaperBackground
         anchors.fill: parent
-
-        // Wallpaper image (used when available)
-        Image {
-            id: wallpaperBackground
-            anchors.fill: parent
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            smooth: true
-            visible: false
-            
-            property string lockscreenFramePath: {
-                if (!GlobalStates.wallpaperManager)
-                    return "";
-                return GlobalStates.wallpaperManager.getLockscreenFramePath(
-                    GlobalStates.wallpaperManager.currentWallpaper
-                );
-            }
-            
-            source: lockscreenFramePath ? "file://" + lockscreenFramePath : ""
-            
-            onStatusChanged: {
-                if (status === Image.Ready) {
-                    console.log("Lockscreen using wallpaper frame:", lockscreenFramePath);
-                    visible = true;
-                    screencopyBackground.visible = false;
-                } else if (status === Image.Error) {
-                    console.warn("Failed to load lockscreen frame, falling back to screencopy");
-                    visible = false;
-                    screencopyBackground.visible = true;
-                }
-            }
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        smooth: true
+        
+        property string lockscreenFramePath: {
+            if (!GlobalStates.wallpaperManager)
+                return "";
+            return GlobalStates.wallpaperManager.getLockscreenFramePath(
+                GlobalStates.wallpaperManager.currentWallpaper
+            );
         }
-
-        // Screen capture background (fallback)
-        ScreencopyView {
-            id: screencopyBackground
-            anchors.fill: parent
-            captureSource: root.screen
-            live: false
-            paintCursor: false
-            visible: true
+        
+        source: lockscreenFramePath ? "file://" + lockscreenFramePath : ""
+        
+        onStatusChanged: {
+            if (status === Image.Ready) {
+                console.log("Lockscreen using wallpaper:", lockscreenFramePath);
+            } else if (status === Image.Error) {
+                console.warn("Failed to load lockscreen wallpaper:", lockscreenFramePath);
+            }
         }
     }
 
@@ -77,7 +56,7 @@ WlSessionLockSurface {
     MultiEffect {
         id: blurEffect
         anchors.fill: parent
-        source: wallpaperBackground.visible ? wallpaperBackground : screencopyBackground
+        source: wallpaperBackground
         autoPaddingEnabled: false
         blurEnabled: true
         blur: startAnim ? 1 : 0
@@ -734,11 +713,6 @@ WlSessionLockSurface {
 
     // Initialize when component is created (when lock becomes active)
     Component.onCompleted: {
-        // Try to load wallpaper first, capture screen as fallback
-        if (wallpaperBackground.source === "") {
-            screencopyBackground.captureFrame();
-        }
-
         // Start animations
         startAnim = true;
         passwordInput.forceActiveFocus();

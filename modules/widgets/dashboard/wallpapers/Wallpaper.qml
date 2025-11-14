@@ -122,15 +122,10 @@ PanelWindow {
             return;
         }
         
-        var fileType = getFileType(filePath);
-        console.log("generateLockscreenFrame: filePath =", filePath);
-        console.log("generateLockscreenFrame: fileType =", fileType);
+        console.log("Generating lockscreen frame for:", filePath);
         
         var scriptPath = Qt.resolvedUrl("../../../../scripts/lockscreen_wallpaper.py").toString().replace("file://", "");
         var dataPath = Quickshell.dataDir;
-        
-        console.log("generateLockscreenFrame: scriptPath =", scriptPath);
-        console.log("generateLockscreenFrame: dataPath =", dataPath);
         
         lockscreenWallpaperScript.command = [
             "python3", scriptPath,
@@ -138,7 +133,6 @@ PanelWindow {
             dataPath
         ];
         
-        console.log("generateLockscreenFrame: Running command:", lockscreenWallpaperScript.command);
         lockscreenWallpaperScript.running = true;
     }
 
