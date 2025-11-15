@@ -9,15 +9,15 @@ ToggleButton {
     iconTint: Config.bar.launcherIconTint
     iconFullTint: Config.bar.launcherIconFullTint
     iconSize: Config.bar.launcherIconSize
-    tooltipText: "Open Application Launcher"
+    tooltipText: "Open Dashboard"
 
     onToggle: function () {
-        if (GlobalStates.launcherOpen) {
+        if (GlobalStates.dashboardOpen) {
             GlobalStates.clearLauncherState();
             Visibilities.setActiveModule("");
         } else {
-            GlobalStates.launcherCurrentTab = 0;
-            Visibilities.setActiveModule("launcher");
+            GlobalStates.dashboardCurrentTab = 0;
+            Visibilities.setActiveModule("dashboard");
         }
     }
 }

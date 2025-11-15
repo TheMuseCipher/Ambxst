@@ -9,7 +9,7 @@ import qs.modules.theme
 import qs.modules.bar.clock
 import qs.modules.bar.systray
 import qs.modules.widgets.overview
-import qs.modules.widgets.launcher
+import qs.modules.widgets.dashboard
 import qs.modules.widgets.powermenu
 import qs.modules.corners
 import qs.modules.components
