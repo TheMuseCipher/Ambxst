@@ -436,6 +436,7 @@ Rectangle {
                     }
                 }
                 focus: root.clearButtonFocused
+                activeFocusOnTab: true
 
                 Behavior on color {
                     enabled: Config.animDuration > 0
