@@ -45,6 +45,19 @@ Item {
 
     property int previewImageSize: 200
     property string currentFullContent: ""
+    
+    // Helper function to get file path from URI
+    function getFilePathFromUri(content) {
+        if (!content || !content.startsWith("file://")) return "";
+        return decodeURIComponent(content.substring(7).trim());
+    }
+    
+    // Helper function to check if file is an image
+    function isImageFile(filePath) {
+        if (!filePath) return false;
+        var ext = filePath.split('.').pop().toLowerCase();
+        return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico'].indexOf(ext) !== -1;
+    }
 
     implicitWidth: 400
     implicitHeight: 7 * 48 + 56
@@ -1140,77 +1153,119 @@ Item {
                     }
                     
                     // Preview para archivos (text/uri-list)
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 16
+                    Item {
+                        anchors.fill: parent
                         visible: previewPanel.currentItem && previewPanel.currentItem.isFile
                         
-                        Rectangle {
-                            width: 120
-                            height: 120
-                            color: Colors.surfaceBright
-                            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
-                            anchors.horizontalCenter: parent.horizontalCenter
+                        property string filePath: {
+                            if (!previewPanel.currentItem) return "";
+                            var content = root.currentFullContent || previewPanel.currentItem.preview;
+                            return root.getFilePathFromUri(content);
+                        }
+                        
+                        property bool isImage: root.isImageFile(filePath)
+                        
+                        // Preview de imagen para archivos de imagen
+                        Image {
+                            anchors.fill: parent
+                            fillMode: Image.PreserveAspectFit
+                            visible: parent.isImage
+                            source: parent.isImage ? "file://" + parent.filePath : ""
+                            cache: false
+                            asynchronous: true
                             
-                            Text {
+                            Rectangle {
                                 anchors.centerIn: parent
-                                text: Icons.file
-                                textFormat: Text.RichText
-                                font.family: Icons.font
-                                font.pixelSize: 48
-                                color: Colors.primary
+                                width: 120
+                                height: 120
+                                color: Colors.surfaceBright
+                                radius: Config.roundness > 0 ? Config.roundness + 4 : 0
+                                visible: parent.status === Image.Loading || parent.status === Image.Error
+                                
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: Icons.image
+                                    textFormat: Text.RichText
+                                    font.family: Icons.font
+                                    font.pixelSize: 48
+                                    color: Colors.primary
+                                }
                             }
                         }
                         
+                        // Preview genérico para otros archivos
                         Column {
-                            width: previewPanel.width - 16
-                            spacing: 8
-                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.centerIn: parent
+                            spacing: 16
+                            visible: !parent.isImage
                             
-                            Text {
-                                text: {
-                                    if (!previewPanel.currentItem) return "";
-                                    var content = root.currentFullContent || previewPanel.currentItem.preview;
-                                    if (content.startsWith("file://")) {
-                                        var filePath = content.substring(7).trim();
-                                        var fileName = filePath.split('/').pop();
-                                        // Decode URL encoding (e.g., %20 -> space)
-                                        return decodeURIComponent(fileName);
-                                    }
-                                    return content;
+                            Rectangle {
+                                width: 120
+                                height: 120
+                                color: Colors.surfaceBright
+                                radius: Config.roundness > 0 ? Config.roundness + 4 : 0
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: Icons.file
+                                    textFormat: Text.RichText
+                                    font.family: Icons.font
+                                    font.pixelSize: 48
+                                    color: Colors.primary
                                 }
-                                font.family: Config.theme.font
-                                font.pixelSize: Config.theme.fontSize + 2
-                                font.weight: Font.Bold
-                                color: Colors.overBackground
-                                horizontalAlignment: Text.AlignHCenter
-                                width: parent.width
-                                wrapMode: Text.Wrap
                             }
                             
-                            Text {
-                                text: {
-                                    if (!previewPanel.currentItem) return "";
-                                    var content = root.currentFullContent || previewPanel.currentItem.preview;
-                                    if (content.startsWith("file://")) {
-                                        var filePath = content.substring(7).trim();
-                                        var parts = filePath.split('/');
-                                        parts.pop(); // Remove filename
-                                        // Decode each part of the path
-                                        var decodedParts = parts.map(function(part) {
-                                            return decodeURIComponent(part);
-                                        });
-                                        return decodedParts.join('/');
+                            Column {
+                                width: previewPanel.width - 16
+                                spacing: 8
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                
+                                Text {
+                                    text: {
+                                        if (!previewPanel.currentItem) return "";
+                                        var content = root.currentFullContent || previewPanel.currentItem.preview;
+                                        if (content.startsWith("file://")) {
+                                            var filePath = content.substring(7).trim();
+                                            var fileName = filePath.split('/').pop();
+                                            // Decode URL encoding (e.g., %20 -> space)
+                                            return decodeURIComponent(fileName);
+                                        }
+                                        return content;
                                     }
-                                    return "";
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Config.theme.fontSize + 2
+                                    font.weight: Font.Bold
+                                    color: Colors.overBackground
+                                    horizontalAlignment: Text.AlignHCenter
+                                    width: parent.width
+                                    wrapMode: Text.Wrap
                                 }
-                                font.family: Config.theme.font
-                                font.pixelSize: Config.theme.fontSize - 1
-                                color: Colors.surfaceBright
-                                horizontalAlignment: Text.AlignHCenter
-                                width: parent.width
-                                wrapMode: Text.Wrap
-                                elide: Text.ElideMiddle
+                                
+                                Text {
+                                    text: {
+                                        if (!previewPanel.currentItem) return "";
+                                        var content = root.currentFullContent || previewPanel.currentItem.preview;
+                                        if (content.startsWith("file://")) {
+                                            var filePath = content.substring(7).trim();
+                                            var parts = filePath.split('/');
+                                            parts.pop(); // Remove filename
+                                            // Decode each part of the path
+                                            var decodedParts = parts.map(function(part) {
+                                                return decodeURIComponent(part);
+                                            });
+                                            return decodedParts.join('/');
+                                        }
+                                        return "";
+                                    }
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Config.theme.fontSize - 1
+                                    color: Colors.surfaceBright
+                                    horizontalAlignment: Text.AlignHCenter
+                                    width: parent.width
+                                    wrapMode: Text.Wrap
+                                    elide: Text.ElideMiddle
+                                }
                             }
                         }
                     }
