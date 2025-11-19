@@ -919,6 +919,7 @@ Item {
                             Rectangle {
                                 Layout.preferredWidth: 32
                                 Layout.preferredHeight: 32
+                                Layout.alignment: Qt.AlignTop
                                 color: {
                                     if (isInDeleteMode) {
                                         return Colors.overError;
@@ -1016,7 +1017,7 @@ Item {
 
                             Column {
                                 Layout.fillWidth: true
-                                spacing: 2
+                                spacing: 0
 
                                 Text {
                                     width: parent.width

@@ -5,13 +5,13 @@ Fetches title, description, image, and other metadata from URLs.
 Includes special support for YouTube, Twitter, and other oEmbed services.
 """
 
-import sys
 import json
-import urllib.request
-import urllib.error
 import re
+import sys
+import urllib.error
+import urllib.request
 from html.parser import HTMLParser
-from urllib.parse import urljoin, urlparse, quote
+from urllib.parse import quote, urljoin, urlparse
 
 
 def extract_youtube_id(url):
@@ -55,7 +55,7 @@ def fetch_youtube_metadata(url, timeout=5):
 
         return {
             "title": data.get("title", ""),
-            "description": f"By {data.get('author_name', 'Unknown')}",
+            "description": f"{data.get('author_name', 'Unknown')}",
             "image": thumbnail,
             "url": url,
             "site_name": "YouTube",
