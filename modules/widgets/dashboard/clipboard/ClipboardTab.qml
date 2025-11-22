@@ -49,12 +49,10 @@ Item {
     property int aliasSelectedIndex: -1
     property int aliasButtonIndex: 0
 
-    // Options menu state
-    property bool optionsMenuOpen: false
-    property int menuItemIndex: -1
-    property bool menuJustClosed: false
-    property bool keyboardOptionsMenuOpen: false
-    property point keyboardMenuPosition: Qt.point(0, 0)
+    // Options menu state (expandable list)
+    property int expandedItemIndex: -1
+    property int selectedOptionIndex: 0
+    property bool keyboardNavigation: false
 
     property int previewImageSize: 200
     property string currentFullContent: ""
@@ -114,6 +112,13 @@ Item {
     onSelectedIndexChanged: {
         if (selectedIndex === -1 && resultsList.count > 0) {
             resultsList.positionViewAtIndex(0, ListView.Beginning);
+        }
+        
+        // Close expanded options when selection changes to a different item
+        if (expandedItemIndex >= 0 && selectedIndex !== expandedItemIndex) {
+            expandedItemIndex = -1;
+            selectedOptionIndex = 0;
+            keyboardNavigation = false;
         }
     }
 
@@ -454,6 +459,21 @@ Item {
                         if (root.deleteMode) {
                             console.log("DEBUG: Enter in delete mode - canceling");
                             root.cancelDeleteMode();
+                        } else if (root.expandedItemIndex >= 0) {
+                            // Execute selected option when menu is expanded
+                            let item = root.allItems[root.expandedItemIndex];
+                            if (item) {
+                                // Recreate the options model
+                                let options = [
+                                    function() { root.copyToClipboard(item.id); Visibilities.setActiveModule(""); },
+                                    function() { ClipboardService.togglePin(item.id); root.expandedItemIndex = -1; },
+                                    function() { root.enterAliasMode(item.id); root.expandedItemIndex = -1; },
+                                    function() { root.enterDeleteMode(item.id); root.expandedItemIndex = -1; }
+                                ];
+                                if (root.selectedOptionIndex >= 0 && root.selectedOptionIndex < options.length) {
+                                    options[root.selectedOptionIndex]();
+                                }
+                            }
                         } else {
                             if (root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
                                 let selectedItem = root.allItems[root.selectedIndex];
@@ -469,38 +489,55 @@ Item {
                     }
 
                     onShiftAccepted: {
-                        if (!root.deleteMode) {
+                        if (!root.deleteMode && !root.aliasMode) {
                             if (root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length) {
-                                let selectedItem = root.allItems[root.selectedIndex];
-                                console.log("DEBUG: Opening options menu for item:", selectedItem);
-                                if (selectedItem) {
-                                    root.menuItemIndex = root.selectedIndex;
-                                    root.optionsMenuOpen = true;
-                                    root.keyboardOptionsMenuOpen = true;
-                                    
-                                    // Calculate menu position next to selected item in the list
-                                    var itemY = resultsList.currentItem ? resultsList.currentItem.y : 0;
-                                    var globalY = resultsList.mapToItem(root, 0, itemY).y;
-                                    root.keyboardMenuPosition = Qt.point(resultsList.x + resultsList.width + 8, globalY);
-                                    
-                                    keyboardOptionsMenu.popup();
+                                // Toggle expanded state
+                                if (root.expandedItemIndex === root.selectedIndex) {
+                                    root.expandedItemIndex = -1;
+                                    root.selectedOptionIndex = 0;
+                                    root.keyboardNavigation = false;
+                                } else {
+                                    root.expandedItemIndex = root.selectedIndex;
+                                    root.selectedOptionIndex = 0;
+                                    root.keyboardNavigation = true;
                                 }
                             }
                         }
                     }
 
                     onEscapePressed: {
-                        if (!root.deleteMode) {
+                        if (root.expandedItemIndex >= 0) {
+                            root.expandedItemIndex = -1;
+                            root.selectedOptionIndex = 0;
+                            root.keyboardNavigation = false;
+                        } else if (!root.deleteMode) {
                             Visibilities.setActiveModule("");
                         }
                     }
 
                     onDownPressed: {
-                        root.onDownPressed();
+                        if (root.expandedItemIndex >= 0) {
+                            // Navigate options when menu is expanded
+                            if (root.selectedOptionIndex < 3) {  // 4 options (0-3)
+                                root.selectedOptionIndex++;
+                                root.keyboardNavigation = true;
+                            }
+                        } else {
+                            root.onDownPressed();
+                        }
                     }
 
                     onUpPressed: {
-                        root.onUpPressed();
+                        if (root.expandedItemIndex >= 0) {
+                            // Navigate options when menu is expanded
+                            if (root.selectedOptionIndex > 0) {
+                                root.selectedOptionIndex--;
+                                root.keyboardNavigation = true;
+                            }
+                            // Stay on first option if already at index 0
+                        } else {
+                            root.onUpPressed();
+                        }
                     }
                 }
 
@@ -661,13 +698,28 @@ Item {
                         required property int index
 
                         width: resultsList.width
-                        height: 48
+                        height: {
+                            let baseHeight = 48;
+                            if (index === root.expandedItemIndex && !isInDeleteMode && !isInAliasMode) {
+                                return baseHeight + 4 + (36 * 4); // base + spacing + 4 options
+                            }
+                            return baseHeight;
+                        }
                         color: "transparent"
                         radius: 16
+
+                        Behavior on height {
+                            enabled: Config.animDuration > 0
+                            NumberAnimation {
+                                duration: Config.animDuration
+                                easing.type: Easing.OutQuart
+                            }
+                        }
 
                         property bool isInDeleteMode: root.deleteMode && modelData.id === root.itemToDelete
                         property bool isInAliasMode: root.aliasMode && modelData.id === root.itemToAlias
                         property bool isSelected: root.selectedIndex === index
+                        property bool isExpanded: index === root.expandedItemIndex
                         property string displayText: {
                             if (isInDeleteMode) {
                                 let preview = modelData.alias || modelData.preview || "";
@@ -687,7 +739,7 @@ Item {
                             id: mouseArea
                             anchors.fill: parent
                             hoverEnabled: true
-                            enabled: !root.deleteMode && !root.aliasMode && !root.optionsMenuOpen
+                            enabled: !root.deleteMode && !root.aliasMode
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                             property real startX: 0
@@ -696,17 +748,14 @@ Item {
                             property bool longPressTriggered: false
 
                             onEntered: {
-                                if (!root.deleteMode && !root.optionsMenuOpen) {
+                                // Don't change selection if there's an expanded menu open
+                                if (!root.deleteMode && root.expandedItemIndex === -1) {
                                     root.selectedIndex = index;
                                     resultsList.currentIndex = index;
                                 }
                             }
 
                             onClicked: mouse => {
-                                if (menuJustClosed) {
-                                    return;
-                                }
-
                                 if (mouse.button === Qt.LeftButton && !isInDeleteMode) {
                                     if (root.deleteMode && modelData.id !== root.itemToDelete) {
                                         console.log("DEBUG: Clicking item outside delete mode - canceling");
@@ -714,7 +763,7 @@ Item {
                                         return;
                                     }
 
-                                    if (!root.deleteMode) {
+                                    if (!root.deleteMode && !isExpanded) {
                                         root.copyToClipboard(modelData.id);
                                         Visibilities.setActiveModule("");
                                     }
@@ -725,10 +774,17 @@ Item {
                                         return;
                                     }
 
-                                    console.log("DEBUG: Right click detected, showing context menu");
-                                    root.menuItemIndex = index;
-                                    root.optionsMenuOpen = true;
-                                    contextMenu.popup(mouse.x, mouse.y);
+                                    // Toggle expanded state instead of opening menu
+                                    if (root.expandedItemIndex === index) {
+                                        root.expandedItemIndex = -1;
+                                        root.selectedOptionIndex = 0;
+                                        root.keyboardNavigation = false;
+                                    } else {
+                                        root.expandedItemIndex = index;
+                                        root.selectedIndex = index;
+                                        root.selectedOptionIndex = 0;
+                                        root.keyboardNavigation = false;
+                                    }
                                 }
                             }
 
@@ -1097,85 +1153,214 @@ Item {
                             }
                         }
 
-                        OptionsMenu {
-                            id: contextMenu
+                        // Expandable options list (similar to SchemeSelector/FullPlayer)
+                        Column {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            anchors.bottomMargin: 8
+                            spacing: 4
+                            visible: isExpanded && !isInDeleteMode && !isInAliasMode
+                            opacity: (isExpanded && !isInDeleteMode && !isInAliasMode) ? 1 : 0
 
-                            onAboutToHide: {
-                                mouseArea.enabled = false;
-                            }
-
-                        onClosed: {
-                            root.optionsMenuOpen = false;
-                            root.menuItemIndex = -1;
-                            Qt.callLater(() => {
-                                mouseArea.enabled = !root.deleteMode && !root.aliasMode && !root.optionsMenuOpen;
-                            });
-                            root.menuJustClosed = true;
-                            menuClosedTimer.start();
-                        }
-
-                            Timer {
-                                id: menuClosedTimer
-                                interval: 100
-                                repeat: false
-                                onTriggered: {
-                                    root.menuJustClosed = false;
+                            Behavior on opacity {
+                                enabled: Config.animDuration > 0
+                                NumberAnimation {
+                                    duration: Config.animDuration
+                                    easing.type: Easing.OutQuart
                                 }
                             }
 
-                            items: [
-                                {
-                                    text: "Copy",
-                                    icon: Icons.copy,
-                                    highlightColor: Colors.primary,
-                                    textColor: Colors.overPrimary,
-                                    onTriggered: function () {
-                                        console.log("DEBUG: Copy clicked from ContextMenu");
-                                        root.copyToClipboard(modelData.id);
-                                        Visibilities.setActiveModule("");
+                            Rectangle {
+                                width: parent.width
+                                height: 36 * 4  // 4 options
+                                color: Colors.background
+                                radius: Config.roundness
+                                clip: true
+
+                                ListView {
+                                    id: optionsListView
+                                    anchors.fill: parent
+                                    interactive: false
+                                    model: [
+                                        {
+                                            text: "Copy",
+                                            icon: Icons.copy,
+                                            highlightColor: Colors.primary,
+                                            textColor: Colors.overPrimary,
+                                            action: function () {
+                                                root.copyToClipboard(modelData.id);
+                                                Visibilities.setActiveModule("");
+                                            }
+                                        },
+                                        {
+                                            text: modelData.pinned ? "Unpin" : "Pin",
+                                            icon: modelData.pinned ? Icons.unpin : Icons.pin,
+                                            highlightColor: Colors.primary,
+                                            textColor: Colors.overPrimary,
+                                            action: function () {
+                                                ClipboardService.togglePin(modelData.id);
+                                                root.expandedItemIndex = -1;
+                                            }
+                                        },
+                                        {
+                                            text: "Alias",
+                                            icon: Icons.edit,
+                                            highlightColor: Colors.secondary,
+                                            textColor: Colors.overSecondary,
+                                            action: function () {
+                                                root.enterAliasMode(modelData.id);
+                                                root.expandedItemIndex = -1;
+                                            }
+                                        },
+                                        {
+                                            text: "Delete",
+                                            icon: Icons.trash,
+                                            highlightColor: Colors.error,
+                                            textColor: Colors.overError,
+                                            action: function () {
+                                                root.enterDeleteMode(modelData.id);
+                                                root.expandedItemIndex = -1;
+                                            }
+                                        }
+                                    ]
+                                    currentIndex: root.selectedOptionIndex
+                                    highlightFollowsCurrentItem: true
+
+                                    highlight: Rectangle {
+                                        color: {
+                                            let options = [
+                                                { highlightColor: Colors.primary },
+                                                { highlightColor: Colors.primary },
+                                                { highlightColor: Colors.secondary },
+                                                { highlightColor: Colors.error }
+                                            ];
+                                            if (optionsListView.currentIndex >= 0 && optionsListView.currentIndex < options.length) {
+                                                return options[optionsListView.currentIndex].highlightColor;
+                                            }
+                                            return Colors.primary;
+                                        }
+                                        radius: Config.roundness
+                                        visible: optionsListView.currentIndex >= 0
+
+                                        Behavior on color {
+                                            enabled: Config.animDuration > 0
+                                            ColorAnimation {
+                                                duration: Config.animDuration / 2
+                                                easing.type: Easing.OutQuart
+                                            }
+                                        }
                                     }
-                                },
-                                {
-                                    text: modelData.pinned ? "Unpin" : "Pin",
-                                    icon: modelData.pinned ? Icons.unpin : Icons.pin,
-                                    highlightColor: Colors.primary,
-                                    textColor: Colors.overPrimary,
-                                    onTriggered: function () {
-                                        console.log("DEBUG: Pin/Unpin clicked from ContextMenu");
-                                        ClipboardService.togglePin(modelData.id);
-                                    }
-                                },
-                                {
-                                    text: "Alias",
-                                    icon: Icons.edit,
-                                    highlightColor: Colors.secondary,
-                                    textColor: Colors.overSecondary,
-                                    onTriggered: function () {
-                                        console.log("DEBUG: Alias clicked from ContextMenu");
-                                        root.enterAliasMode(modelData.id);
-                                    }
-                                },
-                                {
-                                    text: "Delete",
-                                    icon: Icons.trash,
-                                    highlightColor: Colors.overError,
-                                    textColor: Colors.error,
-                                    onTriggered: function () {
-                                        console.log("DEBUG: Delete clicked from ContextMenu");
-                                        root.enterDeleteMode(modelData.id);
+
+                                    highlightMoveDuration: Config.animDuration > 0 ? Config.animDuration / 2 : 0
+                                    highlightMoveVelocity: -1
+
+                                    delegate: Item {
+                                        required property var modelData
+                                        required property int index
+
+                                        property alias itemData: delegateData.modelData
+
+                                        QtObject {
+                                            id: delegateData
+                                            property var modelData: parent.modelData
+                                        }
+
+                                        width: optionsListView.width
+                                        height: 36
+
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            color: "transparent"
+
+                                            RowLayout {
+                                                anchors.fill: parent
+                                                anchors.margins: 8
+                                                spacing: 8
+
+                                                Text {
+                                                    text: modelData.icon
+                                                    font.family: Icons.font
+                                                    font.pixelSize: 14
+                                                    font.weight: Font.Bold
+                                                    textFormat: Text.RichText
+                                                    color: {
+                                                        if (optionsListView.currentIndex === index) {
+                                                            return modelData.textColor;
+                                                        }
+                                                        return Colors.overSurface;
+                                                    }
+
+                                                    Behavior on color {
+                                                        enabled: Config.animDuration > 0
+                                                        ColorAnimation {
+                                                            duration: Config.animDuration / 2
+                                                            easing.type: Easing.OutQuart
+                                                        }
+                                                    }
+                                                }
+
+                                                Text {
+                                                    Layout.fillWidth: true
+                                                    text: modelData.text
+                                                    font.family: Config.theme.font
+                                                    font.pixelSize: Config.theme.fontSize
+                                                    font.weight: optionsListView.currentIndex === index ? Font.Bold : Font.Normal
+                                                    color: {
+                                                        if (optionsListView.currentIndex === index) {
+                                                            return modelData.textColor;
+                                                        }
+                                                        return Colors.overSurface;
+                                                    }
+                                                    elide: Text.ElideRight
+                                                    maximumLineCount: 1
+
+                                                    Behavior on color {
+                                                        enabled: Config.animDuration > 0
+                                                        ColorAnimation {
+                                                            duration: Config.animDuration / 2
+                                                            easing.type: Easing.OutQuart
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+
+                                                onEntered: {
+                                                    optionsListView.currentIndex = index;
+                                                    root.selectedOptionIndex = index;
+                                                    root.keyboardNavigation = false;
+                                                }
+
+                                                onClicked: {
+                                                    if (modelData.action) {
+                                                        modelData.action();
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
-                            ]
+                            }
                         }
 
                         RowLayout {
-                            anchors.fill: parent
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
                             anchors.margins: 8
                             anchors.rightMargin: {
                                 if (isInDeleteMode) return 84;
                                 if (isInAliasMode) return 84;
                                 return 8;
                             }
+                            height: 32
                             spacing: 8
 
                             Behavior on anchors.rightMargin {
@@ -1195,6 +1380,8 @@ Item {
                                         return Colors.overError;
                                     } else if (isInAliasMode) {
                                         return Colors.overSecondary;
+                                    } else if (isExpanded) {
+                                        return Colors.primary;
                                     } else if (isSelected) {
                                         return Colors.overPrimary;
                                     } else {
@@ -1266,6 +1453,8 @@ Item {
                                             return Colors.error;
                                         } else if (isInAliasMode) {
                                             return Colors.secondary;
+                                        } else if (isExpanded) {
+                                            return Colors.overPrimary;
                                         } else if (isSelected) {
                                             return Colors.primary;
                                         } else {
@@ -1338,6 +1527,8 @@ Item {
                                         color: {
                                             if (isInDeleteMode) {
                                                 return Colors.overError;
+                                            } else if (isExpanded) {
+                                                return Colors.overBackground;
                                             } else if (isSelected) {
                                                 return Colors.overPrimary;
                                             } else {
@@ -1432,6 +1623,8 @@ Item {
                                     color: {
                                         if (isInDeleteMode) {
                                             return Colors.overError;
+                                        } else if (isExpanded) {
+                                            return Colors.overBackground;
                                         } else if (isSelected) {
                                             return Colors.overPrimary;
                                         } else {
@@ -1458,9 +1651,17 @@ Item {
                     }
 
                     highlight: Rectangle {
-                        color: root.deleteMode ? Colors.error : Colors.primary
+                        color: {
+                            if (root.deleteMode) {
+                                return Colors.error;
+                            } else if (root.expandedItemIndex >= 0 && root.selectedIndex === root.expandedItemIndex) {
+                                return Colors.surfaceBright;
+                            } else {
+                                return Colors.primary;
+                            }
+                        }
                         radius: Config.roundness > 0 ? Config.roundness + 4 : 0
-                        visible: root.selectedIndex >= 0 && (root.optionsMenuOpen ? root.selectedIndex === root.menuItemIndex : true)
+                        visible: root.selectedIndex >= 0
 
                         Behavior on color {
                             enabled: Config.animDuration > 0
@@ -2386,87 +2587,6 @@ Item {
                     textFormat: Text.RichText
                 }
             }
-        }
-    }
-
-    // Options menu for keyboard shortcuts (Shift+Enter)
-    OptionsMenu {
-        id: keyboardOptionsMenu
-        x: root.keyboardMenuPosition.x
-        y: root.keyboardMenuPosition.y
-
-        onAboutToHide: {
-            // Disabled during menu interaction
-        }
-
-        onClosed: {
-            root.optionsMenuOpen = false;
-            root.keyboardOptionsMenuOpen = false;
-            root.menuItemIndex = -1;
-            Qt.callLater(() => {
-                searchInput.focusInput();
-            });
-            root.menuJustClosed = true;
-            menuClosedTimer.start();
-        }
-
-        Timer {
-            id: menuClosedTimer
-            interval: 100
-            repeat: false
-            onTriggered: {
-                root.menuJustClosed = false;
-            }
-        }
-
-        items: {
-            if (root.menuItemIndex >= 0 && root.menuItemIndex < root.allItems.length) {
-                let item = root.allItems[root.menuItemIndex];
-                return [
-                    {
-                        text: "Copy",
-                        icon: Icons.copy,
-                        highlightColor: Colors.primary,
-                        textColor: Colors.overPrimary,
-                        onTriggered: function () {
-                            console.log("DEBUG: Copy clicked from keyboard menu");
-                            root.copyToClipboard(item.id);
-                            Visibilities.setActiveModule("");
-                        }
-                    },
-                    {
-                        text: item.pinned ? "Unpin" : "Pin",
-                        icon: item.pinned ? Icons.unpin : Icons.pin,
-                        highlightColor: Colors.primary,
-                        textColor: Colors.overPrimary,
-                        onTriggered: function () {
-                            console.log("DEBUG: Pin/Unpin clicked from keyboard menu");
-                            ClipboardService.togglePin(item.id);
-                        }
-                    },
-                    {
-                        text: "Alias",
-                        icon: Icons.edit,
-                        highlightColor: Colors.secondary,
-                        textColor: Colors.overSecondary,
-                        onTriggered: function () {
-                            console.log("DEBUG: Alias clicked from keyboard menu");
-                            root.enterAliasMode(item.id);
-                        }
-                    },
-                    {
-                        text: "Delete",
-                        icon: Icons.trash,
-                        highlightColor: Colors.overError,
-                        textColor: Colors.error,
-                        onTriggered: function () {
-                            console.log("DEBUG: Delete clicked from keyboard menu");
-                            root.enterDeleteMode(item.id);
-                        }
-                    }
-                ];
-            }
-            return [];
         }
     }
 
