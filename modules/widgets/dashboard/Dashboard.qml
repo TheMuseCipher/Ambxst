@@ -8,7 +8,6 @@ import qs.modules.globals
 import qs.modules.services
 import qs.modules.notch
 import qs.modules.widgets.dashboard.widgets
-import qs.modules.widgets.dashboard.pins
 import qs.modules.widgets.dashboard.kanban
 import qs.modules.widgets.dashboard.wallpapers
 import qs.modules.widgets.dashboard.assistant
@@ -24,7 +23,7 @@ NotchAnimationBehavior {
         property int currentTab: GlobalStates.dashboardCurrentTab
     }
 
-    readonly property var tabModel: [Icons.widgets, Icons.pins, Icons.kanban, Icons.wallpapers, Icons.assistant, Icons.terminal, Icons.clipboard, Icons.emoji]
+    readonly property var tabModel: [Icons.widgets, Icons.kanban, Icons.wallpapers, Icons.assistant, Icons.terminal, Icons.clipboard, Icons.emoji]
     readonly property int tabCount: tabModel.length
     readonly property int tabSpacing: 8
 
@@ -71,13 +70,13 @@ NotchAnimationBehavior {
             if (GlobalStates.dashboardCurrentTab === 0) {
                 Notifications.hideAllPopups();
                 focusWidgetsTimer.restart();
-            } else if (GlobalStates.dashboardCurrentTab === 3) {
+            } else if (GlobalStates.dashboardCurrentTab === 2) {
                 focusWallpapersTimer.restart();
-            } else if (GlobalStates.dashboardCurrentTab === 5) {
+            } else if (GlobalStates.dashboardCurrentTab === 4) {
                 focusTmuxTimer.restart();
-            } else if (GlobalStates.dashboardCurrentTab === 6) {
+            } else if (GlobalStates.dashboardCurrentTab === 5) {
                 focusClipboardTimer.restart();
-            } else if (GlobalStates.dashboardCurrentTab === 7) {
+            } else if (GlobalStates.dashboardCurrentTab === 6) {
                 focusEmojiTimer.restart();
             }
         } else {
@@ -298,7 +297,7 @@ NotchAnimationBehavior {
                 anchors.fill: parent
 
                 // Array de componentes para cargar dinámicamente
-                property var components: [overviewComponent, systemComponent, quickSettingsComponent, wallpapersComponent, assistantComponent, tmuxComponent, clipboardComponent, emojiComponent]
+                property var components: [overviewComponent, quickSettingsComponent, wallpapersComponent, assistantComponent, tmuxComponent, clipboardComponent, emojiComponent]
 
                 // Cargar directamente el componente correcto según GlobalStates
                 initialItem: components[GlobalStates.dashboardCurrentTab]
@@ -308,13 +307,13 @@ NotchAnimationBehavior {
                     if (currentItem) {
                         if (root.state.currentTab === 0 && currentItem.focusAppSearch) {
                             focusWidgetsTimer.restart();
-                        } else if (root.state.currentTab === 3 && currentItem.focusSearch) {
+                        } else if (root.state.currentTab === 2 && currentItem.focusSearch) {
                             focusWallpapersTimer.restart();
-                        } else if (root.state.currentTab === 5 && currentItem.focusSearchInput) {
+                        } else if (root.state.currentTab === 4 && currentItem.focusSearchInput) {
                             focusTmuxTimer.restart();
-                        } else if (root.state.currentTab === 6 && currentItem.focusSearchInput) {
+                        } else if (root.state.currentTab === 5 && currentItem.focusSearchInput) {
                             focusClipboardTimer.restart();
-                        } else if (root.state.currentTab === 7 && currentItem.focusSearchInput) {
+                        } else if (root.state.currentTab === 6 && currentItem.focusSearchInput) {
                             focusEmojiTimer.restart();
                         }
                     }
@@ -340,13 +339,13 @@ NotchAnimationBehavior {
                         if (index === 0) {
                             Notifications.hideAllPopups();
                             focusWidgetsTimer.restart();
-                        } else if (index === 3) {
+                        } else if (index === 2) {
                             focusWallpapersTimer.restart();
-                        } else if (index === 5) {
+                        } else if (index === 4) {
                             focusTmuxTimer.restart();
-                        } else if (index === 6) {
+                        } else if (index === 5) {
                             focusClipboardTimer.restart();
-                        } else if (index === 7) {
+                        } else if (index === 6) {
                             focusEmojiTimer.restart();
                         }
                     }
@@ -530,11 +529,6 @@ NotchAnimationBehavior {
     Component {
         id: overviewComponent
         WidgetsTab {}
-    }
-
-    Component {
-        id: systemComponent
-        PinsTab {}
     }
 
     Component {
