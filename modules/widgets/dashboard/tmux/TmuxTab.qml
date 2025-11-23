@@ -462,7 +462,7 @@ Item {
 
         // Columna izquierda: Search + Lista
         Column {
-            width: parent.width * 0.35
+            width: parent.width * 0.30
             height: parent.height
             spacing: 8
 
@@ -1312,7 +1312,7 @@ Item {
         // Preview panel
         Item {
             id: previewPanel
-            width: parent.width - parent.spacing * 2 - 2 - (parent.width * 0.35)
+            width: parent.width - parent.spacing * 2 - 2 - (parent.width * 0.30)
             height: parent.height
 
             property var currentSession: root.selectedIndex >= 0 && root.selectedIndex < root.filteredSessions.length ? root.filteredSessions[root.selectedIndex] : null
@@ -1329,46 +1329,67 @@ Item {
                     return true;
                 }
 
-                // Windows info section
+                // Panes layout preview (top section)
                 Item {
                     width: parent.width
-                    height: 80
+                    height: parent.height - 60 - parent.spacing - 2
 
-                    Column {
+                    Item {
                         anchors.fill: parent
-                        spacing: 8
 
-                        // Header
-                        Text {
-                            text: "Windows"
-                            font.family: Config.theme.font
-                            font.pixelSize: Config.theme.fontSize
-                            font.weight: Font.Bold
-                            color: Colors.overBackground
-                        }
+                        // Calculate scale to maximize use of available space
+                        property real totalWidth: root.sessionPanes.length > 0 ? root.sessionPanes[0].totalWidth || 1 : 1
+                        property real totalHeight: root.sessionPanes.length > 0 ? root.sessionPanes[0].totalHeight || 1 : 1
+                        
+                        // Use individual scales - stretch to fill
+                        property real scaleX: width / totalWidth
+                        property real scaleY: height / totalHeight
 
-                        // Windows list
-                        Flickable {
-                            width: parent.width
-                            height: 56
-                            contentWidth: windowsRow.width
-                            contentHeight: height
-                            clip: true
-                            boundsBehavior: Flickable.StopAtBounds
+                        Repeater {
+                            model: root.sessionPanes
+                            delegate: Rectangle {
+                                required property var modelData
+                                
+                                x: modelData.left * parent.scaleX
+                                y: modelData.top * parent.scaleY
+                                width: modelData.width * parent.scaleX
+                                height: modelData.height * parent.scaleY
+                                
+                                color: modelData.active ? Colors.primary : Colors.surface
+                                border.width: 2
+                                border.color: modelData.active ? Colors.primary : Colors.outline
+                                radius: Config.roundness > 0 ? Math.max(Config.roundness - 2, 0) : 0
 
-                            Row {
-                                id: windowsRow
-                                spacing: 4
-                                height: parent.height
+                                Behavior on color {
+                                    enabled: Config.animDuration > 0
+                                    ColorAnimation {
+                                        duration: Config.animDuration / 2
+                                        easing.type: Easing.OutQuart
+                                    }
+                                }
+                                
+                                Behavior on border.color {
+                                    enabled: Config.animDuration > 0
+                                    ColorAnimation {
+                                        duration: Config.animDuration / 2
+                                        easing.type: Easing.OutQuart
+                                    }
+                                }
 
-                                Repeater {
-                                    model: root.sessionWindows
-                                    delegate: Rectangle {
-                                        required property var modelData
-                                        width: windowText.width + 16
-                                        height: 32
-                                        color: modelData.active ? Colors.primary : Colors.surface
-                                        radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
+                                Column {
+                                    anchors.centerIn: parent
+                                    spacing: 6
+                                    width: parent.width - 16
+
+                                    // Pane index
+                                    Text {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        text: "Pane " + modelData.index
+                                        font.family: Config.theme.font
+                                        font.pixelSize: Config.theme.fontSize
+                                        font.weight: Font.Bold
+                                        color: modelData.active ? Colors.overPrimary : Colors.overSurface
+                                        visible: parent.parent.height > 35
 
                                         Behavior on color {
                                             enabled: Config.animDuration > 0
@@ -1377,29 +1398,106 @@ Item {
                                                 easing.type: Easing.OutQuart
                                             }
                                         }
+                                    }
 
-                                        Row {
-                                            anchors.centerIn: parent
-                                            spacing: 4
+                                    // Command
+                                    Text {
+                                        width: parent.width
+                                        text: modelData.command
+                                        font.family: Config.theme.font
+                                        font.pixelSize: Config.theme.fontSize
+                                        font.weight: modelData.active ? Font.Bold : Font.Normal
+                                        color: modelData.active ? Colors.overPrimary : Colors.overSurface
+                                        horizontalAlignment: Text.AlignHCenter
+                                        elide: Text.ElideMiddle
+                                        visible: parent.parent.height > 50
 
-                                            Text {
-                                                id: windowText
-                                                text: modelData.index + ": " + modelData.name
-                                                font.family: Config.theme.font
-                                                font.pixelSize: Config.theme.fontSize
-                                                font.weight: modelData.active ? Font.Bold : Font.Normal
-                                                color: modelData.active ? Colors.overPrimary : Colors.overSurface
-
-                                                Behavior on color {
-                                                    enabled: Config.animDuration > 0
-                                                    ColorAnimation {
-                                                        duration: Config.animDuration / 2
-                                                        easing.type: Easing.OutQuart
-                                                    }
-                                                }
+                                        Behavior on color {
+                                            enabled: Config.animDuration > 0
+                                            ColorAnimation {
+                                                duration: Config.animDuration / 2
+                                                easing.type: Easing.OutQuart
                                             }
                                         }
                                     }
+                                    
+                                    // Dimensions info
+                                    Text {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        text: modelData.width + "×" + modelData.height
+                                        font.family: Config.theme.font
+                                        font.pixelSize: Config.theme.fontSize
+                                        color: modelData.active ? Colors.overPrimary : Colors.outline
+                                        opacity: 0.7
+                                        visible: parent.parent.height > 70
+
+                                        Behavior on color {
+                                            enabled: Config.animDuration > 0
+                                            ColorAnimation {
+                                                duration: Config.animDuration / 2
+                                                easing.type: Easing.OutQuart
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Empty state for panes
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 8
+                            visible: root.sessionPanes.length === 0 && !root.loadingSessionInfo
+
+                            Text {
+                                text: Icons.terminalWindow
+                                font.family: Icons.font
+                                font.pixelSize: 32
+                                color: Colors.outline
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                textFormat: Text.RichText
+                            }
+
+                            Text {
+                                text: "No panes to display"
+                                font.family: Config.theme.font
+                                font.pixelSize: Config.theme.fontSize
+                                color: Colors.outline
+                                anchors.horizontalCenter: parent.horizontalCenter
+                            }
+                        }
+
+                        // Loading indicator
+                        Rectangle {
+                            anchors.fill: parent
+                            color: Colors.background
+                            visible: root.loadingSessionInfo
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 12
+
+                                Text {
+                                    text: Icons.spinnerGap
+                                    font.family: Icons.font
+                                    font.pixelSize: 20
+                                    color: Colors.primary
+                                    textFormat: Text.RichText
+
+                                    RotationAnimator on rotation {
+                                        from: 0
+                                        to: 360
+                                        duration: 1000
+                                        loops: Animation.Infinite
+                                        running: root.loadingSessionInfo
+                                    }
+                                }
+
+                                Text {
+                                    text: "Loading panes..."
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Config.theme.fontSize
+                                    color: Colors.outline
                                 }
                             }
                         }
@@ -1414,55 +1512,32 @@ Item {
                     color: Colors.surface
                 }
 
-                // Panes layout preview
+                // Windows info section (bottom section)
                 Item {
                     width: parent.width
-                    height: parent.height - 80 - parent.spacing * 2 - 2
+                    height: 52
 
-                    // Header
-                    Text {
-                        id: panesHeader
-                        text: "Panes Layout"
-                        font.family: Config.theme.font
-                        font.pixelSize: Config.theme.fontSize
-                        font.weight: Font.Bold
-                        color: Colors.overBackground
-                    }
+                    Flickable {
+                        anchors.fill: parent
+                        contentWidth: windowsRow.width
+                        contentHeight: height
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
 
-                    // Panes visualization (direct rendering without container background)
-                    Item {
-                        anchors.top: panesHeader.bottom
-                        anchors.topMargin: 8
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-
-                        Item {
-                            id: panesContainer
-                            anchors.fill: parent
-
-                            // Calculate scale to maximize use of available space
-                            property real totalWidth: root.sessionPanes.length > 0 ? root.sessionPanes[0].totalWidth || 1 : 1
-                            property real totalHeight: root.sessionPanes.length > 0 ? root.sessionPanes[0].totalHeight || 1 : 1
-                            
-                            // Use individual scales - stretch to fill
-                            property real scaleX: width / totalWidth
-                            property real scaleY: height / totalHeight
+                        Row {
+                            id: windowsRow
+                            spacing: 4
+                            height: parent.height
 
                             Repeater {
-                                model: root.sessionPanes
+                                model: root.sessionWindows
                                 delegate: Rectangle {
                                     required property var modelData
-                                    
-                                    x: modelData.left * panesContainer.scaleX
-                                    y: modelData.top * panesContainer.scaleY
-                                    width: modelData.width * panesContainer.scaleX
-                                    height: modelData.height * panesContainer.scaleY
-                                    
+                                    width: windowText.width + 16
+                                    height: 32
+                                    anchors.verticalCenter: parent.verticalCenter
                                     color: modelData.active ? Colors.primary : Colors.surface
-                                    border.width: 2
-                                    border.color: modelData.active ? Colors.primary : Colors.outline
-                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 2, 0) : 0
+                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
 
                                     Behavior on color {
                                         enabled: Config.animDuration > 0
@@ -1471,50 +1546,18 @@ Item {
                                             easing.type: Easing.OutQuart
                                         }
                                     }
-                                    
-                                    Behavior on border.color {
-                                        enabled: Config.animDuration > 0
-                                        ColorAnimation {
-                                            duration: Config.animDuration / 2
-                                            easing.type: Easing.OutQuart
-                                        }
-                                    }
 
-                                    Column {
+                                    Row {
                                         anchors.centerIn: parent
-                                        spacing: 6
-                                        width: parent.width - 16
+                                        spacing: 4
 
-                                        // Pane index
                                         Text {
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            text: "Pane " + modelData.index
-                                            font.family: Config.theme.font
-                                            font.pixelSize: Config.theme.fontSize
-                                            font.weight: Font.Bold
-                                            color: modelData.active ? Colors.overPrimary : Colors.overSurface
-                                            visible: parent.parent.height > 35
-
-                                            Behavior on color {
-                                                enabled: Config.animDuration > 0
-                                                ColorAnimation {
-                                                    duration: Config.animDuration / 2
-                                                    easing.type: Easing.OutQuart
-                                                }
-                                            }
-                                        }
-
-                                        // Command
-                                        Text {
-                                            width: parent.width
-                                            text: modelData.command
+                                            id: windowText
+                                            text: modelData.index + ": " + modelData.name
                                             font.family: Config.theme.font
                                             font.pixelSize: Config.theme.fontSize
                                             font.weight: modelData.active ? Font.Bold : Font.Normal
                                             color: modelData.active ? Colors.overPrimary : Colors.overSurface
-                                            horizontalAlignment: Text.AlignHCenter
-                                            elide: Text.ElideMiddle
-                                            visible: parent.parent.height > 50
 
                                             Behavior on color {
                                                 enabled: Config.animDuration > 0
@@ -1524,84 +1567,6 @@ Item {
                                                 }
                                             }
                                         }
-                                        
-                                        // Dimensions info
-                                        Text {
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            text: modelData.width + "×" + modelData.height
-                                            font.family: Config.theme.font
-                                            font.pixelSize: Config.theme.fontSize
-                                            color: modelData.active ? Colors.overPrimary : Colors.outline
-                                            opacity: 0.7
-                                            visible: parent.parent.height > 70
-
-                                            Behavior on color {
-                                                enabled: Config.animDuration > 0
-                                                ColorAnimation {
-                                                    duration: Config.animDuration / 2
-                                                    easing.type: Easing.OutQuart
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Empty state for panes
-                            Column {
-                                anchors.centerIn: parent
-                                spacing: 8
-                                visible: root.sessionPanes.length === 0 && !root.loadingSessionInfo
-
-                                Text {
-                                    text: Icons.terminalWindow
-                                    font.family: Icons.font
-                                    font.pixelSize: 32
-                                    color: Colors.outline
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    textFormat: Text.RichText
-                                }
-
-                                Text {
-                                    text: "No panes to display"
-                                    font.family: Config.theme.font
-                                    font.pixelSize: Config.theme.fontSize
-                                    color: Colors.outline
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                }
-                            }
-
-                            // Loading indicator
-                            Rectangle {
-                                anchors.fill: parent
-                                color: Colors.background
-                                visible: root.loadingSessionInfo
-
-                                Row {
-                                    anchors.centerIn: parent
-                                    spacing: 12
-
-                                    Text {
-                                        text: Icons.spinnerGap
-                                        font.family: Icons.font
-                                        font.pixelSize: 20
-                                        color: Colors.primary
-                                        textFormat: Text.RichText
-
-                                        RotationAnimator on rotation {
-                                            from: 0
-                                            to: 360
-                                            duration: 1000
-                                            loops: Animation.Infinite
-                                            running: root.loadingSessionInfo
-                                        }
-                                    }
-
-                                    Text {
-                                        text: "Loading panes..."
-                                        font.family: Config.theme.font
-                                        font.pixelSize: Config.theme.fontSize
-                                        color: Colors.outline
                                     }
                                 }
                             }
