@@ -260,6 +260,18 @@ Item {
         attachProcess.command = ["bash", "-c", `cd "$HOME" && setsid kitty -e tmux attach-session -t "${sessionName}" < /dev/null > /dev/null 2>&1 &`];
         attachProcess.running = true;
     }
+    
+    function switchToWindow(sessionName, windowIndex) {
+        if (!sessionName || windowIndex === undefined) return;
+        switchWindowProcess.command = ["tmux", "select-window", "-t", `${sessionName}:${windowIndex}`];
+        switchWindowProcess.running = true;
+    }
+    
+    function focusPane(sessionName, paneIndex) {
+        if (!sessionName || paneIndex === undefined) return;
+        focusPaneProcess.command = ["tmux", "select-pane", "-t", `${sessionName}.${paneIndex}`];
+        focusPaneProcess.running = true;
+    }
 
     implicitWidth: 400
     implicitHeight: 7 * 48 + 56
@@ -451,6 +463,36 @@ Item {
             if (code !== 0) {
                 root.sessionPanes = [];
                 root.loadingSessionInfo = false;
+            }
+        }
+    }
+    
+    Process {
+        id: switchWindowProcess
+        running: false
+        
+        onExited: function (code) {
+            if (code === 0) {
+                // Refresh session info to update active window
+                let currentSession = root.selectedIndex >= 0 && root.selectedIndex < root.filteredSessions.length ? root.filteredSessions[root.selectedIndex] : null;
+                if (currentSession && !currentSession.isCreateButton && !currentSession.isCreateSpecificButton) {
+                    root.loadSessionInfo(currentSession.name);
+                }
+            }
+        }
+    }
+    
+    Process {
+        id: focusPaneProcess
+        running: false
+        
+        onExited: function (code) {
+            if (code === 0) {
+                // Refresh session info to update active pane
+                let currentSession = root.selectedIndex >= 0 && root.selectedIndex < root.filteredSessions.length ? root.filteredSessions[root.selectedIndex] : null;
+                if (currentSession && !currentSession.isCreateButton && !currentSession.isCreateSpecificButton) {
+                    root.loadSessionInfo(currentSession.name);
+                }
             }
         }
     }
@@ -1384,6 +1426,34 @@ Item {
                                         easing.type: Easing.OutQuart
                                     }
                                 }
+                                
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    
+                                    onEntered: {
+                                        parent.color = Colors.surfaceBright;
+                                    }
+                                    
+                                    onExited: {
+                                        parent.color = Colors.surface;
+                                    }
+                                    
+                                    onClicked: {
+                                        let currentSession = previewPanel.currentSession;
+                                        if (currentSession && !currentSession.isCreateButton && !currentSession.isCreateSpecificButton) {
+                                            root.focusPane(currentSession.name, modelData.index);
+                                        }
+                                    }
+                                    
+                                    onDoubleClicked: {
+                                        let currentSession = previewPanel.currentSession;
+                                        if (currentSession && !currentSession.isCreateButton && !currentSession.isCreateSpecificButton) {
+                                            root.attachToSession(currentSession.name);
+                                        }
+                                    }
+                                }
 
                                 Column {
                                     anchors.centerIn: parent
@@ -1540,6 +1610,36 @@ Item {
                                         ColorAnimation {
                                             duration: Config.animDuration / 2
                                             easing.type: Easing.OutQuart
+                                        }
+                                    }
+                                    
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        
+                                        onEntered: {
+                                            if (!modelData.active) {
+                                                parent.color = Colors.surfaceBright;
+                                            }
+                                        }
+                                        
+                                        onExited: {
+                                            parent.color = modelData.active ? Colors.primary : Colors.surface;
+                                        }
+                                        
+                                        onClicked: {
+                                            let currentSession = previewPanel.currentSession;
+                                            if (currentSession && !currentSession.isCreateButton && !currentSession.isCreateSpecificButton) {
+                                                root.switchToWindow(currentSession.name, modelData.index);
+                                            }
+                                        }
+                                        
+                                        onDoubleClicked: {
+                                            let currentSession = previewPanel.currentSession;
+                                            if (currentSession && !currentSession.isCreateButton && !currentSession.isCreateSpecificButton) {
+                                                root.attachToSession(currentSession.name);
+                                            }
                                         }
                                     }
 
