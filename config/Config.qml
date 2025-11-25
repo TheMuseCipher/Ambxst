@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.modules.globals
 import qs.modules.theme
+import qs.modules.services as Services
 
 Singleton {
     id: root
@@ -640,7 +641,7 @@ Singleton {
     property int roundness: theme.roundness
     property string defaultFont: theme.font
     property string currentTheme: theme.currentTheme
-    property int animDuration: theme.animDuration
+    property int animDuration: Services.GameModeService.toggled ? 0 : theme.animDuration
     property bool tintIcons: theme.tintIcons
 
     // Detectar cambios en lightMode y ejecutar Matugen
