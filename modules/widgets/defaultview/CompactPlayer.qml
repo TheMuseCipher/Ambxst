@@ -71,30 +71,36 @@ Item {
             }
         }
 
-        Image {
-            id: backgroundArt
+        ClippingRectangle {
             anchors.fill: parent
-            source: compactPlayer.player?.trackArtUrl ?? ""
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            visible: false
-        }
+            radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
+            color: "transparent"
 
-        MultiEffect {
-            anchors.fill: parent
-            source: backgroundArt
-            brightness: -0.25
-            contrast: -0.75
-            saturation: -0.5
-            blurEnabled: true
-            blurMax: 32
-            blur: 0.75
-            opacity: hasArtwork ? 1.0 : 0.0 // Simplificado con hasArtwork
-            Behavior on opacity {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration
-                    easing.type: Easing.OutQuart
+            Image {
+                id: backgroundArt
+                anchors.fill: parent
+                source: compactPlayer.player?.trackArtUrl ?? ""
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                visible: false
+            }
+
+            MultiEffect {
+                anchors.fill: parent
+                source: backgroundArt
+                brightness: -0.25
+                contrast: -0.75
+                saturation: -0.5
+                blurEnabled: true
+                blurMax: 32
+                blur: 0.75
+                opacity: hasArtwork ? 1.0 : 0.0
+                Behavior on opacity {
+                    enabled: Config.animDuration > 0
+                    NumberAnimation {
+                        duration: Config.animDuration
+                        easing.type: Easing.OutQuart
+                    }
                 }
             }
         }
