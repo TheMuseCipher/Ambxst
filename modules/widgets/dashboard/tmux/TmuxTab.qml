@@ -1374,26 +1374,19 @@ Item {
 
                         Repeater {
                             model: root.sessionPanes
-                            delegate: Rectangle {
+                            delegate: StyledRect {
                                 required property var modelData
+                                property bool hovered: false
+                                variant: hovered ? "focus" : "pane"
                                 
                                 x: modelData.left * parent.scaleX
                                 y: modelData.top * parent.scaleY
                                 width: modelData.width * parent.scaleX
                                 height: modelData.height * parent.scaleY
                                 
-                                color: Colors.surface
                                 border.width: modelData.active ? 2 : 0
                                 border.color: modelData.active ? Colors.primary : "transparent"
                                 radius: Config.roundness > 0 ? Math.max(Config.roundness - 2, 0) : 0
-
-                                Behavior on color {
-                                    enabled: Config.animDuration > 0
-                                    ColorAnimation {
-                                        duration: Config.animDuration / 2
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
                                 
                                 Behavior on border.width {
                                     enabled: Config.animDuration > 0
@@ -1417,11 +1410,11 @@ Item {
                                     cursorShape: Qt.PointingHandCursor
                                     
                                     onEntered: {
-                                        parent.color = Colors.surfaceBright;
+                                        parent.hovered = true;
                                     }
                                     
                                     onExited: {
-                                        parent.color = Colors.surface;
+                                        parent.hovered = false;
                                     }
                                     
                                     onClicked: {
@@ -1451,7 +1444,7 @@ Item {
                                         font.family: Config.theme.font
                                         font.pixelSize: Config.theme.fontSize
                                         font.weight: Font.Bold
-                                        color: Colors.overSurface
+                                        color: Colors[Config.theme.itemPane]
                                         horizontalAlignment: Text.AlignHCenter
                                         elide: Text.ElideMiddle
                                         visible: parent.parent.height > 35
@@ -1582,20 +1575,19 @@ Item {
 
                             Repeater {
                                 model: root.sessionWindows
-                                delegate: Rectangle {
+                                delegate: StyledRect {
                                     required property var modelData
-                                    width: windowText.width + 16
-                                    height: parent.height
-                                    color: modelData.active ? Colors.primary : Colors.surface
-                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
-
-                                    Behavior on color {
-                                        enabled: Config.animDuration > 0
-                                        ColorAnimation {
-                                            duration: Config.animDuration / 2
-                                            easing.type: Easing.OutQuart
+                                    property bool hovered: false
+                                    variant: {
+                                        if (modelData.active) {
+                                            return hovered ? "primaryfocus" : "primary";
+                                        } else {
+                                            return hovered ? "focus" : "common";
                                         }
                                     }
+                                    width: windowText.width + 16
+                                    height: parent.height
+                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                     
                                     MouseArea {
                                         anchors.fill: parent
@@ -1603,13 +1595,11 @@ Item {
                                         cursorShape: Qt.PointingHandCursor
                                         
                                         onEntered: {
-                                            if (!modelData.active) {
-                                                parent.color = Colors.surfaceBright;
-                                            }
+                                            parent.hovered = true;
                                         }
                                         
                                         onExited: {
-                                            parent.color = modelData.active ? Colors.primary : Colors.surface;
+                                            parent.hovered = false;
                                         }
                                         
                                         onClicked: {
@@ -1637,7 +1627,7 @@ Item {
                                             font.family: Config.theme.font
                                             font.pixelSize: Config.theme.fontSize
                                             font.weight: modelData.active ? Font.Bold : Font.Normal
-                                            color: modelData.active ? Colors.overPrimary : Colors.overSurface
+                                            color: modelData.active ? Colors[Config.theme.itemPrimary] : Colors[Config.theme.itemCommon]
 
                                             Behavior on color {
                                                 enabled: Config.animDuration > 0
