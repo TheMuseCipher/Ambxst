@@ -51,75 +51,143 @@ Item {
         }
     }
 
-    // Corner fills (keep for shape background). Their previous per-corner stroke canvases were removed.
-    Item {
-        id: leftCorner
+    // StyledRect extendido que cubre todo (notch + corners) para usar como máscara
+    StyledRect {
+        variant: "bg"
+        id: notchFullBackground
         visible: Config.notchTheme === "default"
-        anchors.top: parent.top
-        anchors.right: notchRect.left
-        width: size
-        height: size
-        property int size: Config.roundness > 0 ? Config.roundness + 4 : 0
-        clip: true
+        anchors.centerIn: parent
+        width: parent.implicitWidth
+        height: parent.implicitHeight
+        radius: 0
+        border.width: 0
+        enabled: false // No interactuable
 
-        StyledRect {
-            variant: "bg"
-            id: leftCornerBg
-            anchors.top: parent.top
-            anchors.left: parent.left
-            width: parent.width
-            height: notchRect.height
-            radius: 0
-            border.width: 0
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                maskEnabled: true
-                maskSource: leftCornerMask
-                maskThresholdMin: 0.5
-                maskSpreadAtMin: 1.0
+        property int defaultRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness + 4) : 0
+
+        topLeftRadius: 0
+        topRightRadius: 0
+        bottomLeftRadius: defaultRadius
+        bottomRightRadius: defaultRadius
+
+        Behavior on radius {
+            enabled: Config.animDuration > 0
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: screenNotchOpen || hasActiveNotifications ? Easing.OutBack : Easing.OutQuart
+                easing.overshoot: screenNotchOpen || hasActiveNotifications ? 1.2 : 1.0
             }
         }
 
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: notchFullMask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1.0
+        }
+    }
+
+    // Máscara completa para el notch + corners
+    Item {
+        id: notchFullMask
+        visible: false
+        anchors.centerIn: parent
+        width: parent.implicitWidth
+        height: parent.implicitHeight
+        layer.enabled: true
+        layer.smooth: true
+
+        // Left corner mask
         Item {
-            id: leftCornerMask
+            id: leftCornerMaskPart
+            visible: Config.notchTheme === "default"
             anchors.top: parent.top
             anchors.left: parent.left
-            width: parent.width
-            height: notchRect.height
-            visible: false
-            layer.enabled: true
-            layer.smooth: true
+            width: Config.roundness > 0 ? Config.roundness + 4 : 0
+            height: width
 
             RoundCorner {
-                anchors.top: parent.top
-                anchors.left: parent.left
-                width: parent.width
-                height: parent.width
+                anchors.fill: parent
                 corner: RoundCorner.CornerEnum.TopRight
+                size: parent.width
+                color: "white"
+            }
+        }
+
+        // Center rect mask
+        Rectangle {
+            id: centerMaskPart
+            anchors.top: parent.top
+            anchors.left: leftCornerMaskPart.right
+            anchors.right: rightCornerMaskPart.left
+            height: parent.height
+            color: "white"
+
+            topLeftRadius: notchRect.topLeftRadius
+            topRightRadius: notchRect.topRightRadius
+            bottomLeftRadius: notchRect.bottomLeftRadius
+            bottomRightRadius: notchRect.bottomRightRadius
+        }
+
+        // Right corner mask
+        Item {
+            id: rightCornerMaskPart
+            visible: Config.notchTheme === "default"
+            anchors.top: parent.top
+            anchors.right: parent.right
+            width: Config.roundness > 0 ? Config.roundness + 4 : 0
+            height: width
+
+            RoundCorner {
+                anchors.fill: parent
+                corner: RoundCorner.CornerEnum.TopLeft
                 size: parent.width
                 color: "white"
             }
         }
     }
 
-    StyledRect {
-        variant: "bg"
+    // Contenedor del notch (solo visual, sin fondo)
+    Item {
         id: notchRect
         anchors.centerIn: parent
         width: parent.implicitWidth - 40
         height: parent.implicitHeight
-        layer.enabled: false
-        radius: 0
-        border.width: Config.notchTheme === "default" ? 0 : Config.theme.borderSize
 
         property int defaultRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness + 4) : 0
         property int islandRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness) : 0
 
-        topLeftRadius: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? islandRadius : 0)
-        topRightRadius: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? islandRadius : 0)
-        bottomLeftRadius: Config.notchTheme === "island" ? islandRadius : defaultRadius
-        bottomRightRadius: Config.notchTheme === "island" ? islandRadius : defaultRadius
-        clip: true
+        property int topLeftRadius: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? islandRadius : 0)
+        property int topRightRadius: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? islandRadius : 0)
+        property int bottomLeftRadius: Config.notchTheme === "island" ? islandRadius : defaultRadius
+        property int bottomRightRadius: Config.notchTheme === "island" ? islandRadius : defaultRadius
+
+        // Fondo del notch solo para theme "island"
+        StyledRect {
+            variant: "bg"
+            id: notchIslandBg
+            visible: Config.notchTheme === "island"
+            anchors.fill: parent
+            layer.enabled: false
+            radius: 0
+            border.width: Config.theme.borderSize
+
+            topLeftRadius: parent.topLeftRadius
+            topRightRadius: parent.topRightRadius
+            bottomLeftRadius: parent.bottomLeftRadius
+            bottomRightRadius: parent.bottomRightRadius
+            clip: true
+
+            Behavior on radius {
+                enabled: Config.animDuration > 0
+                NumberAnimation {
+                    duration: Config.animDuration
+                    easing.type: screenNotchOpen || hasActiveNotifications ? Easing.OutBack : Easing.OutQuart
+                    easing.overshoot: screenNotchOpen || hasActiveNotifications ? 1.2 : 1.0
+                }
+            }
+        }
 
         // HoverHandler para detectar hover sin bloquear eventos
         HoverHandler {
@@ -131,15 +199,6 @@ Item {
                 if (stackViewInternal.currentItem && stackViewInternal.currentItem.hasOwnProperty("notchHovered")) {
                     stackViewInternal.currentItem.notchHovered = hovered;
                 }
-            }
-        }
-
-        Behavior on radius {
-            enabled: Config.animDuration > 0
-            NumberAnimation {
-                duration: Config.animDuration
-                easing.type: screenNotchOpen || hasActiveNotifications ? Easing.OutBack : Easing.OutQuart
-                easing.overshoot: screenNotchOpen || hasActiveNotifications ? 1.2 : 1.0
             }
         }
 
@@ -302,63 +361,12 @@ Item {
     property bool isShowingNotifications: false
     property bool isShowingDefault: false
 
-    Item {
-        id: rightCorner
-        visible: Config.notchTheme === "default"
-        anchors.top: parent.top
-        anchors.left: notchRect.right
-        width: size
-        height: size
-        property int size: Config.roundness > 0 ? Config.roundness + 4 : 0
-        clip: true
-
-        StyledRect {
-            variant: "bg"
-            id: rightCornerBg
-            anchors.top: parent.top
-            anchors.right: parent.right
-            width: parent.width
-            height: notchRect.height
-            radius: 0
-            border.width: 0
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                maskEnabled: true
-                maskSource: rightCornerMask
-                maskThresholdMin: 0.5
-                maskSpreadAtMin: 1.0
-            }
-        }
-
-        Item {
-            id: rightCornerMask
-            anchors.top: parent.top
-            anchors.right: parent.right
-            width: parent.width
-            height: notchRect.height
-            visible: false
-            layer.enabled: true
-            layer.smooth: true
-
-            RoundCorner {
-                anchors.top: parent.top
-                anchors.right: parent.right
-                width: parent.width
-                height: parent.width
-                corner: RoundCorner.CornerEnum.TopLeft
-                size: parent.width
-                color: "white"
-            }
-        }
-    }
-
     // Unified outline canvas (single continuous stroke around silhouette)
     Canvas {
         id: outlineCanvas
-        anchors.top: parent.top
-        anchors.left: leftCorner.visible ? leftCorner.left : notchRect.left
-        width: (Config.notchTheme === "default" && leftCorner.visible && rightCorner.visible) ? leftCorner.width + notchRect.width + rightCorner.width : notchRect.width
-        height: notchRect.height
+        anchors.centerIn: parent
+        width: parent.implicitWidth
+        height: parent.implicitHeight
         z: 5000
         antialiasing: true
         visible: Config.notchTheme === "default" && Config.theme.borderSize > 0
@@ -377,7 +385,7 @@ Item {
             ctx.lineJoin = "round";
             ctx.lineCap = "round";
 
-            var rTop = leftCorner.visible ? leftCorner.size : 0;
+            var rTop = Config.roundness > 0 ? Config.roundness + 4 : 0;
             var bl = notchRect.bottomLeftRadius;
             var br = notchRect.bottomRightRadius;
             var wCenter = notchRect.width;
@@ -428,12 +436,6 @@ Item {
             function onBottomRightRadiusChanged() {
                 outlineCanvas.requestPaint();
             }
-            function onTopLeftRadiusChanged() {
-                outlineCanvas.requestPaint();
-            }
-            function onTopRightRadiusChanged() {
-                outlineCanvas.requestPaint();
-            }
             function onWidthChanged() {
                 outlineCanvas.requestPaint();
             }
@@ -442,14 +444,11 @@ Item {
             }
         }
         Connections {
-            target: leftCorner
-            function onSizeChanged() {
+            target: notchContainer
+            function onImplicitWidthChanged() {
                 outlineCanvas.requestPaint();
             }
-        }
-        Connections {
-            target: rightCorner
-            function onSizeChanged() {
+            function onImplicitHeightChanged() {
                 outlineCanvas.requestPaint();
             }
         }
