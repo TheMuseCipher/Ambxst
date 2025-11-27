@@ -118,6 +118,7 @@
         qt6.qtdeclarative
         qt6.qtimageformats
 
+        kdePackages.qtshadertools
         kdePackages.breeze-icons
         hicolor-icon-theme
         fuzzel
