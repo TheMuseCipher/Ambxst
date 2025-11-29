@@ -1022,6 +1022,8 @@ Item {
                         property color textColor: {
                             if (isInDeleteMode) {
                                 return Colors.overError;
+                            } else if (isExpanded) {
+                                return Colors.overBackground;
                             } else if (isSelected) {
                                 return Colors.overPrimary;
                             } else {
@@ -2153,7 +2155,7 @@ Item {
                                 } else if (root.aliasMode) {
                                     return "secondary";
                                 } else if (root.expandedItemIndex >= 0 && root.selectedIndex === root.expandedItemIndex) {
-                                    return "focus";
+                                    return "pane";
                                 } else {
                                     return "primary";
                                 }
