@@ -1002,7 +1002,7 @@ Item {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 36 * 3 // Always 3 options
                             color: Colors.background
-                            radius: Styling.radius(0)
+                            radius: Config.roundness
 
                             Behavior on Layout.preferredHeight {
                                 enabled: Config.animDuration > 0
@@ -1069,7 +1069,7 @@ Item {
                                         }
                                         return "primary";
                                     }
-                                    radius: Styling.radius(0)
+                                    radius: Config.roundness
                                     visible: optionsListView.currentIndex >= 0
                                     z: -1
 
@@ -1215,7 +1215,7 @@ Item {
                         StyledRect {
                             id: renameHighlight
                             variant: "oversecondary"
-                            radius: Styling.radius(-4)
+                            radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                             visible: isInRenameMode
                             z: 0
 
@@ -1374,7 +1374,7 @@ Item {
                                 return "common";
                             }
                         }
-                        radius: Styling.radius(-4)
+                        radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
 
                         Text {
                             anchors.centerIn: parent
@@ -1511,7 +1511,7 @@ Item {
                         StyledRect {
                             id: deleteHighlight
                             variant: "overerror"
-                            radius: Styling.radius(-4)
+                            radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                             visible: isInDeleteMode
                             z: 0
 
@@ -1702,7 +1702,7 @@ Item {
                             return "primary";
                         }
                     }
-                    radius: Styling.radius(4)
+                    radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                     visible: root.selectedIndex >= 0
 
                     Behavior on color {
@@ -1785,7 +1785,7 @@ Item {
         Rectangle {
             Layout.preferredWidth: 2
             Layout.fillHeight: true
-            radius: Styling.radius(0)
+            radius: Config.roundness
             color: Colors.surface
         }
 
@@ -1839,7 +1839,7 @@ Item {
                                 width: Math.floor(modelData.width * parent.scaleX)
                                 height: Math.floor(modelData.height * parent.scaleY)
                                 
-                                radius: Styling.radius(-2)
+                                radius: Config.roundness > 0 ? Math.max(Config.roundness - 2, 0) : 0
                                 
                                 MouseArea {
                                     anchors.fill: parent
@@ -2011,7 +2011,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     height: 2
-                    radius: Styling.radius(0)
+                    radius: Config.roundness
                     color: Colors.surface
                 }
 
@@ -2050,7 +2050,7 @@ Item {
                                     }
                                     width: Math.ceil(windowText.width) + 16
                                     height: parent.height
-                                    radius: Styling.radius(-4)
+                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                     
                                     MouseArea {
                                         anchors.fill: parent

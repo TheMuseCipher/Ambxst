@@ -240,7 +240,7 @@ FocusScope {
                     // Ancho dinámico: incluye icono solo cuando está activo
                     width: filterText.width + 24 + (isActive ? filterIcon.width + 4 : 0)
                     height: 32
-                    radius: isActive ? Styling.radius(0) / 2 : Styling.radius(0)
+                    radius: isActive ? (Config.roundness > 0 ? Config.roundness / 2 : 0) : Config.roundness
 
                     Behavior on radius {
                         enabled: Config.animDuration > 0
@@ -361,14 +361,14 @@ FocusScope {
             implicitWidth: 4
             implicitHeight: 4
             color: Colors.surface
-            radius: Styling.radius(0)
+            radius: Config.roundness
         }
 
         contentItem: Rectangle {
             implicitWidth: 4
             implicitHeight: 4
             color: Colors.primary
-            radius: Styling.radius(0)
+            radius: Config.roundness
         }
 
         onPressedChanged: {

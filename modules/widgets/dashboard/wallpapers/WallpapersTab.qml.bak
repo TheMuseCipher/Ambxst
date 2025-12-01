@@ -186,7 +186,7 @@ FocusScope {
     Rectangle {
         anchors.fill: parent
         color: "transparent"
-        radius: Styling.radius(0)
+        radius: Config.roundness > 0 ? Config.roundness : 0
 
         RowLayout {
             anchors.fill: parent
@@ -208,7 +208,7 @@ FocusScope {
                     iconText: ""
                     clearOnEscape: false
                     handleTabNavigation: true
-                    radius: Styling.radius(4)
+                    radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                     prefixIcon: wallpapersTabRoot.prefixIcon
 
                     // Manejo de eventos de búsqueda y teclado.
@@ -337,7 +337,7 @@ FocusScope {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     color: "transparent"
-                    radius: Styling.radius(4)
+                    radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                     Flickable {
                         anchors.fill: parent
@@ -380,7 +380,7 @@ FocusScope {
                                 StyledRect {
                                     variant: oledCheckboxContainer.keyboardNavigationActive && oledCheckbox.activeFocus ? "focus" : "pane"
                                     anchors.fill: parent
-                                    radius: Styling.radius(4)
+                                    radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                     opacity: oledCheckbox.enabled ? 1.0 : 0.5
 
                                     Behavior on opacity {
@@ -400,7 +400,7 @@ FocusScope {
                                             Layout.fillWidth: true
                                             Layout.fillHeight: true
                                             color: Colors.background
-                                            radius: Styling.radius(0)
+                                            radius: Config.roundness
 
                                             Text {
                                                 anchors.fill: parent
@@ -470,7 +470,7 @@ FocusScope {
 
                                                 Rectangle {
                                                     anchors.fill: parent
-                                                    radius: Styling.radius(0)
+                                                    radius: Config.roundness
                                                     color: Colors.background
                                                     visible: !oledCheckbox.checked
                                                 }
@@ -478,7 +478,7 @@ FocusScope {
                                                 StyledRect {
                                                     variant: "primary"
                                                     anchors.fill: parent
-                                                    radius: Styling.radius(0)
+                                                    radius: Config.roundness
                                                     visible: oledCheckbox.checked
                                                     opacity: oledCheckbox.checked ? 1.0 : 0.0
 
@@ -540,7 +540,7 @@ FocusScope {
                 id: wallpaperGridContainer
                 height: parent.height
                 color: "transparent"
-                radius: Styling.radius(4)
+                radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                 border.color: Colors.outline
                 border.width: 0
                 clip: true
@@ -620,7 +620,7 @@ FocusScope {
                                 border.color: Colors.primary
                                 border.width: 2
                                 visible: selectedIndex >= 0
-                                radius: Styling.radius(4)
+                                radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                 z: 10
 
                                 // Borde interior original
@@ -633,7 +633,7 @@ FocusScope {
                                     color: "transparent"
                                     border.color: Colors.background
                                     border.width: 28
-                                    radius: Styling.radius(24)
+                                    radius: Config.roundness > 0 ? Config.roundness + 24 : 0
                                     z: 5
 
                                     // Etiqueta unificada que se anima con el highlight
@@ -785,7 +785,7 @@ FocusScope {
                                 ClippingRectangle {
                                     anchors.fill: parent
                                     color: Colors.surface
-                                    radius: Styling.radius(4)
+                                    radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                                     // Lazy loader que solo carga cuando el item está visible
                                     Loader {

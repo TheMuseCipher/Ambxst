@@ -14,7 +14,7 @@ ToolTip {
         color: Colors.background
         border.width: 2
         border.color: Colors.surfaceBright
-        radius: Math.max(0, Config.roundness - 8)
+        radius: Styling.radius(-8)
     }
     contentItem: Text {
         anchors.centerIn: parent

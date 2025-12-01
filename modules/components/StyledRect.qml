@@ -1,9 +1,14 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import qs.modules.theme
 import QtQuick.Effects
+import qs.modules.theme
 import QtQuick.Shapes
+import qs.modules.theme
 import Quickshell.Widgets
+import qs.modules.theme
 import qs.config
+import qs.modules.theme
 
 ClippingRectangle {
     id: root
@@ -86,7 +91,7 @@ ClippingRectangle {
 
     readonly property real rectOpacity: variantConfig.opacity
 
-    radius: Config.roundness
+    radius: Styling.radius(0)
     color: "transparent"
 
     // Linear gradient

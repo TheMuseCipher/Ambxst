@@ -219,7 +219,7 @@ PanelWindow {
                         color: "transparent"
                         border.color: Colors.primary
                         border.width: 2
-                        radius: Config.roundness / 2
+                        radius: Styling.radius(0) / 2
                         visible: parent.containsDrag
                         opacity: 0.5
                     }
@@ -233,7 +233,7 @@ PanelWindow {
         width: 200
         height: 60
         color: Qt.rgba(0, 0, 0, 0.7)
-        radius: Config.roundness
+        radius: Styling.radius(0)
         visible: !DesktopService.initialLoadComplete
 
         Text {

@@ -186,7 +186,7 @@ Item {
                 width: (modelData.end - modelData.start + 1) * workspaceButtonWidth
                 height: workspaceButtonWidth
                 
-                radius: Styling.radius(0) > 0 ? Math.max(Styling.radius(0) - widgetPadding, 0) : 0
+                radius: Config.roundness > 0 ? Math.max(Config.roundness - widgetPadding, 0) : 0
 
                 opacity: Config.theme.srFocus.opacity
 
@@ -237,7 +237,7 @@ Item {
                 width: workspaceButtonWidth
                 height: (modelData.end - modelData.start + 1) * workspaceButtonWidth
                 
-                radius: Styling.radius(0) > 0 ? Math.max(Styling.radius(0) - widgetPadding, 0) : 0
+                radius: Config.roundness > 0 ? Math.max(Config.roundness - widgetPadding, 0) : 0
 
                 opacity: Config.theme.srFocus.opacity
 

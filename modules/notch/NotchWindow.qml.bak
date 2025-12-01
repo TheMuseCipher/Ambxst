@@ -158,7 +158,7 @@ PanelWindow {
             clip: false
             visible: height > 0
             z: 999
-            radius: Styling.radius(20)
+            radius: Config.roundness > 0 ? Config.roundness + 20 : 0
 
             layer.enabled: true
             layer.effect: Shadow {}

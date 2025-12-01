@@ -104,7 +104,7 @@ Item {
 
         implicitWidth: workspaceColumnLayout.implicitWidth + workspaceSpacing * 2
         implicitHeight: workspaceColumnLayout.implicitHeight + workspaceSpacing * 2
-        radius: Styling.radius(4)
+        radius: Config.roundness > 0 ? Config.roundness + 4 : 0
         color: Colors.surface
 
         ColumnLayout {
@@ -133,7 +133,7 @@ Item {
                             implicitWidth: overviewRoot.workspaceImplicitWidth + workspacePadding
                             implicitHeight: overviewRoot.workspaceImplicitHeight + workspacePadding
                             color: hoveredWhileDragging ? hoveredWorkspaceColor : defaultWorkspaceColor
-                            radius: Math.max(Styling.radius(4) - workspaceSpacing, 0)
+                            radius: Config.roundness > 0 ? Math.max(Config.roundness - workspaceSpacing + 4, 0) : 0
                             border.width: 2
                             border.color: hoveredWhileDragging ? hoveredBorderColor : "transparent"
 
@@ -261,7 +261,7 @@ Item {
                 width: Math.round(overviewRoot.workspaceImplicitWidth + workspacePadding)
                 height: Math.round(overviewRoot.workspaceImplicitHeight + workspacePadding)
                 color: "transparent"
-                radius: Math.max(Styling.radius(4) - workspaceSpacing, 0)
+                radius: Config.roundness > 0 ? Math.max(Config.roundness - workspaceSpacing + 4, 0) : 0
                 border.width: 2
                 border.color: overviewRoot.activeBorderColor
 

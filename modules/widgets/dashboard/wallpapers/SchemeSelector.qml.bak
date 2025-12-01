@@ -96,7 +96,7 @@ Item {
 
     StyledRect {
         variant: keyboardNavigationActive && schemeButton.activeFocus ? "focus" : "pane"
-        radius: Styling.radius(4)
+        radius: Config.roundness > 0 ? Config.roundness + 4 : 0
         anchors.fill: parent
 
         ColumnLayout {
@@ -194,7 +194,7 @@ Item {
 
                     background: Rectangle {
                         color: Colors.background
-                        radius: Styling.radius(0)
+                        radius: Config.roundness
                     }
 
                     contentItem: Text {
@@ -220,7 +220,7 @@ Item {
                     indicator: Rectangle {
                         implicitWidth: 72
                         implicitHeight: 40
-                        radius: Styling.radius(0)
+                        radius: Config.roundness
                         color: Colors.background
 
                         Text {
@@ -250,7 +250,7 @@ Item {
                             z: 0
                             width: 36
                             height: 36
-                            radius: Styling.radius(-2)
+                            radius: Math.max(0, (Config.roundness - 2))
                             x: Config.theme.lightMode ? 2 : 36
                             anchors.verticalCenter: parent.verticalCenter
 
@@ -275,7 +275,7 @@ Item {
                     Layout.preferredHeight: schemeListExpanded ? 40 * 3 : 0
                     Layout.topMargin: schemeListExpanded ? 4 : 0
                     color: Colors.background
-                    radius: Styling.radius(0)
+                    radius: Config.roundness
                     opacity: schemeListExpanded ? 1 : 0
 
                     ListView {
@@ -352,7 +352,7 @@ Item {
 
                         highlight: StyledRect {
                             variant: "primary"
-                            radius: Styling.radius(0)
+                            radius: Config.roundness
                             visible: selectedSchemeIndex >= 0
                             z: -1
                         }
@@ -401,12 +401,12 @@ Item {
 
                     background: Rectangle {
                         color: Colors.background
-                        radius: Styling.radius(0)
+                        radius: Config.roundness
                     }
 
                     contentItem: StyledRect {
                         variant: "primary"
-                        radius: Styling.radius(0)
+                        radius: Config.roundness
                     }
 
                     onPressedChanged: {

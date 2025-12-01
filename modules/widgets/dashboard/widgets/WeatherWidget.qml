@@ -11,7 +11,7 @@ StyledRect {
     Layout.fillHeight: true
     implicitWidth: parent.width
     color: Colors.surface
-    radius: Config.roundness
+    radius: Styling.radius(0)
 
     visible: WeatherService.dataAvailable
 
@@ -52,7 +52,7 @@ StyledRect {
             Layout.leftMargin: 12
             Layout.rightMargin: 12
             color: Colors.surfaceBright
-            radius: Config.roundness
+            radius: Styling.radius(0)
         }
 
         // Max/Min temps

@@ -134,7 +134,7 @@ Item {
                             Layout.preferredHeight: onlyNotification ? 48 : 32
                             Layout.alignment: Qt.AlignTop
                             size: onlyNotification ? 48 : 32
-                            radius: Styling.radius(4)
+                            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                             appIcon: latestNotification ? (latestNotification.cachedAppIcon || latestNotification.appIcon) : ""
                             image: latestNotification ? (latestNotification.cachedImage || latestNotification.image) : ""
                             summary: latestNotification ? latestNotification.summary : ""
@@ -263,7 +263,7 @@ Item {
                             Layout.preferredHeight: expanded ? 48 : 32
                             Layout.alignment: Qt.AlignTop
                             size: expanded ? 48 : 32
-                            radius: Styling.radius(4)
+                            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                             appIcon: latestNotification ? (latestNotification.cachedAppIcon || latestNotification.appIcon) : ""
                             image: latestNotification ? (latestNotification.cachedImage || latestNotification.image) : ""
                             summary: latestNotification ? latestNotification.summary : ""

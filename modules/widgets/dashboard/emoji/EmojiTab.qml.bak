@@ -886,7 +886,7 @@ Rectangle {
                                 id: emojiIconBackground
                                 width: emojiIcon.implicitWidth + 6
                                 height: 32
-                                radius: Styling.radius(-4)
+                                radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                 variant: root.selectedIndex === index && !root.isRecentFocused ? "overprimary" : "common"
 
                                 Text {
@@ -940,7 +940,7 @@ Rectangle {
                                     return 36 * Math.min(3, optionsCount);
                                 }
                                 color: Colors.background
-                                radius: Styling.radius(0)
+                                radius: Config.roundness
 
                                 Behavior on Layout.preferredHeight {
                                     enabled: Config.animDuration > 0
@@ -975,7 +975,7 @@ Rectangle {
 
                                     highlight: StyledRect {
                                         variant: "primary"
-                                        radius: Styling.radius(0)
+                                        radius: Config.roundness
                                         visible: skinToneOptionsListView.currentIndex >= 0
                                         z: -1
 
@@ -1099,12 +1099,12 @@ Rectangle {
 
                                 background: Rectangle {
                                     color: Colors.background
-                                    radius: Styling.radius(0)
+                                    radius: Config.roundness
                                 }
 
                                 contentItem: Rectangle {
                                     color: Colors.primary
-                                    radius: Styling.radius(0)
+                                    radius: Config.roundness
                                 }
 
                                 property bool scrollBarPressed: false
@@ -1189,7 +1189,7 @@ Rectangle {
                                     return "primary";
                                 }
                             }
-                            radius: Styling.radius(4)
+                            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                             visible: root.selectedIndex >= 0 && !root.isRecentFocused
 
                             Behavior on color {
@@ -1209,7 +1209,7 @@ Rectangle {
             Rectangle {
                 Layout.preferredWidth: 2
                 Layout.fillHeight: true
-                radius: Styling.radius(0)
+                radius: Config.roundness
                 color: Colors.surface
             }
 
@@ -1272,7 +1272,7 @@ Rectangle {
                             width: recentList.width
                             height: 48
                             color: "transparent"
-                            radius: Styling.radius(-4)
+                            radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                             
                             property color textColor: {
                                 if (root.selectedRecentIndex === index && root.isRecentFocused) {
@@ -1313,7 +1313,7 @@ Rectangle {
                                     id: recentEmojiIconBackground
                                     width: recentEmojiIcon.implicitWidth + 6
                                     height: 32
-                                    radius: Styling.radius(-4)
+                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                     variant: root.selectedRecentIndex === index && root.isRecentFocused ? "overprimary" : "common"
 
                                     Text {
@@ -1359,7 +1359,7 @@ Rectangle {
                             StyledRect {
                                 anchors.fill: parent
                                 variant: "primary"
-                                radius: Styling.radius(4)
+                                radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                 visible: root.isRecentFocused
                             }
                         }

@@ -17,7 +17,7 @@ Button {
     background: StyledRect {
         id: buttonBackground
         variant: root.expanded ? (root.hovered ? "primaryfocus" : "primary") : (root.hovered ? "focus" : "common")
-        radius: Config.roundness
+        radius: Styling.radius(0)
     }
 
     contentItem: Row {

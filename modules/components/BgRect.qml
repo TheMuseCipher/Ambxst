@@ -6,7 +6,7 @@ import qs.modules.components
 
 Rectangle {
     id: root
-    radius: Config.roundness
+    radius: Styling.radius(0)
     border.color: Config.resolveColor(Config.theme.borderColor)
     border.width: Config.theme.borderSize
 

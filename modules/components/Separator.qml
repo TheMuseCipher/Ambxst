@@ -5,7 +5,7 @@ import qs.modules.theme
 Rectangle {
     property bool vert: false
 
-    radius: Config.roundness
+    radius: Styling.radius(0)
 
     gradient: Gradient {
         orientation: vert ? Gradient.Horizontal : Gradient.Vertical

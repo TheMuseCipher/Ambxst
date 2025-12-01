@@ -117,7 +117,7 @@ Item {
                 x: parent.width * root.animatedProgress - width / 2
                 width: root.isDragging ? 2 : 4
                 height: root.isDragging ? Math.max(20, root.thickness + 12) : Math.max(16, root.thickness + 8)
-                radius: Config.roundness
+                radius: Styling.radius(0)
                 color: Colors.overBackground
                 z: 2
                 Behavior on width {
@@ -142,7 +142,7 @@ Item {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 height: root.thickness
-                radius: Config.roundness / 4
+                radius: Styling.radius(0) / 4
                 color: root.backgroundColor
                 z: 0
             }
@@ -171,7 +171,7 @@ Item {
                 anchors.rightMargin: root.handleSpacing
                 anchors.verticalCenter: parent.verticalCenter
                 height: root.thickness
-                radius: Config.roundness / 4
+                radius: Styling.radius(0) / 4
                 color: root.progressColor
                 visible: !root.wavy
                 z: 1
@@ -215,7 +215,7 @@ Item {
                 y: parent.height * (1 - root.animatedProgress) - height / 2
                 height: root.isDragging ? 2 : 4
                 width: root.isDragging ? Math.max(20, root.thickness + 12) : Math.max(16, root.thickness + 8)
-                radius: Config.roundness
+                radius: Styling.radius(0)
                 color: iconColor
                 z: 2
                 Behavior on width {
@@ -240,7 +240,7 @@ Item {
                 anchors.bottomMargin: root.handleSpacing
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: root.thickness
-                radius: Config.roundness / 4
+                radius: Styling.radius(0) / 4
                 color: root.backgroundColor
                 z: 0
             }
@@ -275,7 +275,7 @@ Item {
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: root.thickness
-                radius: Config.roundness / 4
+                radius: Styling.radius(0) / 4
                 color: root.progressColor
                 visible: !root.wavy
                 z: 1

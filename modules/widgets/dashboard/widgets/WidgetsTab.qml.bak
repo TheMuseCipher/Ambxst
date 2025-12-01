@@ -749,7 +749,7 @@ Rectangle {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 36 * 2 // Always 2 options
                                 color: Colors.background
-                                radius: Styling.radius(0)
+                                radius: Config.roundness
 
                                 ListView {
                                     id: optionsListView
@@ -814,7 +814,7 @@ Rectangle {
                                             }
                                             return "primary";
                                         }
-                                        radius: Styling.radius(0)
+                                        radius: Config.roundness
                                         visible: optionsListView.currentIndex >= 0
                                         z: -1
                                     }
@@ -969,7 +969,7 @@ Rectangle {
                                     return "primary";
                                 }
                             }
-                            radius: Styling.radius(4)
+                            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                             visible: appLauncher.selectedIndex >= 0
                         }
                     }
@@ -1113,7 +1113,7 @@ Rectangle {
             id: widgetsContainer
             Layout.preferredWidth: controlButtonsContainer.implicitWidth
             Layout.fillHeight: true
-            radius: Styling.radius(4)
+            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
             color: "transparent"
             visible: currentTab === 0
 
@@ -1139,7 +1139,7 @@ Rectangle {
                         Layout.alignment: Qt.AlignHCenter
                         implicitWidth: internalBgRect.implicitWidth + 8
                         implicitHeight: internalBgRect.implicitHeight + 8
-                        radius: Styling.radius(4)
+                        radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                         StyledRect {
                             id: internalBgRect
@@ -1147,7 +1147,7 @@ Rectangle {
                             anchors.centerIn: parent
                             implicitWidth: buttonRow.implicitWidth + 8
                             implicitHeight: buttonRow.implicitHeight + 8
-                            radius: Styling.radius(0)
+                            radius: Config.roundness
 
                             RowLayout {
                                 id: buttonRow

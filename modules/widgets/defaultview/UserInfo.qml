@@ -57,7 +57,7 @@ Item {
                     anchors.centerIn: parent
                     width: 24
                     height: 24
-                    radius: Config.roundness
+                    radius: Styling.radius(0)
                     clip: true
 
                     Image {

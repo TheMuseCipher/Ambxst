@@ -736,7 +736,7 @@ WlSessionLockSurface {
     // Screen corners
     RoundCorner {
         id: topLeft
-        size: Styling.radius(4)
+        size: Config.roundness > 0 ? Config.roundness + 4 : 0
         anchors.left: parent.left
         anchors.top: parent.top
         corner: RoundCorner.CornerEnum.TopLeft
@@ -745,7 +745,7 @@ WlSessionLockSurface {
 
     RoundCorner {
         id: topRight
-        size: Styling.radius(4)
+        size: Config.roundness > 0 ? Config.roundness + 4 : 0
         anchors.right: parent.right
         anchors.top: parent.top
         corner: RoundCorner.CornerEnum.TopRight
@@ -754,7 +754,7 @@ WlSessionLockSurface {
 
     RoundCorner {
         id: bottomLeft
-        size: Styling.radius(4)
+        size: Config.roundness > 0 ? Config.roundness + 4 : 0
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         corner: RoundCorner.CornerEnum.BottomLeft
@@ -763,7 +763,7 @@ WlSessionLockSurface {
 
     RoundCorner {
         id: bottomRight
-        size: Styling.radius(4)
+        size: Config.roundness > 0 ? Config.roundness + 4 : 0
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         corner: RoundCorner.CornerEnum.BottomRight

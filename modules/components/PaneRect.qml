@@ -4,7 +4,7 @@ import qs.modules.theme
 import qs.config
 
 Rectangle {
-    radius: Config.roundness
+    radius: Styling.radius(0)
     border.color: Colors.surfaceBright
     border.width: 0
 

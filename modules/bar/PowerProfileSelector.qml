@@ -69,7 +69,7 @@ StyledRect {
             id: highlight
             variant: "primary"
             z: 0
-            radius: Math.max(0, Config.roundness - 2)
+            radius: Styling.radius(-2)
 
             property int currentIndex: {
                 for (let i = 0; i < root.displayProfiles.length; i++) {

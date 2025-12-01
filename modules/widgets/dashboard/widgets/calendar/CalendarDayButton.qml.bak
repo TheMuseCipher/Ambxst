@@ -18,7 +18,7 @@ Rectangle {
     Layout.preferredHeight: 28
 
     color: "transparent"
-    radius: Styling.radius(-2)
+    radius: Config.roundness > 0 ? Config.roundness - 2 : 0
 
     Rectangle {
         anchors.centerIn: parent

@@ -973,7 +973,7 @@ Item {
                                     return "primary";
                                 }
                             }
-                            radius: Styling.radius(4)
+                            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                             visible: root.selectedIndex >= 0
 
                             Behavior on color {
@@ -1215,7 +1215,7 @@ Item {
                                 StyledRect {
                                     id: deleteHighlight
                                     variant: "overerror"
-                                    radius: Styling.radius(-4)
+                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                     visible: isInDeleteMode
                                     z: 0
 
@@ -1373,7 +1373,7 @@ Item {
                                 StyledRect {
                                     id: aliasHighlight
                                     variant: "oversecondary"
-                                    radius: Styling.radius(-4)
+                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                     visible: isInAliasMode
                                     z: 0
 
@@ -1572,7 +1572,7 @@ Item {
                                     return 36 * Math.min(3, count);
                                 }
                                 color: Colors.background
-                                radius: Styling.radius(0)
+                                radius: Config.roundness
 
                                 Behavior on Layout.preferredHeight {
                                     enabled: Config.animDuration > 0
@@ -1667,7 +1667,7 @@ Item {
                                             }
                                             return "primary";
                                         }
-                                        radius: Styling.radius(0)
+                                        radius: Config.roundness
                                         visible: optionsListView.currentIndex >= 0
                                         z: -1
 
@@ -1819,12 +1819,12 @@ Item {
 
                                 background: Rectangle {
                                     color: Colors.background
-                                    radius: Styling.radius(0)
+                                    radius: Config.roundness
                                 }
 
                                 contentItem: Rectangle {
                                     color: Colors.primary
-                                    radius: Styling.radius(0)
+                                    radius: Config.roundness
                                 }
 
                                 property bool scrollBarPressed: false
@@ -1885,7 +1885,7 @@ Item {
                                             return "common";
                                         }
                                     }
-                                    radius: Styling.radius(-4)
+                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
 
                                     property string iconType: {
                                         if (isInDeleteMode) {
@@ -2211,7 +2211,7 @@ Item {
         Rectangle {
             Layout.preferredWidth: 2
             Layout.fillHeight: true
-            radius: Styling.radius(0)
+            radius: Config.roundness
             color: Colors.surface
         }
 
@@ -2343,7 +2343,7 @@ Item {
                         width: 120
                         height: 120
                         color: Colors.surfaceBright
-                        radius: Styling.radius(4)
+                        radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                         visible: {
                             if (!previewPanel.currentItem)
                                 return false;
@@ -2483,7 +2483,7 @@ Item {
                                         width: parent.width
                                         height: width * 9 / 16  // 16:9 aspect ratio
                                         color: Colors.surfaceBright
-                                        radius: Styling.radius(-4)
+                                        radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                         visible: root.linkPreviewData && root.linkPreviewData.image
 
                                         Image {
@@ -2653,7 +2653,7 @@ Item {
                                         width: 100
                                         height: 100
                                         color: Colors.surfaceBright
-                                        radius: Styling.radius(-4)
+                                        radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                         visible: root.linkPreviewData && root.linkPreviewData.image
                                         anchors.verticalCenter: parent.verticalCenter
 
@@ -2692,7 +2692,7 @@ Item {
                                 height: 60
                                 visible: root.loadingLinkPreview && previewPanel.currentItem && ClipboardUtils.isUrl(root.currentFullContent || previewPanel.currentItem.preview)
                                 color: Colors.surface
-                                radius: Styling.radius(4)
+                                radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                                 Row {
                                     anchors.centerIn: parent
@@ -2735,7 +2735,7 @@ Item {
                                     width: parent.width
                                     height: 60
                                     color: urlPreviewMouseArea.containsMouse ? Colors.surfaceBright : Colors.surface
-                                    radius: Styling.radius(4)
+                                    radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                                     Behavior on color {
                                         enabled: Config.animDuration > 0
@@ -2768,7 +2768,7 @@ Item {
                                             width: 36
                                             height: 36
                                             color: Colors.surfaceBright
-                                            radius: Styling.radius(-4)
+                                            radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
 
                                             Image {
                                                 id: previewFavicon
@@ -2890,7 +2890,7 @@ Item {
                                 width: 120
                                 height: 120
                                 color: Colors.surfaceBright
-                                radius: Styling.radius(4)
+                                radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                                 anchors.horizontalCenter: parent.horizontalCenter
 
                                 Text {
@@ -3130,7 +3130,7 @@ Item {
                                 height: 36
                                 variant: metadataOpenButtonMouseArea.containsMouse ? "focus" : "common"
                                 color: metadataOpenButtonMouseArea.containsMouse ? Colors.surfaceBright : Colors.surface
-                                radius: Styling.radius(0)
+                                radius: Config.roundness
                                 visible: {
                                     if (!previewPanel.currentItem)
                                         return false;
@@ -3184,7 +3184,7 @@ Item {
                                 height: 36
                                 variant: metadataDragArea.containsMouse ? "focus" : "common"
                                 color: metadataDragArea.containsMouse ? Colors.surfaceBright : Colors.surface
-                                radius: Styling.radius(0)
+                                radius: Config.roundness
 
                                 Behavior on color {
                                     enabled: Config.animDuration > 0

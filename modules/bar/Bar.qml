@@ -161,7 +161,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 36
                     color: "transparent"
-                    radius: Config.roundness
+                    radius: Styling.radius(0)
                     layer.enabled: Config.bar.showBackground
                     layer.effect: Shadow {}
 
@@ -222,7 +222,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 36
                     color: "transparent"
-                    radius: Config.roundness
+                    radius: Styling.radius(0)
                     layer.enabled: Config.bar.showBackground
                     layer.effect: Shadow {}
 
@@ -327,7 +327,7 @@ PanelWindow {
                     Layout.fillHeight: true
                     Layout.preferredWidth: 36
                     color: "transparent"
-                    radius: Config.roundness
+                    radius: Styling.radius(0)
                     layer.enabled: Config.bar.showBackground
                     layer.effect: Shadow {}
 
@@ -389,7 +389,7 @@ PanelWindow {
                     Layout.fillHeight: true
                     Layout.preferredWidth: 36
                     color: "transparent"
-                    radius: Config.roundness
+                    radius: Styling.radius(0)
                     layer.enabled: Config.bar.showBackground
                     layer.effect: Shadow {}
 

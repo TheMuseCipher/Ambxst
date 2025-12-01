@@ -80,7 +80,7 @@ FocusScope {
         StyledRect {
             variant: "primary"
             id: highlight
-            radius: Styling.radius(4)
+            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
             z: 0 // Por debajo de los botones
             visible: repeater.count > 0
 
@@ -174,7 +174,7 @@ FocusScope {
 
                     background: Rectangle {
                         color: "transparent"
-                        radius: Styling.radius(4)
+                        radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                     }
 
                     contentItem: Text {
