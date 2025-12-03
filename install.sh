@@ -127,37 +127,17 @@ echo "✔ Font cache updated"
 # === Configure icon theme paths for Nix ===
 echo "🎨 Setting up icon theme paths for Nix..."
 
-# Add Nix icon paths to XDG_DATA_DIRS if not already present
-SHELL_RC=""
-if [ -n "$BASH_VERSION" ]; then
-  SHELL_RC="$HOME/.bashrc"
-elif [ -n "$ZSH_VERSION" ]; then
-  SHELL_RC="$HOME/.zshrc"
-else
-  # Try to detect shell from SHELL env var
-  case "$SHELL" in
-    */bash) SHELL_RC="$HOME/.bashrc" ;;
-    */zsh) SHELL_RC="$HOME/.zshrc" ;;
-    */fish) SHELL_RC="$HOME/.config/fish/config.fish" ;;
-  esac
-fi
+mkdir -p ~/.config/environment.d
 
-if [ -n "$SHELL_RC" ] && [ -f "$SHELL_RC" ]; then
-  if ! grep -q "XDG_DATA_DIRS.*nix/var/nix/profiles" "$SHELL_RC" 2>/dev/null; then
-    echo "📝 Adding Nix icon paths to $SHELL_RC..."
-    cat >> "$SHELL_RC" <<'EOF'
-
-# Nix icon theme paths
-export XDG_DATA_DIRS="$HOME/.nix-profile/share:/nix/var/nix/profiles/default/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+if [ ! -f ~/.config/environment.d/nix-icons.conf ]; then
+  echo "📝 Creating environment.d config for Nix icons..."
+  cat > ~/.config/environment.d/nix-icons.conf <<EOF
+XDG_DATA_DIRS=$HOME/.nix-profile/share:/nix/var/nix/profiles/default/share:\$XDG_DATA_DIRS
 EOF
-    echo "✔ Icon paths added to shell config"
-    echo "⚠ Run 'source $SHELL_RC' or restart your shell to apply changes"
-  else
-    echo "✔ Icon paths already in shell config"
-  fi
+  echo "✔ Icon paths configured in environment.d"
+  echo "⚠ Logout and login again to apply XDG_DATA_DIRS changes"
 else
-  echo "⚠ Could not detect shell config file. Add this to your shell RC manually:"
-  echo '   export XDG_DATA_DIRS="$HOME/.nix-profile/share:/nix/var/nix/profiles/default/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"'
+  echo "✔ Icon paths already configured"
 fi
 
 # Also set for current session
