@@ -58,6 +58,7 @@ QtObject {
     readonly property string hdd: ""
     readonly property string temperature: ""
     readonly property string at: ""
+    readonly property string gear: ""
 
     // Wi-Fi
     readonly property string wifiOff: ""
