@@ -138,7 +138,6 @@
         terminus_font
         terminus_font_ttf
         nerd-fonts.symbols-only
-        rPackages.phosphoricons
         noto-fonts
         noto-fonts-color-emoji
       ]);
