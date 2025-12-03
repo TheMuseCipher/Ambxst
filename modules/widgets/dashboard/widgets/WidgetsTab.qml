@@ -101,7 +101,7 @@ Rectangle {
             property string searchText: GlobalStates.launcherSearchText
             property bool showResults: searchText.length > 0
             property int selectedIndex: GlobalStates.launcherSelectedIndex
-            
+
             // Options menu state (expandable list)
             property int expandedItemIndex: -1
             property int selectedOptionIndex: 0
@@ -111,14 +111,14 @@ Rectangle {
             property var filteredApps: searchText.length > 0 ? AppSearch.fuzzyQuery(searchText) : AppSearch.getAllApps()
             property var appsById: ({})
 
-             onFilteredAppsChanged: {
-                 resultsList.enableScrollAnimation = false;
-                 resultsList.contentY = 0;
-                 updateAppsModel();
-                 Qt.callLater(() => {
-                     resultsList.enableScrollAnimation = true;
-                 });
-             }
+            onFilteredAppsChanged: {
+                resultsList.enableScrollAnimation = false;
+                resultsList.contentY = 0;
+                updateAppsModel();
+                Qt.callLater(() => {
+                    resultsList.enableScrollAnimation = true;
+                });
+            }
 
             function updateAppsModel() {
                 let newApps = filteredApps;
@@ -221,18 +221,18 @@ Rectangle {
                 }
             }
 
-             onSelectedIndexChanged: {
-                 if (selectedIndex === -1 && resultsList.count > 0) {
-                     resultsList.contentY = 0;
-                 }
-                 
-                 // Close expanded options when selection changes to a different item
-                 if (expandedItemIndex >= 0 && selectedIndex !== expandedItemIndex) {
-                     expandedItemIndex = -1;
-                     selectedOptionIndex = 0;
-                     keyboardNavigation = false;
-                 }
-             }
+            onSelectedIndexChanged: {
+                if (selectedIndex === -1 && resultsList.count > 0) {
+                    resultsList.contentY = 0;
+                }
+
+                // Close expanded options when selection changes to a different item
+                if (expandedItemIndex >= 0 && selectedIndex !== expandedItemIndex) {
+                    expandedItemIndex = -1;
+                    selectedOptionIndex = 0;
+                    keyboardNavigation = false;
+                }
+            }
 
             function clearSearch() {
                 GlobalStates.clearLauncherState();
@@ -242,7 +242,7 @@ Rectangle {
             function focusSearchInput() {
                 searchInput.focusInput();
             }
-            
+
             function adjustScrollForExpandedItem(index) {
                 if (index < 0 || index >= appsModel.count)
                     return;
@@ -274,7 +274,7 @@ Rectangle {
                     // Item bottom is below viewport - scroll down to show it
                     resultsList.contentY = Math.min(itemBottom - resultsList.height, maxContentY);
                 }
-                // Otherwise, item is already fully visible - no scroll needed
+            // Otherwise, item is already fully visible - no scroll needed
             }
 
             Behavior on height {
@@ -298,30 +298,30 @@ Rectangle {
                     placeholderText: "Search applications..."
                     iconText: ""
 
-                     onSearchTextChanged: text => {
-                         GlobalStates.launcherSearchText = text;
-                         appLauncher.searchText = text;
-                         
-                         resultsList.enableScrollAnimation = false;
-                         
-                         if (text.length > 0) {
-                             GlobalStates.launcherSelectedIndex = 0;
-                             appLauncher.selectedIndex = 0;
-                             resultsList.currentIndex = 0;
-                             
-                             resultsList.contentY = 0;
-                         } else {
-                             GlobalStates.launcherSelectedIndex = -1;
-                             appLauncher.selectedIndex = -1;
-                             resultsList.currentIndex = -1;
-                             
-                             resultsList.contentY = 0;
-                         }
-                         
-                         Qt.callLater(() => {
-                             resultsList.enableScrollAnimation = true;
-                         });
-                     }
+                    onSearchTextChanged: text => {
+                        GlobalStates.launcherSearchText = text;
+                        appLauncher.searchText = text;
+
+                        resultsList.enableScrollAnimation = false;
+
+                        if (text.length > 0) {
+                            GlobalStates.launcherSelectedIndex = 0;
+                            appLauncher.selectedIndex = 0;
+                            resultsList.currentIndex = 0;
+
+                            resultsList.contentY = 0;
+                        } else {
+                            GlobalStates.launcherSelectedIndex = -1;
+                            appLauncher.selectedIndex = -1;
+                            resultsList.currentIndex = -1;
+
+                            resultsList.contentY = 0;
+                        }
+
+                        Qt.callLater(() => {
+                            resultsList.enableScrollAnimation = true;
+                        });
+                    }
 
                     onAccepted: {
                         if (appLauncher.expandedItemIndex >= 0) {
@@ -329,35 +329,24 @@ Rectangle {
                             let selectedApp = appsModel.get(appLauncher.expandedItemIndex);
                             if (selectedApp) {
                                 // Build options array
-                                let options = [
-                                    function() { 
+                                let options = [function () {
                                         appLauncher.executeApp(selectedApp.appId);
                                         Visibilities.setActiveModule("");
-                                    },
-                                    function() {
+                                    }, function () {
                                         // Create shortcut
                                         let desktopDir = Quickshell.env("XDG_DESKTOP_DIR") || Quickshell.env("HOME") + "/Desktop";
                                         let timestamp = Date.now();
                                         let fileName = selectedApp.appId + "-" + timestamp + ".desktop";
                                         let filePath = desktopDir + "/" + fileName;
-                                        
-                                        let desktopContent = "[Desktop Entry]\n" + 
-                                            "Version=1.0\n" + 
-                                            "Type=Application\n" + 
-                                            "Name=" + selectedApp.appName + "\n" + 
-                                            "Exec=" + selectedApp.appExecString + "\n" + 
-                                            "Icon=" + selectedApp.appIcon + "\n" + 
-                                            (selectedApp.appComment ? "Comment=" + selectedApp.appComment + "\n" : "") + 
-                                            (selectedApp.appCategories.length > 0 ? "Categories=" + selectedApp.appCategories.join(";") + ";\n" : "") + 
-                                            (selectedApp.appRunInTerminal ? "Terminal=true\n" : "Terminal=false\n");
-                                        
+
+                                        let desktopContent = "[Desktop Entry]\n" + "Version=1.0\n" + "Type=Application\n" + "Name=" + selectedApp.appName + "\n" + "Exec=" + selectedApp.appExecString + "\n" + "Icon=" + selectedApp.appIcon + "\n" + (selectedApp.appComment ? "Comment=" + selectedApp.appComment + "\n" : "") + (selectedApp.appCategories.length > 0 ? "Categories=" + selectedApp.appCategories.join(";") + ";\n" : "") + (selectedApp.appRunInTerminal ? "Terminal=true\n" : "Terminal=false\n");
+
                                         let writeCmd = "printf '%s' '" + desktopContent.replace(/'/g, "'\\''") + "' > \"" + filePath + "\" && chmod 755 \"" + filePath + "\" && gio set \"" + filePath + "\" metadata::trusted true";
                                         copyProcess.command = ["sh", "-c", writeCmd];
                                         copyProcess.running = true;
                                         appLauncher.expandedItemIndex = -1;
-                                    }
-                                ];
-                                
+                                    }];
+
                                 if (appLauncher.selectedOptionIndex >= 0 && appLauncher.selectedOptionIndex < options.length) {
                                     options[appLauncher.selectedOptionIndex]();
                                 }
@@ -372,7 +361,7 @@ Rectangle {
                             }
                         }
                     }
-                    
+
                     onShiftAccepted: {
                         if (appLauncher.selectedIndex >= 0 && appLauncher.selectedIndex < resultsList.count) {
                             // Toggle expanded state
@@ -497,7 +486,7 @@ Rectangle {
                     currentIndex: appLauncher.selectedIndex
 
                     property bool enableScrollAnimation: true
-                    
+
                     Behavior on contentY {
                         enabled: Config.animDuration > 0 && resultsList.enableScrollAnimation && !resultsList.moving
                         NumberAnimation {
@@ -523,13 +512,13 @@ Rectangle {
                                 }
                                 itemY += itemHeight;
                             }
-                            
+
                             var currentItemHeight = 48;
                             if (currentIndex === appLauncher.expandedItemIndex) {
                                 var listHeight = 36 * 2;
                                 currentItemHeight = 48 + 4 + listHeight + 8;
                             }
-                            
+
                             var viewportTop = resultsList.contentY;
                             var viewportBottom = viewportTop + resultsList.height;
 
@@ -566,7 +555,7 @@ Rectangle {
                         }
                         color: "transparent"
                         radius: 16
-                        
+
                         Behavior on height {
                             enabled: Config.animDuration > 0
                             NumberAnimation {
@@ -591,7 +580,7 @@ Rectangle {
                                     resultsList.currentIndex = index;
                                 }
                             }
-                            
+
                             onClicked: mouse => {
                                 if (mouse.button === Qt.LeftButton) {
                                     if (!isExpanded) {
@@ -619,7 +608,7 @@ Rectangle {
                                 }
                             }
                         }
-                        
+
                         // App content (icon and text)
                         RowLayout {
                             anchors.left: parent.left
@@ -724,7 +713,7 @@ Rectangle {
                                 }
                             }
                         }
-                        
+
                         // Expandable options list
                         RowLayout {
                             anchors.left: parent.left
@@ -763,7 +752,7 @@ Rectangle {
                                             icon: Icons.launch,
                                             highlightColor: Colors.primary,
                                             textColor: Config.resolveColor(Config.theme.srPrimary.itemColor),
-                                            action: function() {
+                                            action: function () {
                                                 appLauncher.executeApp(appId);
                                                 Visibilities.setActiveModule("");
                                             }
@@ -773,21 +762,13 @@ Rectangle {
                                             icon: Icons.shortcut,
                                             highlightColor: Colors.secondary,
                                             textColor: Config.resolveColor(Config.theme.srSecondary.itemColor),
-                                            action: function() {
+                                            action: function () {
                                                 let desktopDir = Quickshell.env("XDG_DESKTOP_DIR") || Quickshell.env("HOME") + "/Desktop";
                                                 let timestamp = Date.now();
                                                 let fileName = appId + "-" + timestamp + ".desktop";
                                                 let filePath = desktopDir + "/" + fileName;
 
-                                                let desktopContent = "[Desktop Entry]\n" + 
-                                                    "Version=1.0\n" + 
-                                                    "Type=Application\n" + 
-                                                    "Name=" + appName + "\n" + 
-                                                    "Exec=" + appExecString + "\n" + 
-                                                    "Icon=" + appIcon + "\n" + 
-                                                    (appComment ? "Comment=" + appComment + "\n" : "") + 
-                                                    (appCategories.length > 0 ? "Categories=" + appCategories.join(";") + ";\n" : "") + 
-                                                    (appRunInTerminal ? "Terminal=true\n" : "Terminal=false\n");
+                                                let desktopContent = "[Desktop Entry]\n" + "Version=1.0\n" + "Type=Application\n" + "Name=" + appName + "\n" + "Exec=" + appExecString + "\n" + "Icon=" + appIcon + "\n" + (appComment ? "Comment=" + appComment + "\n" : "") + (appCategories.length > 0 ? "Categories=" + appCategories.join(";") + ";\n" : "") + (appRunInTerminal ? "Terminal=true\n" : "Terminal=false\n");
 
                                                 let writeCmd = "printf '%s' '" + desktopContent.replace(/'/g, "'\\''") + "' > \"" + filePath + "\" && chmod 755 \"" + filePath + "\" && gio set \"" + filePath + "\" metadata::trusted true";
                                                 copyProcess.command = ["sh", "-c", writeCmd];
@@ -943,7 +924,7 @@ Rectangle {
                                 easing.type: Easing.OutCubic
                             }
                         }
-                        
+
                         Behavior on height {
                             enabled: Config.animDuration > 0
                             NumberAnimation {
@@ -951,7 +932,7 @@ Rectangle {
                                 easing.type: Easing.OutQuart
                             }
                         }
-                        
+
                         onHeightChanged: {
                             if (appLauncher.expandedItemIndex >= 0 && height > 48) {
                                 Qt.callLater(() => {
@@ -1278,7 +1259,10 @@ Rectangle {
 
                     StyledRect {
                         id: iconRect
+                        radius: Styling.radius(4)
                         variant: {
+                            if (iconMouseArea.containsMouse && Brightness.syncBrightness)
+                                return "primaryfocus";
                             if (Brightness.syncBrightness)
                                 return "primary";
                             if (iconMouseArea.containsMouse)
@@ -1352,7 +1336,7 @@ Rectangle {
                             onClicked: {
                                 let wasActive = Brightness.syncBrightness;
                                 Brightness.syncBrightness = !Brightness.syncBrightness;
-                                
+
                                 // Only show sync feedback animation when activating
                                 if (Brightness.syncBrightness) {
                                     // Show sync icon instantly and start rotation
@@ -1360,7 +1344,7 @@ Rectangle {
                                     brightnessIcon.iconOpacity = 1;
                                     brightnessIcon.syncIconRotation = 0;
                                     brightnessIcon.syncIconRotation = 360;
-                                    
+
                                     // Hold sync icon
                                     syncHoldTimer.start();
                                 }
@@ -1446,7 +1430,7 @@ Rectangle {
                             brightnessValue = value;
                             brightnessIcon.brightnessIconRotation = (value / 1.0) * 180;
                             brightnessIcon.brightnessIconScale = 0.8 + (value / 1.0) * 0.2;
-                            
+
                             if (Brightness.syncBrightness) {
                                 // Sync all monitors
                                 for (let i = 0; i < Brightness.monitors.length; i++) {
