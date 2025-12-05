@@ -17,6 +17,7 @@ Singleton {
     property var cpuPrevTotal: 0
     property var cpuPrevIdle: 0
     property string cpuModel: ""
+    property int cpuTemp: -1  // CPU temperature in Celsius, -1 if unavailable
 
     // RAM metrics
     property real ramUsage: 0.0
@@ -31,9 +32,13 @@ Singleton {
     property int gpuCount: 0
     property bool gpuDetected: false
     
+    // GPU temperature metrics - supports multiple GPUs
+    property var gpuTemps: []            // Array of temperatures in Celsius, -1 if unavailable
+    
     // Legacy single GPU properties (for backward compatibility)
     property real gpuUsage: gpuUsages.length > 0 ? gpuUsages[0] : 0.0
     property string gpuVendor: gpuVendors.length > 0 ? gpuVendors[0] : "unknown"
+    property int gpuTemp: gpuTemps.length > 0 ? gpuTemps[0] : -1
 
     // Disk metrics - map of mountpoint to usage percentage
     property var diskUsage: ({})
@@ -51,6 +56,8 @@ Singleton {
     property var cpuHistory: []
     property var ramHistory: []
     property var gpuHistories: []       // Array of arrays - one history per GPU
+    property var cpuTempHistory: []     // CPU temperature history
+    property var gpuTempHistories: []   // Array of arrays - one temp history per GPU
     property int maxHistoryPoints: 50
     
     // Total data points collected (continues incrementing forever)
@@ -60,6 +67,7 @@ Singleton {
         detectGPU();
         cpuModelReader.running = true;
         diskTypeDetector.running = true;
+        cpuTempReader.running = true;
     }
 
     // Watch for config changes and revalidate disks
@@ -115,6 +123,14 @@ Singleton {
         }
         cpuHistory = newCpuHistory;
 
+        // Add CPU temperature history
+        let newCpuTempHistory = cpuTempHistory.slice();
+        newCpuTempHistory.push(cpuTemp);
+        if (newCpuTempHistory.length > maxHistoryPoints) {
+            newCpuTempHistory.shift();
+        }
+        cpuTempHistory = newCpuTempHistory;
+
         // Add RAM history
         let newRamHistory = ramHistory.slice();
         newRamHistory.push(ramUsage / 100);
@@ -126,10 +142,14 @@ Singleton {
         // Add GPU histories if detected
         if (gpuDetected && gpuCount > 0) {
             let newGpuHistories = gpuHistories.slice();
+            let newGpuTempHistories = gpuTempHistories.slice();
             
             // Initialize histories array if needed
             while (newGpuHistories.length < gpuCount) {
                 newGpuHistories.push([]);
+            }
+            while (newGpuTempHistories.length < gpuCount) {
+                newGpuTempHistories.push([]);
             }
             
             // Update each GPU's history
@@ -140,9 +160,17 @@ Singleton {
                     gpuHist.shift();
                 }
                 newGpuHistories[i] = gpuHist;
+
+                let gpuTempHist = newGpuTempHistories[i].slice();
+                gpuTempHist.push(gpuTemps[i] !== undefined ? gpuTemps[i] : -1);
+                if (gpuTempHist.length > maxHistoryPoints) {
+                    gpuTempHist.shift();
+                }
+                newGpuTempHistories[i] = gpuTempHist;
             }
             
             gpuHistories = newGpuHistories;
+            gpuTempHistories = newGpuTempHistories;
         }
     }
 
@@ -155,16 +183,20 @@ Singleton {
             cpuReader.running = true;
             ramReader.running = true;
             diskReader.running = true;
+            cpuTempReader.running = true;
             
             // Only query GPU if detected
             if (root.gpuDetected && root.gpuCount > 0) {
                 const vendor = root.gpuVendors[0] || root.gpuVendor;
                 if (vendor === "nvidia") {
                     gpuReaderNvidia.running = true;
+                    gpuTempReaderNvidia.running = true;
                 } else if (vendor === "amd") {
                     gpuReaderAMD.running = true;
+                    gpuTempReaderAMD.running = true;
                 } else if (vendor === "intel") {
                     gpuReaderIntel.running = true;
+                    // Intel GPU temperature not supported (same as btop)
                 }
             }
 
@@ -230,6 +262,61 @@ Singleton {
                     
                     root.cpuModel = model;
                 }
+            }
+        }
+    }
+
+    // CPU temperature reader (btop-style: hwmon first, then thermal zones)
+    Process {
+        id: cpuTempReader
+        running: false
+        command: ["sh", "-c", `
+            # Try hwmon first (best option, like btop)
+            for d in /sys/class/hwmon/hwmon*; do
+                [ -d "$d" ] || continue
+                name=$(cat "$d/name" 2>/dev/null)
+                case "$name" in
+                    coretemp|k10temp|zenpower|cpu_thermal|x86_pkg_temp|amd_energy)
+                        for t in "$d"/temp*_input; do
+                            [ -f "$t" ] || continue
+                            val=$(cat "$t" 2>/dev/null)
+                            if [ "$val" -gt 10000 ] 2>/dev/null && [ "$val" -lt 120000 ] 2>/dev/null; then
+                                echo $((val / 1000))
+                                exit 0
+                            fi
+                        done
+                        ;;
+                esac
+            done
+            # Fallback to thermal zones (avoid acpitz)
+            for z in /sys/class/thermal/thermal_zone*; do
+                [ -d "$z" ] || continue
+                type=$(cat "$z/type" 2>/dev/null)
+                case "$type" in
+                    x86_pkg_temp|cpu-thermal|soc_thermal|cpu_thermal|proc_thermal)
+                        val=$(cat "$z/temp" 2>/dev/null)
+                        if [ "$val" -gt 1000 ] 2>/dev/null && [ "$val" -lt 120000 ] 2>/dev/null; then
+                            echo $((val / 1000))
+                            exit 0
+                        fi
+                        ;;
+                esac
+            done
+            echo -1
+        `]
+        
+        stdout: StdioCollector {
+            waitForEnd: true
+            onStreamFinished: {
+                const raw = text.trim();
+                const temp = parseInt(raw);
+                root.cpuTemp = isNaN(temp) ? -1 : temp;
+            }
+        }
+
+        onExited: (code, status) => {
+            if (code !== 0) {
+                root.cpuTemp = -1;
             }
         }
     }
@@ -320,6 +407,7 @@ Singleton {
                     root.gpuVendors = [];
                     root.gpuNames = [];
                     root.gpuUsages = [];
+                    root.gpuTemps = [];
                     root.gpuCount = 0;
                     root.gpuDetected = false;
                 }
@@ -345,6 +433,7 @@ Singleton {
                 root.gpuCount = count;
                 root.gpuNames = lines.map(name => name.trim());
                 root.gpuUsages = Array(count).fill(0);
+                root.gpuTemps = Array(count).fill(-1);
                 root.gpuVendors = Array(count).fill("nvidia");
             }
         }
@@ -366,6 +455,7 @@ Singleton {
                     root.gpuCount = count;
                     root.gpuNames = Array.from({length: count}, (_, i) => `AMD GPU ${i}`);
                     root.gpuUsages = Array(count).fill(0);
+                    root.gpuTemps = Array(count).fill(-1);
                     root.gpuVendors = Array(count).fill("amd");
                 }
             }
@@ -387,6 +477,7 @@ Singleton {
                 root.gpuCount = count;
                 root.gpuNames = Array.from({length: count}, (_, i) => `Intel GPU ${i}`);
                 root.gpuUsages = Array(count).fill(0);
+                root.gpuTemps = Array(count).fill(-1);  // Intel GPU temp not supported
                 root.gpuVendors = Array(count).fill("intel");
             }
         }
@@ -450,6 +541,109 @@ Singleton {
         onExited: (code, status) => {
             if (code !== 0) {
                 root.gpuUsages = Array(root.gpuCount).fill(0);
+            }
+        }
+    }
+
+    // NVIDIA GPU temperature reader - supports multiple GPUs
+    Process {
+        id: gpuTempReaderNvidia
+        running: false
+        command: ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"]
+        
+        stdout: StdioCollector {
+            waitForEnd: true
+            onStreamFinished: {
+                const raw = text.trim();
+                if (!raw) return;
+                
+                const lines = raw.split('\n').filter(line => line.trim());
+                let newTemps = [];
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const temp = parseInt(lines[i]);
+                    newTemps.push(isNaN(temp) ? -1 : temp);
+                }
+                
+                root.gpuTemps = newTemps;
+            }
+        }
+
+        onExited: (code, status) => {
+            if (code !== 0) {
+                root.gpuTemps = Array(root.gpuCount).fill(-1);
+            }
+        }
+    }
+
+    // AMD GPU temperature reader - supports multiple GPUs
+    // Reads from hwmon under /sys/class/drm/card*/device/hwmon/
+    Process {
+        id: gpuTempReaderAMD
+        running: false
+        command: ["sh", "-c", `
+            for card in /sys/class/drm/card*/device; do
+                [ -d "$card" ] || continue
+                # Check if this is an AMD GPU (has gpu_busy_percent)
+                [ -f "$card/gpu_busy_percent" ] || continue
+                # Find hwmon directory and read edge temperature
+                found=0
+                for hwmon in "$card"/hwmon/hwmon*; do
+                    [ -d "$hwmon" ] || continue
+                    # Try edge temperature first (most common for AMD GPUs)
+                    for label in "$hwmon"/temp*_label; do
+                        [ -f "$label" ] || continue
+                        lbl=$(cat "$label" 2>/dev/null)
+                        if [ "$lbl" = "edge" ]; then
+                            input=\${label%_label}_input
+                            if [ -f "$input" ]; then
+                                val=$(cat "$input" 2>/dev/null)
+                                if [ "$val" -gt 1000 ] 2>/dev/null && [ "$val" -lt 120000 ] 2>/dev/null; then
+                                    echo $((val / 1000))
+                                    found=1
+                                    break 2
+                                fi
+                            fi
+                        fi
+                    done
+                    # Fallback: try temp1_input if no labeled edge temp
+                    if [ $found -eq 0 ] && [ -f "$hwmon/temp1_input" ]; then
+                        val=$(cat "$hwmon/temp1_input" 2>/dev/null)
+                        if [ "$val" -gt 1000 ] 2>/dev/null && [ "$val" -lt 120000 ] 2>/dev/null; then
+                            echo $((val / 1000))
+                            found=1
+                            break
+                        fi
+                    fi
+                done
+                [ $found -eq 0 ] && echo -1
+            done
+        `]
+        
+        stdout: StdioCollector {
+            waitForEnd: true
+            onStreamFinished: {
+                const raw = text.trim();
+                if (!raw) {
+                    root.gpuTemps = Array(root.gpuCount).fill(-1);
+                    return;
+                }
+                
+                const lines = raw.split('\n').filter(line => line.trim());
+                let newTemps = [];
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const temp = parseInt(lines[i]);
+                    newTemps.push(isNaN(temp) ? -1 : temp);
+                }
+                
+                root.gpuTemps = newTemps;
+            }
+        }
+
+        onExited: (code, status) => {
+            if (code !== 0) {
+                root.gpuTemps = Array(root.gpuCount).fill(-1);
             }
         }
     }
