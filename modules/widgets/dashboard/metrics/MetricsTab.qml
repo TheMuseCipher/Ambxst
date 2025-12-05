@@ -355,7 +355,7 @@ Rectangle {
 
                             RowLayout {
                                 width: parent.width
-                                spacing: 8
+                                spacing: 4
 
                                 Text {
                                     text: SystemResources.cpuModel || "CPU"
@@ -381,14 +381,16 @@ Rectangle {
                                 }
 
                                 Text {
+                                    visible: SystemResources.cpuTemp >= 0
                                     text: Icons.temperature
                                     font.family: Icons.font
                                     font.pixelSize: Styling.fontSize(-2)
-                                    color: Colors.overBackground
+                                    color: Colors.red
                                 }
 
                                 Text {
-                                    text: "XXX"
+                                    visible: SystemResources.cpuTemp >= 0
+                                    text: `${SystemResources.cpuTemp}°`
                                     font.family: Config.theme.font
                                     font.pixelSize: Styling.fontSize(-2)
                                     font.weight: Font.Medium
@@ -412,7 +414,7 @@ Rectangle {
 
                             RowLayout {
                                 width: parent.width
-                                spacing: 8
+                                spacing: 4
 
                                 Text {
                                     text: {
@@ -486,7 +488,7 @@ Rectangle {
 
                                 RowLayout {
                                     width: parent.width
-                                    spacing: 8
+                                    spacing: 4
 
                                     Text {
                                         text: {
@@ -515,14 +517,28 @@ Rectangle {
                                     }
 
                                     Text {
+                                        visible: (SystemResources.gpuTemps[index] ?? -1) >= 0
                                         text: Icons.temperature
                                         font.family: Icons.font
                                         font.pixelSize: Styling.fontSize(-2)
-                                        color: Colors.overBackground
+                                        color: {
+                                            const vendor = SystemResources.gpuVendors[index] || "";
+                                            switch (vendor.toLowerCase()) {
+                                            case "nvidia":
+                                                return Colors.green;
+                                            case "amd":
+                                                return Colors.red;
+                                            case "intel":
+                                                return Colors.blue;
+                                            default:
+                                                return Colors.magenta;
+                                            }
+                                        }
                                     }
 
                                     Text {
-                                        text: "XXX"
+                                        visible: (SystemResources.gpuTemps[index] ?? -1) >= 0
+                                        text: `${SystemResources.gpuTemps[index]}°`
                                         font.family: Config.theme.font
                                         font.pixelSize: Styling.fontSize(-2)
                                         font.weight: Font.Medium
@@ -562,7 +578,7 @@ Rectangle {
 
                                 RowLayout {
                                     width: parent.width
-                                    spacing: 8
+                                    spacing: 4
 
                                     Text {
                                         text: modelData
