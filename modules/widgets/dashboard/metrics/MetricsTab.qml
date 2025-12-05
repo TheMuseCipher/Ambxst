@@ -278,8 +278,8 @@ Rectangle {
                             spacing: 4
 
                             Text {
-                                text: root.osIcon || Icons.linux
-                                font.family: root.osIcon ? "Symbols Nerd Font Mono" : Icons.font
+                                text: root.osIcon || (root.linuxLogos ? root.linuxLogos["Linux"] : "")
+                                font.family: "Symbols Nerd Font Mono"
                                 font.pixelSize: Config.theme.fontSize + 2
                                 color: Colors.primary
                             }
