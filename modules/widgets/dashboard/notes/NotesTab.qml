@@ -1708,8 +1708,8 @@ Item {
                     // Font size controls: minus button, input, plus button
                     Rectangle {
                         id: fontSizeMinusButton
-                        width: 28
-                        height: 28
+                        width: 32
+                        height: 32
                         radius: Styling.radius(-4)
                         color: "transparent"
 
@@ -1725,7 +1725,7 @@ Item {
                             anchors.centerIn: parent
                             text: Icons.minus
                             font.family: Icons.font
-                            font.pixelSize: 12
+                            font.pixelSize: 14
                             color: Colors.overSurface
                         }
 
@@ -1742,7 +1742,7 @@ Item {
                         }
 
                         StyledToolTip {
-                            text: "Decrease font size (Alt+Down)"
+                            tooltipText: "Decrease font size (Alt+Down)"
                             visible: minusMouseArea.containsMouse
                         }
                     }
@@ -1750,7 +1750,7 @@ Item {
                     Rectangle {
                         id: fontSizeInput
                         width: 40
-                        height: 28
+                        height: 32
                         radius: Styling.radius(-4)
                         color: "transparent"
 
@@ -1767,7 +1767,7 @@ Item {
                             horizontalAlignment: TextInput.AlignHCenter
                             text: getCurrentFontSize().toString()
                             font.family: Config.theme.font
-                            font.pixelSize: 12
+                            font.pixelSize: 14
                             color: activeFocus ? Colors.overPrimary : Colors.overSurface
                             selectByMouse: true
                             validator: IntValidator { bottom: 8; top: 200 }
@@ -1791,8 +1791,8 @@ Item {
 
                     Rectangle {
                         id: fontSizePlusButton
-                        width: 28
-                        height: 28
+                        width: 32
+                        height: 32
                         radius: Styling.radius(-4)
                         color: "transparent"
 
@@ -1808,7 +1808,7 @@ Item {
                             anchors.centerIn: parent
                             text: Icons.plus
                             font.family: Icons.font
-                            font.pixelSize: 12
+                            font.pixelSize: 14
                             color: Colors.overSurface
                         }
 
@@ -1825,7 +1825,7 @@ Item {
                         }
 
                         StyledToolTip {
-                            text: "Increase font size (Alt+Up)"
+                            tooltipText: "Increase font size (Alt+Up)"
                             visible: plusMouseArea.containsMouse
                         }
                     }
@@ -1873,7 +1873,7 @@ Item {
                         }
 
                         StyledToolTip {
-                            text: "Bold (Ctrl+B)"
+                            tooltipText: "Bold (Ctrl+B)"
                             visible: boldMouseArea.containsMouse
                         }
                     }
@@ -1913,7 +1913,7 @@ Item {
                         }
 
                         StyledToolTip {
-                            text: "Italic (Ctrl+I)"
+                            tooltipText: "Italic (Ctrl+I)"
                             visible: italicMouseArea.containsMouse
                         }
                     }
@@ -1953,7 +1953,7 @@ Item {
                         }
 
                         StyledToolTip {
-                            text: "Underline (Ctrl+U)"
+                            tooltipText: "Underline (Ctrl+U)"
                             visible: underlineMouseArea.containsMouse
                         }
                     }
@@ -1993,7 +1993,7 @@ Item {
                         }
 
                         StyledToolTip {
-                            text: "Strikethrough"
+                            tooltipText: "Strikethrough (Ctrl+D)"
                             visible: strikeMouseArea.containsMouse
                         }
                     }
@@ -2043,7 +2043,7 @@ Item {
                         }
 
                         StyledToolTip {
-                            text: "Align Left"
+                            tooltipText: "Align Left (Alt+Left)"
                             visible: alignLeftMouseArea.containsMouse
                         }
                     }
@@ -2085,7 +2085,7 @@ Item {
                         }
 
                         StyledToolTip {
-                            text: "Align Center"
+                            tooltipText: "Align Center (Alt+Left/Right)"
                             visible: alignCenterMouseArea.containsMouse
                         }
                     }
@@ -2127,8 +2127,50 @@ Item {
                         }
 
                         StyledToolTip {
-                            text: "Align Right"
+                            tooltipText: "Align Right (Alt+Left/Right)"
                             visible: alignRightMouseArea.containsMouse
+                        }
+                    }
+
+                    // Align Justify
+                    Rectangle {
+                        id: alignJustifyButton
+                        width: 32
+                        height: 32
+                        radius: Styling.radius(-4)
+                        color: noteEditor.cursorSelection.alignment === Qt.AlignJustify ? Colors.primary : "transparent"
+
+                        property bool isHovered: alignJustifyMouseArea.containsMouse
+
+                        StyledRect {
+                            anchors.fill: parent
+                            variant: parent.isHovered && noteEditor.cursorSelection.alignment !== Qt.AlignJustify ? "surface" : "transparent"
+                            radius: Styling.radius(-4)
+                            visible: noteEditor.cursorSelection.alignment !== Qt.AlignJustify
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: Icons.alignJustify
+                            font.family: Icons.font
+                            font.pixelSize: 14
+                            color: noteEditor.cursorSelection.alignment === Qt.AlignJustify ? Colors.overPrimary : Colors.overSurface
+                        }
+
+                        MouseArea {
+                            id: alignJustifyMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                noteEditor.cursorSelection.alignment = Qt.AlignJustify;
+                                noteEditor.forceActiveFocus();
+                            }
+                        }
+
+                        StyledToolTip {
+                            tooltipText: "Justify (Alt+Right)"
+                            visible: alignJustifyMouseArea.containsMouse
                         }
                     }
 
@@ -2225,9 +2267,14 @@ Item {
                                         toggleUnderline();
                                         event.accepted = true;
                                         break;
+                                    case Qt.Key_D:
+                                        toggleStrikeout();
+                                        event.accepted = true;
+                                        break;
                                 }
                             }
                             // Alt+Up/Down to increase/decrease font size
+                            // Alt+Left/Right to cycle through alignments
                             if (event.modifiers & Qt.AltModifier) {
                                 if (event.key === Qt.Key_Up) {
                                     let currentSize = getCurrentFontSize();
@@ -2238,6 +2285,30 @@ Item {
                                     let currentSize = getCurrentFontSize();
                                     let newSize = Math.max(8, currentSize - 2);
                                     setFontSize(newSize);
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Left) {
+                                    // Cycle alignment: Justify -> Right -> Center -> Left
+                                    let current = noteEditor.cursorSelection.alignment;
+                                    if (current === Qt.AlignJustify) {
+                                        noteEditor.cursorSelection.alignment = Qt.AlignRight;
+                                    } else if (current === Qt.AlignRight) {
+                                        noteEditor.cursorSelection.alignment = Qt.AlignHCenter;
+                                    } else if (current === Qt.AlignHCenter) {
+                                        noteEditor.cursorSelection.alignment = Qt.AlignLeft;
+                                    }
+                                    // Already at Left, do nothing
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Right) {
+                                    // Cycle alignment: Left -> Center -> Right -> Justify
+                                    let current = noteEditor.cursorSelection.alignment;
+                                    if (current === Qt.AlignLeft) {
+                                        noteEditor.cursorSelection.alignment = Qt.AlignHCenter;
+                                    } else if (current === Qt.AlignHCenter) {
+                                        noteEditor.cursorSelection.alignment = Qt.AlignRight;
+                                    } else if (current === Qt.AlignRight) {
+                                        noteEditor.cursorSelection.alignment = Qt.AlignJustify;
+                                    }
+                                    // Already at Justify, do nothing
                                     event.accepted = true;
                                 }
                             }
