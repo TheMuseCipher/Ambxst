@@ -42,14 +42,6 @@ Item {
         ? mainRowHeight + notificationContainerHeight
         : mainRowHeight
 
-    Behavior on implicitHeight {
-        enabled: Config.animDuration > 0
-        NumberAnimation {
-            duration: Config.animDuration
-            easing.type: Easing.OutQuart
-        }
-    }
-
     Behavior on implicitWidth {
         enabled: Config.animDuration > 0
         NumberAnimation {
@@ -127,14 +119,6 @@ Item {
             width: parent.width
             height: hasActiveNotifications ? notificationContainerHeight : 0
             visible: hasActiveNotifications
-
-            Behavior on height {
-                enabled: Config.animDuration > 0
-                NumberAnimation {
-                    duration: Config.animDuration
-                    easing.type: Easing.OutQuart
-                }
-            }
 
             NotchNotificationView {
                 id: notificationView
