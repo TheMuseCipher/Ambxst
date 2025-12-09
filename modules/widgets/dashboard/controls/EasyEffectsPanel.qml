@@ -17,74 +17,30 @@ Item {
         anchors.fill: parent
         spacing: 8
 
-        // Header with title and bypass toggle
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 32
-            spacing: 8
-
-            Text {
-                text: "EasyEffects"
-                font.family: Config.theme.font
-                font.pixelSize: Config.theme.fontSize + 2
-                font.weight: Font.Medium
-                color: Colors.overBackground
-            }
-
-            Item { Layout.fillWidth: true }
-
-            // Status indicator
-            Text {
-                visible: EasyEffectsService.bypassed
-                text: "Bypassed"
-                font.family: Config.theme.font
-                font.pixelSize: Config.theme.fontSize - 2
-                color: Colors.error
-            }
-
-            // Bypass toggle switch
-            Switch {
-                id: bypassToggle
-                checked: !EasyEffectsService.bypassed
-                onCheckedChanged: {
-                    if (checked !== !EasyEffectsService.bypassed) {
-                        EasyEffectsService.setBypass(!checked);
-                    }
+        // Titlebar
+        PanelTitlebar {
+            title: "EasyEffects"
+            statusText: EasyEffectsService.bypassed ? "Bypassed" : ""
+            statusColor: Colors.error
+            showToggle: EasyEffectsService.available
+            toggleChecked: !EasyEffectsService.bypassed
+            
+            actions: EasyEffectsService.available ? [
+                {
+                    icon: Icons.externalLink,
+                    tooltip: "Open EasyEffects",
+                    onClicked: function() { EasyEffectsService.openApp(); }
+                },
+                {
+                    icon: Icons.sync,
+                    tooltip: "Refresh",
+                    onClicked: function() { EasyEffectsService.refresh(); }
                 }
-
-                indicator: Rectangle {
-                    implicitWidth: 40
-                    implicitHeight: 20
-                    x: bypassToggle.leftPadding
-                    y: parent.height / 2 - height / 2
-                    radius: height / 2
-                    color: bypassToggle.checked ? Colors.primary : Colors.surfaceBright
-                    border.color: bypassToggle.checked ? Colors.primary : Colors.outline
-
-                    Behavior on color {
-                        enabled: Config.animDuration > 0
-                        ColorAnimation { duration: Config.animDuration / 2 }
-                    }
-
-                    Rectangle {
-                        x: bypassToggle.checked ? parent.width - width - 2 : 2
-                        y: 2
-                        width: parent.height - 4
-                        height: width
-                        radius: width / 2
-                        color: bypassToggle.checked ? Colors.background : Colors.overSurfaceVariant
-
-                        Behavior on x {
-                            enabled: Config.animDuration > 0
-                            NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
-                        }
-                    }
-                }
-                background: null
-
-                StyledToolTip {
-                    visible: bypassToggle.hovered
-                    text: bypassToggle.checked ? "Effects enabled" : "Effects bypassed"
+            ] : []
+            
+            onToggleChanged: checked => {
+                if (checked !== !EasyEffectsService.bypassed) {
+                    EasyEffectsService.setBypass(!checked);
                 }
             }
         }
@@ -282,74 +238,6 @@ Item {
                             color: Colors.overBackground
                         }
                     }
-                }
-            }
-        }
-
-        // Footer with open app button
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 32
-            spacing: 8
-            visible: EasyEffectsService.available
-
-            Item { Layout.fillWidth: true }
-
-            // Open EasyEffects button
-            Button {
-                id: openButton
-                flat: true
-                implicitWidth: 32
-                implicitHeight: 32
-
-                background: StyledRect {
-                    variant: openButton.hovered ? "focus" : "common"
-                    radius: Styling.radius(4)
-                }
-
-                contentItem: Text {
-                    text: Icons.externalLink
-                    font.family: Icons.font
-                    font.pixelSize: 16
-                    color: Colors.overBackground
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                onClicked: EasyEffectsService.openApp()
-
-                StyledToolTip {
-                    visible: openButton.hovered
-                    text: "Open EasyEffects"
-                }
-            }
-
-            // Refresh button
-            Button {
-                id: refreshButton
-                flat: true
-                implicitWidth: 32
-                implicitHeight: 32
-
-                background: StyledRect {
-                    variant: refreshButton.hovered ? "focus" : "common"
-                    radius: Styling.radius(4)
-                }
-
-                contentItem: Text {
-                    text: Icons.sync
-                    font.family: Icons.font
-                    font.pixelSize: 16
-                    color: Colors.overBackground
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                onClicked: EasyEffectsService.refresh()
-
-                StyledToolTip {
-                    visible: refreshButton.hovered
-                    text: "Refresh"
                 }
             }
         }

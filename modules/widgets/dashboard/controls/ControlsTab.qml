@@ -16,95 +16,123 @@ Rectangle {
 
     property int currentSection: 0  // 0: Network, 1: Bluetooth, 2: Mixer, 3: Effects
 
-    ColumnLayout {
+    RowLayout {
         anchors.fill: parent
         spacing: 8
 
-        // Tab bar at the top, centered
-        RowLayout {
-            id: tabBar
-            Layout.alignment: Qt.AlignHCenter
+        // Sidebar container with background
+        StyledRect {
+            id: sidebarContainer
+            variant: "common"
+            Layout.preferredWidth: 200
+            Layout.maximumWidth: 200
+            Layout.fillHeight: true
             Layout.fillWidth: false
-            spacing: 4
 
-            Repeater {
-                model: [
-                    { icon: Icons.wifiHigh, label: "Network", section: 0 },
-                    { icon: Icons.bluetooth, label: "Bluetooth", section: 1 },
-                    { icon: Icons.faders, label: "Mixer", section: 2 },
-                    { icon: Icons.waveform, label: "Effects", section: 3 }
-                ]
+            Flickable {
+                id: sidebarFlickable
+                anchors.fill: parent
+                anchors.margins: 4
+                contentWidth: width
+                contentHeight: sidebar.height
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
 
-                delegate: Button {
-                    id: tabButton
-                    required property var modelData
-                    required property int index
+                Column {
+                    id: sidebar
+                    width: parent.width
+                    spacing: 4
 
-                    implicitWidth: 90
-                    implicitHeight: 32
-                    flat: true
-                    hoverEnabled: true
+                    Repeater {
+                        model: [
+                            { icon: Icons.wifiHigh, label: "Network", section: 0 },
+                            { icon: Icons.bluetooth, label: "Bluetooth", section: 1 },
+                            { icon: Icons.faders, label: "Mixer", section: 2 },
+                            { icon: Icons.waveform, label: "Effects", section: 3 }
+                        ]
 
-                    background: StyledRect {
-                        variant: root.currentSection === tabButton.modelData.section ? "primary" : (tabButton.hovered ? "focus" : "common")
-                        radius: Styling.radius(4)
-                    }
+                        delegate: Button {
+                            id: sidebarButton
+                            required property var modelData
+                            required property int index
 
-                    contentItem: RowLayout {
-                        id: tabContent
-                        spacing: 6
-                        anchors.centerIn: parent
+                            width: sidebar.width
+                            height: 40
+                            flat: true
+                            hoverEnabled: true
 
-                        Text {
-                            text: tabButton.modelData.icon
-                            font.family: Icons.font
-                            font.pixelSize: 14
-                            color: root.currentSection === tabButton.modelData.section 
-                                ? Config.resolveColor(Config.theme.srPrimary.itemColor) 
-                                : Colors.overBackground
-                            Layout.leftMargin: 8
+                            property bool isActive: root.currentSection === sidebarButton.modelData.section
 
-                            Behavior on color {
-                                enabled: Config.animDuration > 0
-                                ColorAnimation {
-                                    duration: Config.animDuration
-                                    easing.type: Easing.OutCubic
+                            background: StyledRect {
+                                visible: sidebarButton.isActive || sidebarButton.hovered
+                                variant: "focus"
+                                radius: Styling.radius(-4)
+                            }
+
+                            contentItem: Row {
+                                spacing: 8
+
+                                // Icon on the left
+                                Text {
+                                    id: iconText
+                                    text: sidebarButton.modelData.icon
+                                    font.family: Icons.font
+                                    font.pixelSize: 20
+                                    color: sidebarButton.isActive 
+                                        ? Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                                        : Config.resolveColor(Config.theme.srCommon.itemColor)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    leftPadding: 10
+
+                                    Behavior on color {
+                                        enabled: Config.animDuration > 0
+                                        ColorAnimation {
+                                            duration: Config.animDuration
+                                            easing.type: Easing.OutCubic
+                                        }
+                                    }
+                                }
+
+                                // Text
+                                Text {
+                                    text: sidebarButton.modelData.label
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    font.weight: sidebarButton.isActive ? Font.Bold : Font.Normal
+                                    color: sidebarButton.isActive 
+                                        ? Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                                        : Config.resolveColor(Config.theme.srCommon.itemColor)
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    Behavior on color {
+                                        enabled: Config.animDuration > 0
+                                        ColorAnimation {
+                                            duration: Config.animDuration
+                                            easing.type: Easing.OutCubic
+                                        }
+                                    }
                                 }
                             }
-                        }
 
-                        Text {
-                            text: tabButton.modelData.label
-                            font.family: Config.theme.font
-                            font.pixelSize: Config.theme.fontSize - 2
-                            font.weight: Font.Medium
-                            color: root.currentSection === tabButton.modelData.section 
-                                ? Config.resolveColor(Config.theme.srPrimary.itemColor) 
-                                : Colors.overBackground
-                            Layout.rightMargin: 8
-
-                            Behavior on color {
-                                enabled: Config.animDuration > 0
-                                ColorAnimation {
-                                    duration: Config.animDuration
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
+                            onClicked: root.currentSection = sidebarButton.modelData.section
                         }
                     }
-
-                    onClicked: root.currentSection = tabButton.modelData.section
                 }
-            }
 
-            // Scroll/wheel support on tab bar
-            WheelHandler {
-                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-                onWheel: event => {
-                    if (event.angleDelta.y > 0 && root.currentSection > 0) {
-                        root.currentSection--;
-                    } else if (event.angleDelta.y < 0 && root.currentSection < 3) {
-                        root.currentSection++;
+                // Scroll wheel navigation between sections
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    onWheel: event => {
+                        // If content is scrollable, let Flickable handle it
+                        if (sidebarFlickable.contentHeight > sidebarFlickable.height) {
+                            return;
+                        }
+                        // Otherwise, navigate sections
+                        if (event.angleDelta.y > 0 && root.currentSection > 0) {
+                            root.currentSection--;
+                        } else if (event.angleDelta.y < 0 && root.currentSection < 3) {
+                            root.currentSection++;
+                        }
                     }
                 }
             }
@@ -136,7 +164,10 @@ Rectangle {
             // WiFi Panel
             WifiPanel {
                 id: wifiPanel
-                anchors.fill: parent
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: Math.min(parent.width, 480)
                 visible: opacity > 0
                 opacity: root.currentSection === 0 ? 1 : 0
 
@@ -149,9 +180,9 @@ Rectangle {
                 }
 
                 transform: Translate {
-                    x: root.currentSection === 0 ? 0 : (root.currentSection > 0 ? -20 : 20)
+                    y: root.currentSection === 0 ? 0 : (root.currentSection > 0 ? -20 : 20)
 
-                    Behavior on x {
+                    Behavior on y {
                         enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
@@ -164,7 +195,10 @@ Rectangle {
             // Bluetooth Panel
             BluetoothPanel {
                 id: bluetoothPanel
-                anchors.fill: parent
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: Math.min(parent.width, 480)
                 visible: opacity > 0
                 opacity: root.currentSection === 1 ? 1 : 0
 
@@ -177,9 +211,9 @@ Rectangle {
                 }
 
                 transform: Translate {
-                    x: root.currentSection === 1 ? 0 : (root.currentSection > 1 ? -20 : 20)
+                    y: root.currentSection === 1 ? 0 : (root.currentSection > 1 ? -20 : 20)
 
-                    Behavior on x {
+                    Behavior on y {
                         enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
@@ -192,7 +226,10 @@ Rectangle {
             // Audio Mixer Panel
             AudioMixerPanel {
                 id: audioPanel
-                anchors.fill: parent
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: Math.min(parent.width, 480)
                 visible: opacity > 0
                 opacity: root.currentSection === 2 ? 1 : 0
 
@@ -205,9 +242,9 @@ Rectangle {
                 }
 
                 transform: Translate {
-                    x: root.currentSection === 2 ? 0 : (root.currentSection > 2 ? -20 : 20)
+                    y: root.currentSection === 2 ? 0 : (root.currentSection > 2 ? -20 : 20)
 
-                    Behavior on x {
+                    Behavior on y {
                         enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
@@ -220,7 +257,10 @@ Rectangle {
             // EasyEffects Panel
             EasyEffectsPanel {
                 id: effectsPanel
-                anchors.fill: parent
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: Math.min(parent.width, 480)
                 visible: opacity > 0
                 opacity: root.currentSection === 3 ? 1 : 0
 
@@ -233,9 +273,9 @@ Rectangle {
                 }
 
                 transform: Translate {
-                    x: root.currentSection === 3 ? 0 : (root.currentSection > 3 ? -20 : 20)
+                    y: root.currentSection === 3 ? 0 : (root.currentSection > 3 ? -20 : 20)
 
-                    Behavior on x {
+                    Behavior on y {
                         enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration

@@ -16,88 +16,31 @@ Item {
 
     property bool showOutput: true  // true = output, false = input
 
+    property Process launchPavuProcess: Process {
+        command: ["pavucontrol"]
+        running: false
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 8
 
-        // Header with title and output/input toggle
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 32
-            spacing: 8
-
-            Text {
-                text: root.showOutput ? "Sound Output" : "Sound Input"
-                font.family: Config.theme.font
-                font.pixelSize: Config.theme.fontSize + 2
-                font.weight: Font.Medium
-                color: Colors.overBackground
-            }
-
-            Item { Layout.fillWidth: true }
-
-            // Toggle between output and input
-            Button {
-                id: toggleButton
-                flat: true
-                implicitWidth: 32
-                implicitHeight: 32
-
-                background: StyledRect {
-                    variant: toggleButton.hovered ? "focus" : "common"
-                    radius: Styling.radius(4)
+        // Titlebar
+        PanelTitlebar {
+            title: root.showOutput ? "Sound Output" : "Sound Input"
+            
+            actions: [
+                {
+                    icon: root.showOutput ? Icons.mic : Icons.speakerHigh,
+                    tooltip: root.showOutput ? "Switch to Input" : "Switch to Output",
+                    onClicked: function() { root.showOutput = !root.showOutput; }
+                },
+                {
+                    icon: Icons.externalLink,
+                    tooltip: "Open Volume Control",
+                    onClicked: function() { root.launchPavuProcess.running = true; }
                 }
-
-                contentItem: Text {
-                    text: root.showOutput ? Icons.mic : Icons.speakerHigh
-                    font.family: Icons.font
-                    font.pixelSize: 16
-                    color: Colors.overBackground
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                onClicked: root.showOutput = !root.showOutput
-
-                StyledToolTip {
-                    visible: toggleButton.hovered
-                    text: root.showOutput ? "Switch to Input" : "Switch to Output"
-                }
-            }
-
-            // Open pavucontrol button
-            Button {
-                id: settingsButton
-                flat: true
-                implicitWidth: 32
-                implicitHeight: 32
-
-                background: StyledRect {
-                    variant: settingsButton.hovered ? "focus" : "common"
-                    radius: Styling.radius(4)
-                }
-
-                contentItem: Text {
-                    text: Icons.externalLink
-                    font.family: Icons.font
-                    font.pixelSize: 16
-                    color: Colors.overBackground
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                property Process launchProcess: Process {
-                    command: ["pavucontrol"]
-                    running: false
-                }
-
-                onClicked: launchProcess.running = true
-
-                StyledToolTip {
-                    visible: settingsButton.hovered
-                    text: "Open Volume Control"
-                }
-            }
+            ]
         }
 
         // Scrollable content
@@ -138,6 +81,7 @@ Item {
                 // Separator
                 Separator {
                     Layout.fillWidth: true
+                    Layout.preferredHeight: 2
                     Layout.topMargin: 8
                     Layout.bottomMargin: 8
                 }

@@ -13,6 +13,11 @@ import qs.config
 Item {
     id: root
 
+    property Process launchBluemanProcess: Process {
+        command: ["blueman-manager"]
+        running: false
+    }
+
     Component.onCompleted: {
         if (BluetoothService.enabled) {
             BluetoothService.startDiscovery();
@@ -27,79 +32,32 @@ Item {
         anchors.fill: parent
         spacing: 8
 
-        // Header with title and toggle
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 32
-            spacing: 8
-
-            Text {
-                text: "Bluetooth"
-                font.family: Config.theme.font
-                font.pixelSize: Config.theme.fontSize + 2
-                font.weight: Font.Medium
-                color: Colors.overBackground
-            }
-
-            Item { Layout.fillWidth: true }
-
-            // Scanning indicator
-            Text {
-                visible: BluetoothService.discovering
-                text: Icons.sync
-                font.family: Icons.font
-                font.pixelSize: 16
-                color: Colors.primary
-                
-                RotationAnimation on rotation {
-                    running: BluetoothService.discovering
-                    from: 0
-                    to: 360
-                    duration: 1000
-                    loops: Animation.Infinite
+        // Titlebar
+        PanelTitlebar {
+            title: "Bluetooth"
+            showSpinner: BluetoothService.discovering
+            showToggle: true
+            toggleChecked: BluetoothService.enabled
+            
+            actions: [
+                {
+                    icon: Icons.externalLink,
+                    tooltip: "Open Blueman",
+                    onClicked: function() { root.launchBluemanProcess.running = true; }
+                },
+                {
+                    icon: Icons.sync,
+                    tooltip: "Scan for devices",
+                    enabled: !BluetoothService.discovering && BluetoothService.enabled,
+                    onClicked: function() { BluetoothService.startDiscovery(); }
                 }
-            }
-
-            // Bluetooth toggle switch
-            Switch {
-                id: btToggle
-                checked: BluetoothService.enabled
-                onCheckedChanged: {
-                    BluetoothService.setEnabled(checked);
-                    if (checked) {
-                        BluetoothService.startDiscovery();
-                    }
+            ]
+            
+            onToggleChanged: checked => {
+                BluetoothService.setEnabled(checked);
+                if (checked) {
+                    BluetoothService.startDiscovery();
                 }
-
-                indicator: Rectangle {
-                    implicitWidth: 40
-                    implicitHeight: 20
-                    x: btToggle.leftPadding
-                    y: parent.height / 2 - height / 2
-                    radius: height / 2
-                    color: btToggle.checked ? Colors.primary : Colors.surfaceBright
-                    border.color: btToggle.checked ? Colors.primary : Colors.outline
-
-                    Behavior on color {
-                        enabled: Config.animDuration > 0
-                        ColorAnimation { duration: Config.animDuration / 2 }
-                    }
-
-                    Rectangle {
-                        x: btToggle.checked ? parent.width - width - 2 : 2
-                        y: 2
-                        width: parent.height - 4
-                        height: width
-                        radius: width / 2
-                        color: btToggle.checked ? Colors.background : Colors.overSurfaceVariant
-
-                        Behavior on x {
-                            enabled: Config.animDuration > 0
-                            NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
-                        }
-                    }
-                }
-                background: null
             }
         }
 
@@ -127,78 +85,6 @@ Item {
                 font.family: Config.theme.font
                 font.pixelSize: Config.theme.fontSize
                 color: Colors.overSurfaceVariant
-            }
-        }
-
-        // Footer with scan button and external settings
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 32
-            spacing: 8
-
-            // Open Blueman button
-            Button {
-                id: settingsButton
-                flat: true
-                implicitWidth: 32
-                implicitHeight: 32
-
-                background: StyledRect {
-                    variant: settingsButton.hovered ? "focus" : "common"
-                    radius: Styling.radius(4)
-                }
-
-                contentItem: Text {
-                    text: Icons.externalLink
-                    font.family: Icons.font
-                    font.pixelSize: 16
-                    color: Colors.overBackground
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                property Process launchProcess: Process {
-                    command: ["blueman-manager"]
-                    running: false
-                }
-
-                onClicked: launchProcess.running = true
-
-                StyledToolTip {
-                    visible: settingsButton.hovered
-                    text: "Open Blueman"
-                }
-            }
-
-            Item { Layout.fillWidth: true }
-
-            Button {
-                id: scanButton
-                flat: true
-                enabled: !BluetoothService.discovering && BluetoothService.enabled
-                implicitWidth: 32
-                implicitHeight: 32
-
-                background: StyledRect {
-                    variant: scanButton.hovered ? "focus" : "common"
-                    radius: Styling.radius(4)
-                }
-
-                contentItem: Text {
-                    text: Icons.sync
-                    font.family: Icons.font
-                    font.pixelSize: 16
-                    color: scanButton.enabled ? Colors.overBackground : Colors.outline
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                onClicked: BluetoothService.startDiscovery()
-
-                StyledToolTip {
-                    visible: scanButton.hovered
-                    text: "Scan for devices"
-                }
             }
         }
     }

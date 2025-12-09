@@ -17,6 +17,7 @@ Item {
     property bool isMainDevice: false
 
     implicitHeight: 48
+    implicitWidth: parent?.width ?? 300
 
     PwObjectTracker {
         objects: [root.node]
@@ -27,7 +28,10 @@ Item {
     property real lastSetVolume: volume
 
     RowLayout {
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        height: parent.height
         spacing: 8
 
         // Mute button with icon
@@ -36,6 +40,9 @@ Item {
             flat: true
             implicitWidth: 36
             implicitHeight: 36
+            Layout.preferredWidth: 36
+            Layout.maximumWidth: 36
+            Layout.fillWidth: false
 
             background: StyledRect {
                 variant: muteButton.hovered ? "focus" : "common"
@@ -92,14 +99,14 @@ Item {
         StyledSlider {
             id: volumeSlider
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: 24
             value: root.volume
+            scroll: false
             progressColor: {
                 if (root.isMuted) return Colors.outline;
                 if (Audio.protectionTriggered && root.isMainDevice) return Colors.warning;
                 return Colors.primary;
             }
-            resizeParent: false
 
             onValueChanged: {
                 if (root.node?.audio && Math.abs(value - root.volume) > 0.001) {
@@ -117,6 +124,8 @@ Item {
         // Volume percentage with protection indicator
         RowLayout {
             Layout.preferredWidth: 50
+            Layout.maximumWidth: 50
+            Layout.fillWidth: false
             spacing: 4
 
             // Protection indicator

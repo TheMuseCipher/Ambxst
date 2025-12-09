@@ -17,6 +17,7 @@ Item {
     property bool isSelected: false
 
     implicitHeight: 40
+    implicitWidth: parent?.width ?? 300
 
     PwObjectTracker {
         objects: [root.node]
