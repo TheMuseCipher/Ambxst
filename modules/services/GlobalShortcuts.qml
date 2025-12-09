@@ -144,15 +144,15 @@ Item {
         name: "dashboard-kanban"
         description: "Open dashboard kanban tab"
 
-        onPressed: toggleDashboardTab(1)
+        onPressed: toggleDashboardTab(2)
     }
 
     GlobalShortcut {
         appid: root.appId
         name: "dashboard-wallpapers"
-        description: "Open dashboard wallpapers (via prefix)"
+        description: "Open dashboard wallpapers tab"
 
-        onPressed: toggleDashboardWithPrefix(Config.prefix.wallpapers + " ")
+        onPressed: toggleDashboardTab(1)
     }
 
     GlobalShortcut {
@@ -168,7 +168,15 @@ Item {
         name: "dashboard-assistant"
         description: "Open dashboard assistant tab"
 
-        onPressed: toggleDashboardTab(2)
+        onPressed: toggleDashboardTab(3)
+    }
+
+    GlobalShortcut {
+        appid: root.appId
+        name: "dashboard-controls"
+        description: "Open dashboard controls tab"
+
+        onPressed: toggleDashboardTab(4)
     }
 
     // Media player shortcuts

@@ -12,14 +12,10 @@ import qs.config
 FocusScope {
     id: wallpapersTabRoot
 
-    property string prefixIcon: ""
-    signal backspaceOnEmpty
-
     // Propiedades personalizadas para la funcionalidad del componente.
     property string searchText: ""
     property int selectedIndex: GlobalStates.wallpaperSelectedIndex
 
-    property int leftPanelWidth: 0
     property var activeFilters: []  // Lista de tipos de archivo seleccionados para filtrar
 
     // Configuración interna del grid
@@ -56,6 +52,11 @@ FocusScope {
     function focusSearch() {
         currentFocusIndex = -1;
         wallpaperSearchInput.focusInput();
+    }
+
+    // Alias para compatibilidad con Dashboard
+    function focusSearchInput() {
+        focusSearch();
     }
 
     // Función para enfocar los filtros
@@ -194,7 +195,7 @@ FocusScope {
 
             // Columna para el buscador y las opciones.
             ColumnLayout {
-                Layout.preferredWidth: root.leftPanelWidth
+                Layout.preferredWidth: 200
                 Layout.fillWidth: false
                 Layout.fillHeight: true
                 spacing: 8
@@ -209,7 +210,6 @@ FocusScope {
                     clearOnEscape: false
                     handleTabNavigation: true
                     radius: Styling.radius(4)
-                    prefixIcon: wallpapersTabRoot.prefixIcon
 
                     // Manejo de eventos de búsqueda y teclado.
                     onSearchTextChanged: text => {
@@ -223,10 +223,6 @@ FocusScope {
                             selectedIndex = -1;
                             wallpaperGrid.currentIndex = -1;
                         }
-                    }
-
-                    onBackspaceOnEmpty: {
-                        wallpapersTabRoot.backspaceOnEmpty();
                     }
 
                     onEscapePressed: {

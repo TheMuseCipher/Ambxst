@@ -9,6 +9,7 @@ import qs.modules.services
 import qs.modules.notch
 import qs.modules.widgets.dashboard.widgets
 import qs.modules.widgets.dashboard.controls
+import qs.modules.widgets.dashboard.wallpapers
 import qs.modules.widgets.dashboard.assistant
 import qs.modules.widgets.dashboard.tmux
 import qs.modules.widgets.dashboard.clipboard
@@ -25,8 +26,8 @@ NotchAnimationBehavior {
         property int currentTab: GlobalStates.dashboardCurrentTab
     }
 
-    readonly property var tabModel: [Icons.widgets, Icons.faders, Icons.heartbeat, Icons.assistant]
-    readonly property int tabCount: tabModel.length
+    readonly property var tabModel: [Icons.widgets, Icons.wallpapers, Icons.heartbeat, Icons.assistant]
+    readonly property int tabCount: tabModel.length + 1  // +1 for controls tab at bottom
     readonly property int tabSpacing: 8
 
     readonly property int tabWidth: 48
@@ -134,24 +135,43 @@ NotchAnimationBehavior {
                 property real idx1: root.state.currentTab
                 property real idx2: root.state.currentTab
 
-                x: 0
-                y: Math.min(idx1, idx2) * (width + root.tabSpacing)
-                height: Math.abs(idx1 - idx2) * (width + root.tabSpacing) + width
+                // Calcular posición Y para un índice dado
+                function getYForIndex(idx) {
+                    if (idx <= 3) {
+                        return idx * (width + root.tabSpacing);
+                    } else {
+                        // Tab 4 (controls) está en la parte inferior
+                        return controlsButtonContainer.y;
+                    }
+                }
 
-                Behavior on idx1 {
+                property real targetY1: getYForIndex(idx1)
+                property real targetY2: getYForIndex(idx2)
+
+                property real animatedY1: targetY1
+                property real animatedY2: targetY2
+
+                x: 0
+                y: Math.min(animatedY1, animatedY2)
+                height: Math.abs(animatedY2 - animatedY1) + width
+
+                Behavior on animatedY1 {
                     enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 3
                         easing.type: Easing.OutSine
                     }
                 }
-                Behavior on idx2 {
+                Behavior on animatedY2 {
                     enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutSine
                     }
                 }
+
+                onTargetY1Changed: animatedY1 = targetY1
+                onTargetY2Changed: animatedY2 = targetY2
             }
 
             Column {
@@ -205,19 +225,30 @@ NotchAnimationBehavior {
                 }
             }
 
-            // Settings button
+            // Controls button (separate at bottom)
+            StyledRect {
+                id: controlsButtonContainer
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: width
+                radius: Styling.radius(4)
+                variant: controlsButton.hovered ? "focus" : "common"
+                z: -1
+            }
+
             Button {
-                id: settingsButton
+                id: controlsButton
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
                 height: width
                 flat: true
                 hoverEnabled: true
+                z: 1
 
-                background: StyledRect {
-                    radius: Styling.radius(4)
-                    variant: settingsButton.hovered ? "focus" : "common"
+                background: Rectangle {
+                    color: "transparent"
                 }
 
                 contentItem: Text {
@@ -225,15 +256,20 @@ NotchAnimationBehavior {
                     font.family: Icons.font
                     font.pixelSize: 20
                     font.weight: Font.Medium
-                    color: Colors.overBackground
+                    color: root.state.currentTab === 4 ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
+
+                    Behavior on color {
+                        enabled: Config.animDuration > 0
+                        ColorAnimation {
+                            duration: Config.animDuration
+                            easing.type: Easing.OutCubic
+                        }
+                    }
                 }
 
-                onClicked: {
-                    Visibilities.setActiveModule("");
-                    GlobalStates.openSettings();
-                }
+                onClicked: stack.navigateToTab(4)
             }
         }
 
@@ -259,7 +295,7 @@ NotchAnimationBehavior {
                 anchors.fill: parent
 
                 // Array de componentes para cargar dinámicamente
-                property var components: [unifiedLauncherComponent, quickSettingsComponent, metricsComponent, assistantComponent]
+                property var components: [unifiedLauncherComponent, wallpapersComponent, metricsComponent, assistantComponent, quickSettingsComponent]
 
                 // Cargar directamente el componente correcto según GlobalStates
                 initialItem: components[GlobalStates.dashboardCurrentTab]
@@ -492,5 +528,10 @@ NotchAnimationBehavior {
     Component {
         id: metricsComponent
         MetricsTab {}
+    }
+
+    Component {
+        id: wallpapersComponent
+        WallpapersTab {}
     }
 }
