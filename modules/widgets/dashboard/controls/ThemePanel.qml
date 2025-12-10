@@ -18,24 +18,78 @@ Item {
     property string selectedVariant: "bg"
 
     readonly property var allVariants: [
-        { id: "bg", label: "Background" },
-        { id: "internalbg", label: "Internal BG" },
-        { id: "barbg", label: "Bar BG" },
-        { id: "pane", label: "Pane" },
-        { id: "common", label: "Common" },
-        { id: "focus", label: "Focus" },
-        { id: "primary", label: "Primary" },
-        { id: "primaryfocus", label: "Primary Focus" },
-        { id: "overprimary", label: "Over Primary" },
-        { id: "secondary", label: "Secondary" },
-        { id: "secondaryfocus", label: "Secondary Focus" },
-        { id: "oversecondary", label: "Over Secondary" },
-        { id: "tertiary", label: "Tertiary" },
-        { id: "tertiaryfocus", label: "Tertiary Focus" },
-        { id: "overtertiary", label: "Over Tertiary" },
-        { id: "error", label: "Error" },
-        { id: "errorfocus", label: "Error Focus" },
-        { id: "overerror", label: "Over Error" }
+        {
+            id: "bg",
+            label: "Background"
+        },
+        {
+            id: "internalbg",
+            label: "Internal BG"
+        },
+        {
+            id: "barbg",
+            label: "Bar BG"
+        },
+        {
+            id: "pane",
+            label: "Pane"
+        },
+        {
+            id: "common",
+            label: "Common"
+        },
+        {
+            id: "focus",
+            label: "Focus"
+        },
+        {
+            id: "primary",
+            label: "Primary"
+        },
+        {
+            id: "primaryfocus",
+            label: "Primary Focus"
+        },
+        {
+            id: "overprimary",
+            label: "Over Primary"
+        },
+        {
+            id: "secondary",
+            label: "Secondary"
+        },
+        {
+            id: "secondaryfocus",
+            label: "Secondary Focus"
+        },
+        {
+            id: "oversecondary",
+            label: "Over Secondary"
+        },
+        {
+            id: "tertiary",
+            label: "Tertiary"
+        },
+        {
+            id: "tertiaryfocus",
+            label: "Tertiary Focus"
+        },
+        {
+            id: "overtertiary",
+            label: "Over Tertiary"
+        },
+        {
+            id: "error",
+            label: "Error"
+        },
+        {
+            id: "errorfocus",
+            label: "Error Focus"
+        },
+        {
+            id: "overerror",
+            label: "Over Error"
+        }
     ]
 
     function getVariantLabel(variantId: string): string {
@@ -76,16 +130,20 @@ Item {
 
                     actions: [
                         {
-                            icon: Icons.sync,
+                            icon: Icons.arrowCounterClockwise,
                             tooltip: "Discard changes",
                             enabled: GlobalStates.themeHasChanges,
-                            onClicked: function() { GlobalStates.discardThemeChanges(); }
+                            onClicked: function () {
+                                GlobalStates.discardThemeChanges();
+                            }
                         },
                         {
                             icon: Icons.disk,
                             tooltip: "Apply changes",
                             enabled: GlobalStates.themeHasChanges,
-                            onClicked: function() { GlobalStates.applyThemeChanges(); }
+                            onClicked: function () {
+                                GlobalStates.applyThemeChanges();
+                            }
                         }
                     ]
                 }

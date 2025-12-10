@@ -188,6 +188,7 @@ QtObject {
     readonly property string markdown: ""
     readonly property string faders: ""
     readonly property string paintBrush: ""
+    readonly property string arrowCounterClockwise: ""
 
     // Theme editor icons
     readonly property string arrowRightLine: ""  // Arrow right line icon
