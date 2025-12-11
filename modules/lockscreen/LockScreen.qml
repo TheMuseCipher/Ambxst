@@ -421,20 +421,13 @@ WlSessionLockSurface {
                 }
 
                 // Password field
-                Rectangle {
+                StyledRect {
+                    id: passwordFieldBg
                     width: parent.width - avatarContainer.width - parent.spacing
                     height: 48
                     anchors.verticalCenter: parent.verticalCenter
-                    color: passwordInputBox.showError ? Colors.error : Colors.surface
+                    variant: passwordInputBox.showError ? "error" : "common"
                     radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
-
-                    Behavior on color {
-                        enabled: Config.animDuration > 0
-                        ColorAnimation {
-                            duration: Config.animDuration
-                            easing.type: Easing.OutQuad
-                        }
-                    }
 
                     RowLayout {
                         anchors.fill: parent
@@ -448,7 +441,7 @@ WlSessionLockSurface {
                             text: authenticating ? Icons.spinnerGap : Icons.user
                             font.family: Icons.font
                             font.pixelSize: 24
-                            color: passwordInputBox.showError ? Colors.overError : Colors.overBackground
+                            color: passwordFieldBg.itemColor
                             Layout.preferredWidth: 24
                             Layout.preferredHeight: 24
                             Layout.alignment: Qt.AlignVCenter
@@ -486,10 +479,10 @@ WlSessionLockSurface {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
                             placeholderText: usernameCollector.text.trim()
-                            placeholderTextColor: passwordInputBox.showError ? Qt.rgba(Colors.overError.r, Colors.overError.g, Colors.overError.b, 0.5) : Colors.outline
+                            placeholderTextColor: Qt.rgba(passwordFieldBg.itemColor.r, passwordFieldBg.itemColor.g, passwordFieldBg.itemColor.b, 0.5)
                             font.family: Config.theme.font
                             font.pixelSize: Styling.fontSize(0)
-                            color: passwordInputBox.showError ? Colors.overError : Colors.overBackground
+                            color: passwordFieldBg.itemColor
                             background: null
                             echoMode: TextInput.Password
                             verticalAlignment: TextInput.AlignVCenter

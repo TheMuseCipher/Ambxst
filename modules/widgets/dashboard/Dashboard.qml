@@ -235,6 +235,16 @@ NotchAnimationBehavior {
                 radius: Styling.radius(4)
                 variant: controlsButton.hovered ? "focus" : "common"
                 z: -1
+
+                opacity: root.state.currentTab === 4 ? 0 : 1
+
+                Behavior on opacity {
+                    enabled: Config.animDuration > 0
+                    NumberAnimation {
+                        duration: Config.animDuration
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
 
             Button {
