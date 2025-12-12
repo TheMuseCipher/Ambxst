@@ -215,33 +215,25 @@ brightness)
     exit 1
   fi
   
-  # Handle relative mode - calculate absolute value from current
+  # Handle relative mode - use IPC adjust function directly
   if [ "$RELATIVE_MODE" = true ]; then
+    # Convert delta to 0-1 range
+    NORMALIZED_DELTA=$(awk "BEGIN {printf \"%.2f\", $RELATIVE_DELTA / 100}")
+    
     if [ -z "$MONITOR" ]; then
-      # Get first monitor's brightness as reference for all
-      CURRENT_LINE=$(bash "${SCRIPT_DIR}/scripts/brightness_list.sh" 2>/dev/null | head -1)
-      if [ -z "$CURRENT_LINE" ]; then
-        echo "Error: Could not get current brightness"
+      qs ipc --pid "$PID" call brightness adjust "$NORMALIZED_DELTA" "" 2>/dev/null || {
+        echo "Error: Could not adjust brightness"
         exit 1
-      fi
-      CURRENT=$(echo "$CURRENT_LINE" | cut -d: -f2)
+      }
+      echo "Adjusted brightness by ${RELATIVE_DELTA}% for all monitors"
     else
-      # Get specific monitor's brightness
-      CURRENT_LINE=$(bash "${SCRIPT_DIR}/scripts/brightness_list.sh" 2>/dev/null | grep "^${MONITOR}:")
-      if [ -z "$CURRENT_LINE" ]; then
-        echo "Error: Monitor $MONITOR not found"
+      qs ipc --pid "$PID" call brightness adjust "$NORMALIZED_DELTA" "$MONITOR" 2>/dev/null || {
+        echo "Error: Could not adjust brightness for $MONITOR"
         exit 1
-      fi
-      CURRENT=$(echo "$CURRENT_LINE" | cut -d: -f2)
+      }
+      echo "Adjusted brightness by ${RELATIVE_DELTA}% for $MONITOR"
     fi
-    # Calculate new value
-    VALUE=$((CURRENT + RELATIVE_DELTA))
-    # Clamp to 0-100
-    if [ "$VALUE" -lt 0 ]; then
-      VALUE=0
-    elif [ "$VALUE" -gt 100 ]; then
-      VALUE=100
-    fi
+    exit 0
   fi
   
   # Validate brightness range

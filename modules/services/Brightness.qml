@@ -260,6 +260,26 @@ Singleton {
                 }
             }
         }
+
+        function adjust(delta: real, monitorName: string) {
+            if (!monitorName || monitorName === "") {
+                // Adjust all monitors
+                for (let i = 0; i < root.monitors.length; ++i) {
+                    const mon = root.monitors[i];
+                    if (mon && mon.ready) {
+                        mon.setBrightness(mon.brightness + delta);
+                    }
+                }
+            } else {
+                // Adjust specific monitor
+                const monitor = root.monitors.find(m => m.screen.name === monitorName);
+                if (monitor && monitor.ready) {
+                    monitor.setBrightness(monitor.brightness + delta);
+                } else {
+                    console.warn("Monitor not found or not ready:", monitorName);
+                }
+            }
+        }
     }
 
     GlobalShortcut {
