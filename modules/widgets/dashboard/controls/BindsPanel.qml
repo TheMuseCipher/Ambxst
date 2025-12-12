@@ -21,6 +21,97 @@ Item {
     property bool editMode: false
     property int editingIndex: -1
     property var editingBind: null
+    property bool isEditingAmbxst: false
+
+    // Edit form state
+    property var editModifiers: []
+    property string editKey: ""
+    property string editDispatcher: ""
+    property string editArgument: ""
+    property string editFlags: ""
+
+    readonly property var availableModifiers: ["SUPER", "SHIFT", "CTRL", "ALT"]
+
+    function openEditDialog(bind, index, isAmbxst) {
+        root.editingIndex = index;
+        root.editingBind = bind;
+        root.isEditingAmbxst = isAmbxst;
+
+        // Initialize edit form state
+        const bindData = isAmbxst ? bind.bind : bind;
+        root.editModifiers = bindData.modifiers ? bindData.modifiers.slice() : [];
+        root.editKey = bindData.key || "";
+        root.editDispatcher = bindData.dispatcher || "";
+        root.editArgument = bindData.argument || "";
+        root.editFlags = bindData.flags || "";
+
+        root.editMode = true;
+    }
+
+    function closeEditDialog() {
+        root.editMode = false;
+    }
+
+    function hasModifier(mod) {
+        return root.editModifiers.indexOf(mod) !== -1;
+    }
+
+    function toggleModifier(mod) {
+        let newMods = [];
+        let found = false;
+        for (let i = 0; i < root.editModifiers.length; i++) {
+            if (root.editModifiers[i] === mod) {
+                found = true;
+            } else {
+                newMods.push(root.editModifiers[i]);
+            }
+        }
+        if (!found) {
+            newMods.push(mod);
+        }
+        root.editModifiers = newMods;
+    }
+
+    function saveEdit() {
+        if (root.isEditingAmbxst) {
+            // Save ambxst bind
+            const path = root.editingBind.path.split(".");
+            // path = ["ambxst", "dashboard"|"system", "bindName"]
+            const section = path[1];
+            const bindName = path[2];
+
+            const adapter = Config.keybindsLoader.adapter;
+            if (adapter && adapter.ambxst && adapter.ambxst[section] && adapter.ambxst[section][bindName]) {
+                adapter.ambxst[section][bindName].modifiers = root.editModifiers;
+                adapter.ambxst[section][bindName].key = root.editKey;
+                // dispatcher and argument are fixed for ambxst binds
+            }
+        } else {
+            // Save custom bind
+            const customBinds = Config.keybindsLoader.adapter.custom;
+            if (customBinds && customBinds[root.editingIndex]) {
+                let newBinds = [];
+                for (let i = 0; i < customBinds.length; i++) {
+                    if (i === root.editingIndex) {
+                        let updatedBind = Object.assign({}, customBinds[i]);
+                        updatedBind.modifiers = root.editModifiers;
+                        updatedBind.key = root.editKey;
+                        updatedBind.dispatcher = root.editDispatcher;
+                        updatedBind.argument = root.editArgument;
+                        if (root.editFlags) {
+                            updatedBind.flags = root.editFlags;
+                        }
+                        newBinds.push(updatedBind);
+                    } else {
+                        newBinds.push(customBinds[i]);
+                    }
+                }
+                Config.keybindsLoader.adapter.custom = newBinds;
+            }
+        }
+
+        root.editMode = false;
+    }
 
     readonly property var categories: [
         { id: "ambxst", label: "Ambxst", icon: Icons.widgets },
@@ -85,12 +176,36 @@ Item {
         return adapter.custom;
     }
 
+    // Main content - slides left when editing
     Flickable {
         id: mainFlickable
         anchors.fill: parent
         contentHeight: mainColumn.implicitHeight
         clip: true
         boundsBehavior: Flickable.StopAtBounds
+        interactive: !root.editMode
+
+        // Horizontal slide + fade animation
+        opacity: root.editMode ? 0 : 1
+        transform: Translate {
+            x: root.editMode ? -30 : 0
+
+            Behavior on x {
+                enabled: Config.animDuration > 0
+                NumberAnimation {
+                    duration: Config.animDuration / 2
+                    easing.type: Easing.OutQuart
+                }
+            }
+        }
+
+        Behavior on opacity {
+            enabled: Config.animDuration > 0
+            NumberAnimation {
+                duration: Config.animDuration / 2
+                easing.type: Easing.OutQuart
+            }
+        }
 
         ColumnLayout {
             id: mainColumn
@@ -214,9 +329,7 @@ Item {
                             isAmbxst: true
 
                             onEditRequested: {
-                                root.editingIndex = index;
-                                root.editingBind = modelData;
-                                root.editMode = true;
+                                root.openEditDialog(modelData, index, true);
                             }
                         }
                     }
@@ -257,9 +370,7 @@ Item {
                             }
 
                             onEditRequested: {
-                                root.editingIndex = index;
-                                root.editingBind = modelData;
-                                root.editMode = true;
+                                root.openEditDialog(modelData, index, false);
                             }
                         }
                     }
@@ -280,114 +391,422 @@ Item {
         }
     }
 
-    // Edit overlay
-    Rectangle {
-        id: editOverlay
+    // Edit view (shown when editMode is true) - slides in from right
+    Item {
+        id: editContainer
         anchors.fill: parent
-        color: Qt.rgba(Colors.background.r, Colors.background.g, Colors.background.b, 0.9)
-        visible: root.editMode
+        clip: true
+
+        // Horizontal slide + fade animation (enters from right)
         opacity: root.editMode ? 1 : 0
+        transform: Translate {
+            x: root.editMode ? 0 : 30
+
+            Behavior on x {
+                enabled: Config.animDuration > 0
+                NumberAnimation {
+                    duration: Config.animDuration / 2
+                    easing.type: Easing.OutQuart
+                }
+            }
+        }
 
         Behavior on opacity {
             enabled: Config.animDuration > 0
-            NumberAnimation { duration: Config.animDuration / 2 }
+            NumberAnimation {
+                duration: Config.animDuration / 2
+                easing.type: Easing.OutQuart
+            }
         }
 
+        // Prevent interaction when hidden
+        enabled: root.editMode
+
+        // Block interaction with elements behind when active
         MouseArea {
             anchors.fill: parent
-            onClicked: root.editMode = false
+            enabled: root.editMode
+            hoverEnabled: true
+            acceptedButtons: Qt.AllButtons
+            onPressed: event => event.accepted = true
+            onReleased: event => event.accepted = true
+            onWheel: event => event.accepted = true
         }
 
-        StyledRect {
-            id: editDialog
-            variant: "pane"
-            width: Math.min(400, parent.width - 32)
-            height: editDialogContent.implicitHeight + 32
-            anchors.centerIn: parent
-            radius: Styling.radius(0)
-            enableShadow: true
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {} // Prevent closing when clicking dialog
-            }
+        Flickable {
+            id: editFlickable
+            anchors.fill: parent
+            contentHeight: editContent.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
 
             ColumnLayout {
-                id: editDialogContent
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 12
+                id: editContent
+                width: editFlickable.width
+                spacing: 8
 
-                Text {
-                    text: "Edit Keybind"
-                    font.family: Config.theme.font
-                    font.pixelSize: Styling.fontSize(2)
-                    font.weight: Font.Bold
-                    color: Colors.overBackground
-                }
-
-                Text {
-                    visible: root.editingBind !== null
-                    text: root.editingBind ? (root.editingBind.name || root.editingBind.dispatcher || "") : ""
-                    font.family: Config.theme.font
-                    font.pixelSize: Styling.fontSize(0)
-                    color: Colors.overSurfaceVariant
-                }
-
-                // Current keybind display
-                StyledRect {
+                // Header with back button
+                Item {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 48
-                    variant: "common"
-                    radius: Styling.radius(-2)
+                    Layout.preferredHeight: editTitlebar.height
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: root.editingBind ? root.formatKeybind(root.editingBind.bind || root.editingBind) : ""
-                        font.family: Config.theme.font
-                        font.pixelSize: Styling.fontSize(1)
-                        font.weight: Font.Medium
-                        color: Colors.primary
-                    }
-                }
+                    RowLayout {
+                        id: editTitlebar
+                        width: root.contentWidth
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 8
 
-                Text {
-                    text: "Editing keybinds directly is not yet supported.\nPlease edit ~/.config/Ambxst/binds.json manually."
-                    font.family: Config.theme.font
-                    font.pixelSize: Styling.fontSize(-1)
-                    color: Colors.overSurfaceVariant
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
-                }
+                        // Back button
+                        StyledRect {
+                            id: backButton
+                            variant: backButtonArea.containsMouse ? "focus" : "common"
+                            Layout.preferredWidth: 36
+                            Layout.preferredHeight: 36
+                            radius: Styling.radius(-2)
 
-                // Close button
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
+                            Text {
+                                anchors.centerIn: parent
+                                text: Icons.caretLeft
+                                font.family: Icons.font
+                                font.pixelSize: 16
+                                color: backButton.itemColor
+                            }
 
-                    Item { Layout.fillWidth: true }
+                            MouseArea {
+                                id: backButtonArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.closeEditDialog()
+                            }
+                        }
 
-                    StyledRect {
-                        variant: closeButtonArea.containsMouse ? "primaryfocus" : "primary"
-                        Layout.preferredWidth: 80
-                        Layout.preferredHeight: 36
-                        radius: Styling.radius(-2)
-
+                        // Title
                         Text {
-                            anchors.centerIn: parent
-                            text: "Close"
+                            text: "Edit Keybind"
                             font.family: Config.theme.font
                             font.pixelSize: Styling.fontSize(0)
                             font.weight: Font.Medium
-                            color: parent.itemColor
+                            color: Colors.overBackground
+                            Layout.fillWidth: true
                         }
 
-                        MouseArea {
-                            id: closeButtonArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.editMode = false
+                        // Save button
+                        StyledRect {
+                            id: saveButton
+                            variant: saveButtonArea.containsMouse ? "primaryfocus" : "primary"
+                            Layout.preferredWidth: saveButtonContent.width + 24
+                            Layout.preferredHeight: 36
+                            radius: Styling.radius(-2)
+
+                            Row {
+                                id: saveButtonContent
+                                anchors.centerIn: parent
+                                spacing: 6
+
+                                Text {
+                                    text: Icons.accept
+                                    font.family: Icons.font
+                                    font.pixelSize: 14
+                                    color: saveButton.itemColor
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                Text {
+                                    text: "Save"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    font.weight: Font.Medium
+                                    color: saveButton.itemColor
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            MouseArea {
+                                id: saveButtonArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.saveEdit()
+                            }
+                        }
+                    }
+                }
+
+                // Edit form content
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: formColumn.implicitHeight
+
+                    ColumnLayout {
+                        id: formColumn
+                        width: root.contentWidth
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 16
+
+                        // Bind name/info
+                        Text {
+                            visible: root.editingBind !== null
+                            text: root.editingBind ? (root.editingBind.name || root.editingBind.dispatcher || "") : ""
+                            font.family: Config.theme.font
+                            font.pixelSize: Styling.fontSize(1)
+                            font.weight: Font.Medium
+                            color: Colors.overBackground
+                        }
+
+                        // Preview at top
+                        StyledRect {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 56
+                            variant: "common"
+                            radius: Styling.radius(-2)
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: {
+                                    const mods = root.formatModifiers(root.editModifiers);
+                                    const key = root.editKey || "?";
+                                    return mods ? mods + " + " + key : key;
+                                }
+                                font.family: Config.theme.font
+                                font.pixelSize: Styling.fontSize(2)
+                                font.weight: Font.Bold
+                                color: Colors.primary
+                            }
+                        }
+
+                        // Modifiers section
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            Text {
+                                text: "Modifiers"
+                                font.family: Config.theme.font
+                                font.pixelSize: Styling.fontSize(-1)
+                                font.weight: Font.Medium
+                                color: Colors.overSurfaceVariant
+                            }
+
+                            Flow {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                Repeater {
+                                    model: root.availableModifiers
+
+                                    delegate: StyledRect {
+                                        id: modTag
+                                        required property string modelData
+                                        required property int index
+
+                                        property bool isSelected: root.hasModifier(modelData)
+                                        property bool isHovered: false
+
+                                        variant: isSelected ? "primary" : (isHovered ? "focus" : "common")
+                                        width: modLabel.width + 32
+                                        height: 40
+                                        radius: Styling.radius(-2)
+
+                                        Text {
+                                            id: modLabel
+                                            anchors.centerIn: parent
+                                            text: modTag.modelData
+                                            font.family: Config.theme.font
+                                            font.pixelSize: Styling.fontSize(0)
+                                            font.weight: modTag.isSelected ? Font.Bold : Font.Normal
+                                            color: modTag.itemColor
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onEntered: modTag.isHovered = true
+                                            onExited: modTag.isHovered = false
+                                            onClicked: root.toggleModifier(modTag.modelData)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Key input
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            Text {
+                                text: "Key"
+                                font.family: Config.theme.font
+                                font.pixelSize: Styling.fontSize(-1)
+                                font.weight: Font.Medium
+                                color: Colors.overSurfaceVariant
+                            }
+
+                            StyledRect {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 44
+                                variant: keyInput.activeFocus ? "focus" : "common"
+                                radius: Styling.radius(-2)
+
+                                TextInput {
+                                    id: keyInput
+                                    anchors.fill: parent
+                                    anchors.margins: 12
+                                    text: root.editKey
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    verticalAlignment: Text.AlignVCenter
+                                    selectByMouse: true
+                                    onTextChanged: root.editKey = text.toUpperCase()
+
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        visible: !keyInput.text && !keyInput.activeFocus
+                                        text: "e.g. R, TAB, ESCAPE..."
+                                        font: keyInput.font
+                                        color: Colors.overSurfaceVariant
+                                    }
+                                }
+                            }
+                        }
+
+                        // Dispatcher input (only for custom binds)
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+                            visible: !root.isEditingAmbxst
+
+                            Text {
+                                text: "Dispatcher"
+                                font.family: Config.theme.font
+                                font.pixelSize: Styling.fontSize(-1)
+                                font.weight: Font.Medium
+                                color: Colors.overSurfaceVariant
+                            }
+
+                            StyledRect {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 44
+                                variant: dispatcherInput.activeFocus ? "focus" : "common"
+                                radius: Styling.radius(-2)
+
+                                TextInput {
+                                    id: dispatcherInput
+                                    anchors.fill: parent
+                                    anchors.margins: 12
+                                    text: root.editDispatcher
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    verticalAlignment: Text.AlignVCenter
+                                    selectByMouse: true
+                                    onTextChanged: root.editDispatcher = text
+
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        visible: !dispatcherInput.text && !dispatcherInput.activeFocus
+                                        text: "e.g. exec, workspace, killactive..."
+                                        font: dispatcherInput.font
+                                        color: Colors.overSurfaceVariant
+                                    }
+                                }
+                            }
+                        }
+
+                        // Argument input (only for custom binds)
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+                            visible: !root.isEditingAmbxst
+
+                            Text {
+                                text: "Argument"
+                                font.family: Config.theme.font
+                                font.pixelSize: Styling.fontSize(-1)
+                                font.weight: Font.Medium
+                                color: Colors.overSurfaceVariant
+                            }
+
+                            StyledRect {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 44
+                                variant: argumentInput.activeFocus ? "focus" : "common"
+                                radius: Styling.radius(-2)
+
+                                TextInput {
+                                    id: argumentInput
+                                    anchors.fill: parent
+                                    anchors.margins: 12
+                                    text: root.editArgument
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    verticalAlignment: Text.AlignVCenter
+                                    selectByMouse: true
+                                    onTextChanged: root.editArgument = text
+
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        visible: !argumentInput.text && !argumentInput.activeFocus
+                                        text: "e.g. kitty, 1, playerctl play-pause..."
+                                        font: argumentInput.font
+                                        color: Colors.overSurfaceVariant
+                                    }
+                                }
+                            }
+                        }
+
+                        // Flags input (only for custom binds)
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+                            visible: !root.isEditingAmbxst
+
+                            Text {
+                                text: "Flags (optional)"
+                                font.family: Config.theme.font
+                                font.pixelSize: Styling.fontSize(-1)
+                                font.weight: Font.Medium
+                                color: Colors.overSurfaceVariant
+                            }
+
+                            StyledRect {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 44
+                                variant: flagsInput.activeFocus ? "focus" : "common"
+                                radius: Styling.radius(-2)
+
+                                TextInput {
+                                    id: flagsInput
+                                    anchors.fill: parent
+                                    anchors.margins: 12
+                                    text: root.editFlags
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    verticalAlignment: Text.AlignVCenter
+                                    selectByMouse: true
+                                    onTextChanged: root.editFlags = text
+
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        visible: !flagsInput.text && !flagsInput.activeFocus
+                                        text: "e.g. m, l, e, le..."
+                                        font: flagsInput.font
+                                        color: Colors.overSurfaceVariant
+                                    }
+                                }
+                            }
+
+                            Text {
+                                text: "l=locked, e=repeat, m=mouse, r=release"
+                                font.family: Config.theme.font
+                                font.pixelSize: Styling.fontSize(-2)
+                                color: Colors.overSurfaceVariant
+                            }
                         }
                     }
                 }
