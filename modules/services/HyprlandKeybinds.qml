@@ -37,7 +37,7 @@ QtObject {
             return modifiers.join(" ");
         }
 
-        // Helper function para crear un bind command
+        // Helper function para crear un bind command (old format for ambxst binds)
         function createBindCommand(keybind, flags) {
             const mods = formatModifiers(keybind.modifiers);
             const key = keybind.key;
@@ -51,17 +51,39 @@ QtObject {
             return `keyword ${bindKeyword} ${mods},${key},${dispatcher},${argument}`;
         }
 
-        // Helper function para crear un unbind command
+        // Helper function para crear un unbind command (old format)
         function createUnbindCommand(keybind) {
             const mods = formatModifiers(keybind.modifiers);
             const key = keybind.key;
             return `keyword unbind ${mods},${key}`;
         }
 
+        // Helper function para crear unbind command desde key object (new format)
+        function createUnbindFromKey(keyObj) {
+            const mods = formatModifiers(keyObj.modifiers);
+            const key = keyObj.key;
+            return `keyword unbind ${mods},${key}`;
+        }
+
+        // Helper function para crear bind command desde key + action (new format)
+        function createBindFromKeyAction(keyObj, action) {
+            const mods = formatModifiers(keyObj.modifiers);
+            const key = keyObj.key;
+            const dispatcher = action.dispatcher;
+            const argument = action.argument || "";
+            const flags = action.flags || "";
+            const bindKeyword = flags ? `bind${flags}` : "bind";
+            // Para bindm no se incluye argumento si está vacío
+            if (flags === "m" && !argument) {
+                return `keyword ${bindKeyword} ${mods},${key},${dispatcher}`;
+            }
+            return `keyword ${bindKeyword} ${mods},${key},${dispatcher},${argument}`;
+        }
+
         // Construir batch command con todos los binds
         let batchCommands = [];
 
-        // Procesar Ambxst keybinds
+        // Procesar Ambxst keybinds (still use old format)
         const ambxst = Config.keybindsLoader.adapter.ambxst;
         
         // Dashboard keybinds
@@ -94,17 +116,35 @@ QtObject {
         batchCommands.push(createBindCommand(system.config));
         batchCommands.push(createBindCommand(system.lockscreen));
 
-        // Procesar custom keybinds
+        // Procesar custom keybinds (new format with keys[] and actions[])
         const customBinds = Config.keybindsLoader.adapter.custom;
         if (customBinds && customBinds.length > 0) {
             for (let i = 0; i < customBinds.length; i++) {
                 const bind = customBinds[i];
-                // Siempre hacer unbind primero para limpiar el estado anterior
-                unbindCommands.push(createUnbindCommand(bind));
-                // Solo crear el bind si está habilitado
-                if (bind.enabled !== false) {  // Por defecto enabled=true
-                    const flags = bind.flags || "";
-                    batchCommands.push(createBindCommand(bind, flags));
+                
+                // Check if bind has the new format
+                if (bind.keys && bind.actions) {
+                    // Unbind all keys first
+                    for (let k = 0; k < bind.keys.length; k++) {
+                        unbindCommands.push(createUnbindFromKey(bind.keys[k]));
+                    }
+                    
+                    // Only create binds if enabled
+                    if (bind.enabled !== false) {
+                        // For each key, bind all actions
+                        for (let k = 0; k < bind.keys.length; k++) {
+                            for (let a = 0; a < bind.actions.length; a++) {
+                                batchCommands.push(createBindFromKeyAction(bind.keys[k], bind.actions[a]));
+                            }
+                        }
+                    }
+                } else {
+                    // Fallback for old format (shouldn't happen after normalization)
+                    unbindCommands.push(createUnbindCommand(bind));
+                    if (bind.enabled !== false) {
+                        const flags = bind.flags || "";
+                        batchCommands.push(createBindCommand(bind, flags));
+                    }
                 }
             }
         }

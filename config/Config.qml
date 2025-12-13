@@ -1077,7 +1077,7 @@ Singleton {
             }
         }
 
-        // Normalize custom binds to ensure all have a 'name' property
+        // Normalize custom binds to new format with keys[] and actions[]
         function normalizeCustomBinds() {
             if (!adapter || !adapter.custom)
                 return;
@@ -1087,15 +1087,21 @@ Singleton {
 
             for (let i = 0; i < adapter.custom.length; i++) {
                 let bind = adapter.custom[i];
-                if (bind.name === undefined) {
+                
+                // Check if it's old format (has modifiers/key instead of keys[])
+                if (bind.keys === undefined || bind.actions === undefined) {
                     needsUpdate = true;
                     normalizedBinds.push({
-                        "name": "",
-                        "modifiers": bind.modifiers || [],
-                        "key": bind.key || "",
-                        "dispatcher": bind.dispatcher || "",
-                        "argument": bind.argument || "",
-                        "flags": bind.flags || "",
+                        "name": bind.name || "",
+                        "keys": [{
+                            "modifiers": bind.modifiers || [],
+                            "key": bind.key || ""
+                        }],
+                        "actions": [{
+                            "dispatcher": bind.dispatcher || "",
+                            "argument": bind.argument || "",
+                            "flags": bind.flags || ""
+                        }],
                         "enabled": bind.enabled !== false
                     });
                 } else {
@@ -1104,7 +1110,7 @@ Singleton {
             }
 
             if (needsUpdate) {
-                console.log("Normalizing custom binds: adding missing 'name' property");
+                console.log("Normalizing custom binds: migrating to new keys/actions format");
                 adapter.custom = normalizedBinds;
             }
         }
@@ -1192,396 +1198,283 @@ Singleton {
                 // Window management
                 {
                     "name": "Close Window",
-                    "modifiers": ["SUPER"],
-                    "key": "C",
-                    "dispatcher": "killactive",
-                    "argument": "",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "C" }],
+                    "actions": [{ "dispatcher": "killactive", "argument": "", "flags": "" }],
                     "enabled": true
                 },
 
                 // Switch workspaces with SUPER + [0-9]
                 {
                     "name": "Workspace 1",
-                    "modifiers": ["SUPER"],
-                    "key": "1",
-                    "dispatcher": "workspace",
-                    "argument": "1",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "1" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "1", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Workspace 2",
-                    "modifiers": ["SUPER"],
-                    "key": "2",
-                    "dispatcher": "workspace",
-                    "argument": "2",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "2" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "2", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Workspace 3",
-                    "modifiers": ["SUPER"],
-                    "key": "3",
-                    "dispatcher": "workspace",
-                    "argument": "3",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "3" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "3", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Workspace 4",
-                    "modifiers": ["SUPER"],
-                    "key": "4",
-                    "dispatcher": "workspace",
-                    "argument": "4",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "4" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "4", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Workspace 5",
-                    "modifiers": ["SUPER"],
-                    "key": "5",
-                    "dispatcher": "workspace",
-                    "argument": "5",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "5" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "5", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Workspace 6",
-                    "modifiers": ["SUPER"],
-                    "key": "6",
-                    "dispatcher": "workspace",
-                    "argument": "6",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "6" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "6", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Workspace 7",
-                    "modifiers": ["SUPER"],
-                    "key": "7",
-                    "dispatcher": "workspace",
-                    "argument": "7",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "7" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "7", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Workspace 8",
-                    "modifiers": ["SUPER"],
-                    "key": "8",
-                    "dispatcher": "workspace",
-                    "argument": "8",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "8" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "8", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Workspace 9",
-                    "modifiers": ["SUPER"],
-                    "key": "9",
-                    "dispatcher": "workspace",
-                    "argument": "9",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "9" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "9", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Workspace 10",
-                    "modifiers": ["SUPER"],
-                    "key": "0",
-                    "dispatcher": "workspace",
-                    "argument": "10",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "0" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "10", "flags": "" }],
                     "enabled": true
                 },
 
                 // Move active window to workspace with SUPER + SHIFT + [0-9]
                 {
                     "name": "Move to Workspace 1",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "1",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "1",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "1" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "1", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Workspace 2",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "2",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "2",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "2" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "2", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Workspace 3",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "3",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "3",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "3" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "3", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Workspace 4",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "4",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "4",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "4" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "4", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Workspace 5",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "5",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "5",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "5" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "5", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Workspace 6",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "6",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "6",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "6" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "6", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Workspace 7",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "7",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "7",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "7" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "7", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Workspace 8",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "8",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "8",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "8" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "8", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Workspace 9",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "9",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "9",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "9" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "9", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Workspace 10",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "0",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "10",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "0" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "10", "flags": "" }],
                     "enabled": true
                 },
 
-                // Scroll through workspaces
-                {
-                    "name": "Previous Occupied Workspace (Scroll)",
-                    "modifiers": ["SUPER"],
-                    "key": "mouse_down",
-                    "dispatcher": "workspace",
-                    "argument": "e-1",
-                    "enabled": true
-                },
+                // Navigate workspaces (consolidated with multiple keys)
                 {
                     "name": "Previous Occupied Workspace",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "Z",
-                    "dispatcher": "workspace",
-                    "argument": "e-1",
-                    "enabled": true
-                },
-                {
-                    "name": "Next Occupied Workspace (Scroll)",
-                    "modifiers": ["SUPER"],
-                    "key": "mouse_up",
-                    "dispatcher": "workspace",
-                    "argument": "e+1",
+                    "keys": [
+                        { "modifiers": ["SUPER"], "key": "mouse_down" },
+                        { "modifiers": ["SUPER", "SHIFT"], "key": "Z" }
+                    ],
+                    "actions": [{ "dispatcher": "workspace", "argument": "e-1", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Next Occupied Workspace",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "X",
-                    "dispatcher": "workspace",
-                    "argument": "e+1",
+                    "keys": [
+                        { "modifiers": ["SUPER"], "key": "mouse_up" },
+                        { "modifiers": ["SUPER", "SHIFT"], "key": "X" }
+                    ],
+                    "actions": [{ "dispatcher": "workspace", "argument": "e+1", "flags": "" }],
                     "enabled": true
                 },
-
-                // Next/previous workspace with Z and X
                 {
                     "name": "Previous Workspace",
-                    "modifiers": ["SUPER"],
-                    "key": "Z",
-                    "dispatcher": "workspace",
-                    "argument": "-1",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "Z" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "-1", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Next Workspace",
-                    "modifiers": ["SUPER"],
-                    "key": "X",
-                    "dispatcher": "workspace",
-                    "argument": "+1",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "X" }],
+                    "actions": [{ "dispatcher": "workspace", "argument": "+1", "flags": "" }],
                     "enabled": true
                 },
 
                 // Move/resize windows with mouse
                 {
                     "name": "Drag Window",
-                    "modifiers": ["SUPER"],
-                    "key": "mouse:272",
-                    "dispatcher": "movewindow",
-                    "argument": "",
-                    "flags": "m",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "mouse:272" }],
+                    "actions": [{ "dispatcher": "movewindow", "argument": "", "flags": "m" }],
                     "enabled": true
                 },
                 {
                     "name": "Drag Resize Window",
-                    "modifiers": ["SUPER"],
-                    "key": "mouse:273",
-                    "dispatcher": "resizewindow",
-                    "argument": "",
-                    "flags": "m",
+                    "keys": [{ "modifiers": ["SUPER"], "key": "mouse:273" }],
+                    "actions": [{ "dispatcher": "resizewindow", "argument": "", "flags": "m" }],
                     "enabled": true
                 },
 
                 // Media player controls
                 {
                     "name": "Play/Pause",
-                    "modifiers": [],
-                    "key": "XF86AudioPlay",
-                    "dispatcher": "exec",
-                    "argument": "playerctl play-pause",
+                    "keys": [
+                        { "modifiers": [], "key": "XF86AudioPlay" },
+                        { "modifiers": [], "key": "XF86AudioMedia" }
+                    ],
+                    "actions": [{ "dispatcher": "exec", "argument": "playerctl play-pause", "flags": "l" }],
                     "enabled": true
                 },
                 {
                     "name": "Previous Track",
-                    "modifiers": [],
-                    "key": "XF86AudioPrev",
-                    "dispatcher": "exec",
-                    "argument": "playerctl previous",
+                    "keys": [{ "modifiers": [], "key": "XF86AudioPrev" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "playerctl previous", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Next Track",
-                    "modifiers": [],
-                    "key": "XF86AudioNext",
-                    "dispatcher": "exec",
-                    "argument": "playerctl next",
-                    "enabled": true
-                },
-                {
-                    "name": "Media Play/Pause",
-                    "modifiers": [],
-                    "key": "XF86AudioMedia",
-                    "dispatcher": "exec",
-                    "argument": "playerctl play-pause",
-                    "flags": "l",
+                    "keys": [{ "modifiers": [], "key": "XF86AudioNext" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "playerctl next", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Stop Playback",
-                    "modifiers": [],
-                    "key": "XF86AudioStop",
-                    "dispatcher": "exec",
-                    "argument": "playerctl stop",
-                    "flags": "l",
+                    "keys": [{ "modifiers": [], "key": "XF86AudioStop" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "playerctl stop", "flags": "l" }],
                     "enabled": true
                 },
 
                 // Volume controls
                 {
                     "name": "Volume Up",
-                    "modifiers": [],
-                    "key": "XF86AudioRaiseVolume",
-                    "dispatcher": "exec",
-                    "argument": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 10%+",
-                    "flags": "le",
+                    "keys": [{ "modifiers": [], "key": "XF86AudioRaiseVolume" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 10%+", "flags": "le" }],
                     "enabled": true
                 },
                 {
                     "name": "Volume Down",
-                    "modifiers": [],
-                    "key": "XF86AudioLowerVolume",
-                    "dispatcher": "exec",
-                    "argument": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 10%-",
-                    "flags": "le",
+                    "keys": [{ "modifiers": [], "key": "XF86AudioLowerVolume" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 10%-", "flags": "le" }],
                     "enabled": true
                 },
                 {
                     "name": "Mute Audio",
-                    "modifiers": [],
-                    "key": "XF86AudioMute",
-                    "dispatcher": "exec",
-                    "argument": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-                    "flags": "le",
+                    "keys": [{ "modifiers": [], "key": "XF86AudioMute" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle", "flags": "le" }],
                     "enabled": true
                 },
 
                 // Brightness controls
                 {
                     "name": "Brightness Up",
-                    "modifiers": [],
-                    "key": "XF86MonBrightnessUp",
-                    "dispatcher": "exec",
-                    "argument": "ambxst brightness +5",
-                    "flags": "le",
+                    "keys": [{ "modifiers": [], "key": "XF86MonBrightnessUp" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "ambxst brightness +5", "flags": "le" }],
                     "enabled": true
                 },
                 {
                     "name": "Brightness Down",
-                    "modifiers": [],
-                    "key": "XF86MonBrightnessDown",
-                    "dispatcher": "exec",
-                    "argument": "ambxst brightness -5",
-                    "flags": "le",
+                    "keys": [{ "modifiers": [], "key": "XF86MonBrightnessDown" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "ambxst brightness -5", "flags": "le" }],
                     "enabled": true
                 },
 
                 // Calculator key
                 {
                     "name": "Calculator",
-                    "modifiers": [],
-                    "key": "XF86Calculator",
-                    "dispatcher": "exec",
-                    "argument": "notify-send \"Soon\"",
+                    "keys": [{ "modifiers": [], "key": "XF86Calculator" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "notify-send \"Soon\"", "flags": "" }],
                     "enabled": true
                 },
 
                 // Special workspaces
                 {
                     "name": "Toggle Special Workspace",
-                    "modifiers": ["SUPER", "SHIFT"],
-                    "key": "V",
-                    "dispatcher": "togglespecialworkspace",
-                    "argument": "",
+                    "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "V" }],
+                    "actions": [{ "dispatcher": "togglespecialworkspace", "argument": "", "flags": "" }],
                     "enabled": true
                 },
                 {
                     "name": "Move to Special Workspace",
-                    "modifiers": ["SUPER", "ALT"],
-                    "key": "V",
-                    "dispatcher": "movetoworkspace",
-                    "argument": "special",
+                    "keys": [{ "modifiers": ["SUPER", "ALT"], "key": "V" }],
+                    "actions": [{ "dispatcher": "movetoworkspace", "argument": "special", "flags": "" }],
                     "enabled": true
                 },
 
                 // Lid switch events
                 {
                     "name": "Lock on Lid Close",
-                    "modifiers": [],
-                    "key": "switch:Lid Switch",
-                    "dispatcher": "exec",
-                    "argument": "loginctl lock-session",
-                    "flags": "l",
+                    "keys": [{ "modifiers": [], "key": "switch:Lid Switch" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "loginctl lock-session", "flags": "l" }],
                     "enabled": true
                 },
                 {
                     "name": "Display Off on Lid Close",
-                    "modifiers": [],
-                    "key": "switch:on:Lid Switch",
-                    "dispatcher": "exec",
-                    "argument": "hyprctl dispatch dpms off",
-                    "flags": "l",
+                    "keys": [{ "modifiers": [], "key": "switch:on:Lid Switch" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "hyprctl dispatch dpms off", "flags": "l" }],
                     "enabled": true
                 },
                 {
                     "name": "Display On on Lid Open",
-                    "modifiers": [],
-                    "key": "switch:off:Lid Switch",
-                    "dispatcher": "exec",
-                    "argument": "hyprctl dispatch dpms on",
-                    "flags": "l",
+                    "keys": [{ "modifiers": [], "key": "switch:off:Lid Switch" }],
+                    "actions": [{ "dispatcher": "exec", "argument": "hyprctl dispatch dpms on", "flags": "l" }],
                     "enabled": true
                 }
             ]
