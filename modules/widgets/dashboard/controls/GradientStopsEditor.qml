@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import qs.modules.theme
 import qs.modules.components
@@ -110,41 +109,46 @@ Item {
             spacing: 16
 
             // Add button
-            Button {
+            StyledRect {
                 id: addButton
+                variant: "primary"
                 Layout.preferredWidth: 32
                 Layout.preferredHeight: 32
                 Layout.alignment: Qt.AlignVCenter
-                enabled: root.stops.length < 20
+                radius: Styling.radius(-4)
+                opacity: addButton.isEnabled ? (addMouseArea.containsMouse ? 0.8 : 1.0) : 0.5
 
-                background: Rectangle {
-                    color: addButton.enabled ? Colors.primary : Colors.surfaceContainer
-                    radius: Styling.radius(-4)
-                    opacity: addButton.enabled ? (addButton.hovered ? 0.8 : 1.0) : 0.5
-                }
+                property bool isEnabled: root.stops.length < 20
 
-                contentItem: Text {
+                Text {
+                    anchors.centerIn: parent
                     text: Icons.plus
                     font.family: Icons.font
                     font.pixelSize: 16
-                    color: addButton.enabled ? Colors.overPrimary : Colors.overBackground
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+                    color: addButton.itemColor
                 }
 
-                onClicked: {
-                    if (root.stops.length >= 20)
-                        return;
-                    let newStops = root.stops.slice();
-                    const lastColor = newStops[newStops.length - 1][0];
-                    newStops.push([lastColor, 1.0]);
-                    root.updateStops(newStops);
-                    root.selectedStopIndex = newStops.length - 1;
+                MouseArea {
+                    id: addMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: addButton.isEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+
+                    onClicked: {
+                        if (!addButton.isEnabled || root.stops.length >= 20)
+                            return;
+                        let newStops = root.stops.slice();
+                        const lastColor = newStops[newStops.length - 1][0];
+                        newStops.push([lastColor, 1.0]);
+                        root.updateStops(newStops);
+                        root.selectedStopIndex = newStops.length - 1;
+                    }
                 }
 
-                ToolTip.visible: hovered
-                ToolTip.text: "Add stop"
-                ToolTip.delay: 500
+                StyledToolTip {
+                    visible: addMouseArea.containsMouse
+                    tooltipText: "Add Stop"
+                }
             }
 
             // Gradient container
@@ -373,35 +377,39 @@ Item {
             }
 
             // Reset button
-            Button {
+            StyledRect {
                 id: resetButton
+                variant: "error"
                 Layout.preferredWidth: 32
                 Layout.preferredHeight: 32
                 Layout.alignment: Qt.AlignVCenter
+                radius: Styling.radius(-4)
+                opacity: resetMouseArea.containsMouse ? 0.8 : 1.0
 
-                background: Rectangle {
-                    color: Colors.error
-                    radius: Styling.radius(-4)
-                    opacity: resetButton.hovered ? 0.8 : 1.0
-                }
-
-                contentItem: Text {
+                Text {
+                    anchors.centerIn: parent
                     text: Icons.broom
                     font.family: Icons.font
                     font.pixelSize: 16
-                    color: Colors.overError
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+                    color: resetButton.itemColor
                 }
 
-                onClicked: {
-                    root.updateStops(root.defaultGradient.slice());
-                    root.selectedStopIndex = 0;
+                MouseArea {
+                    id: resetMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+
+                    onClicked: {
+                        root.updateStops(root.defaultGradient.slice());
+                        root.selectedStopIndex = 0;
+                    }
                 }
 
-                ToolTip.visible: hovered
-                ToolTip.text: "Reset to default"
-                ToolTip.delay: 500
+                StyledToolTip {
+                    visible: resetMouseArea.containsMouse
+                    tooltipText: "Reset Gradient"
+                }
             }
         }
 

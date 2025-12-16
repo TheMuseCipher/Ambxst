@@ -581,19 +581,24 @@ Item {
                         Layout.fillWidth: true
                         spacing: 12
 
-                        Text {
-                            text: Icons.arrowDown
-                            font.family: Icons.font
-                            font.pixelSize: 18
-                            color: Colors.primary
-                            rotation: root.variantConfig ? root.variantConfig.gradientAngle : 0
+                        Item {
                             Layout.preferredWidth: 24
+                            Layout.preferredHeight: 24
 
-                            Behavior on rotation {
-                                enabled: Config.animDuration > 0
-                                NumberAnimation {
-                                    duration: Config.animDuration / 2
-                                    easing.type: Easing.OutQuart
+                            Text {
+                                anchors.centerIn: parent
+                                text: Icons.arrowDown
+                                font.family: Icons.font
+                                font.pixelSize: 18
+                                color: Colors.primary
+                                rotation: root.variantConfig ? root.variantConfig.gradientAngle : 0
+
+                                Behavior on rotation {
+                                    enabled: Config.animDuration > 0
+                                    NumberAnimation {
+                                        duration: Config.animDuration / 2
+                                        easing.type: Easing.OutQuart
+                                    }
                                 }
                             }
                         }
