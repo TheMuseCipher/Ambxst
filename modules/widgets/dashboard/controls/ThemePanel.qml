@@ -210,6 +210,221 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 12
 
+                    // Fonts section
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: fontsContent.implicitHeight
+
+                        ColumnLayout {
+                            id: fontsContent
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            spacing: 8
+
+                            Text {
+                                text: "Fonts"
+                                font.family: Config.theme.font
+                                font.pixelSize: Styling.fontSize(-1)
+                                font.weight: Font.Medium
+                                color: Colors.overSurfaceVariant
+                                Layout.bottomMargin: -4
+                            }
+
+                            // UI Font row
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                Text {
+                                    text: "UI Font"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    Layout.preferredWidth: 80
+                                }
+
+                                StyledRect {
+                                    variant: "common"
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 32
+                                    radius: Styling.radius(-2)
+
+                                    TextInput {
+                                        id: fontInput
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+                                        font.family: Config.theme.font
+                                        font.pixelSize: Styling.fontSize(0)
+                                        color: Colors.overBackground
+                                        selectByMouse: true
+                                        clip: true
+                                        verticalAlignment: TextInput.AlignVCenter
+
+                                        readonly property string configValue: Config.theme.font
+
+                                        onConfigValueChanged: {
+                                            if (text !== configValue) {
+                                                text = configValue;
+                                            }
+                                        }
+
+                                        Component.onCompleted: text = configValue
+
+                                        onEditingFinished: {
+                                            if (text !== Config.theme.font && text.trim() !== "") {
+                                                GlobalStates.markThemeChanged();
+                                                Config.theme.font = text.trim();
+                                            }
+                                        }
+                                    }
+                                }
+
+                                StyledRect {
+                                    variant: "common"
+                                    Layout.preferredWidth: 60
+                                    Layout.preferredHeight: 32
+                                    radius: Styling.radius(-2)
+
+                                    TextInput {
+                                        id: fontSizeInput
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+                                        font.family: Config.theme.font
+                                        font.pixelSize: Styling.fontSize(0)
+                                        color: Colors.overBackground
+                                        selectByMouse: true
+                                        clip: true
+                                        verticalAlignment: TextInput.AlignVCenter
+                                        horizontalAlignment: TextInput.AlignHCenter
+                                        validator: IntValidator { bottom: 8; top: 32 }
+
+                                        readonly property int configValue: Config.theme.fontSize
+
+                                        onConfigValueChanged: {
+                                            if (text !== configValue.toString()) {
+                                                text = configValue.toString();
+                                            }
+                                        }
+
+                                        Component.onCompleted: text = configValue.toString()
+
+                                        onEditingFinished: {
+                                            let newSize = parseInt(text);
+                                            if (!isNaN(newSize) && newSize >= 8 && newSize <= 32 && newSize !== Config.theme.fontSize) {
+                                                GlobalStates.markThemeChanged();
+                                                Config.theme.fontSize = newSize;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    text: "px"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overSurfaceVariant
+                                }
+                            }
+
+                            // Mono Font row
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                Text {
+                                    text: "Mono Font"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    Layout.preferredWidth: 80
+                                }
+
+                                StyledRect {
+                                    variant: "common"
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 32
+                                    radius: Styling.radius(-2)
+
+                                    TextInput {
+                                        id: monoFontInput
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+                                        font.family: Config.theme.monoFont
+                                        font.pixelSize: Styling.fontSize(0)
+                                        color: Colors.overBackground
+                                        selectByMouse: true
+                                        clip: true
+                                        verticalAlignment: TextInput.AlignVCenter
+
+                                        readonly property string configValue: Config.theme.monoFont
+
+                                        onConfigValueChanged: {
+                                            if (text !== configValue) {
+                                                text = configValue;
+                                            }
+                                        }
+
+                                        Component.onCompleted: text = configValue
+
+                                        onEditingFinished: {
+                                            if (text !== Config.theme.monoFont && text.trim() !== "") {
+                                                GlobalStates.markThemeChanged();
+                                                Config.theme.monoFont = text.trim();
+                                            }
+                                        }
+                                    }
+                                }
+
+                                StyledRect {
+                                    variant: "common"
+                                    Layout.preferredWidth: 60
+                                    Layout.preferredHeight: 32
+                                    radius: Styling.radius(-2)
+
+                                    TextInput {
+                                        id: monoFontSizeInput
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+                                        font.family: Config.theme.monoFont
+                                        font.pixelSize: Styling.fontSize(0)
+                                        color: Colors.overBackground
+                                        selectByMouse: true
+                                        clip: true
+                                        verticalAlignment: TextInput.AlignVCenter
+                                        horizontalAlignment: TextInput.AlignHCenter
+                                        validator: IntValidator { bottom: 8; top: 32 }
+
+                                        readonly property int configValue: Config.theme.monoFontSize
+
+                                        onConfigValueChanged: {
+                                            if (text !== configValue.toString()) {
+                                                text = configValue.toString();
+                                            }
+                                        }
+
+                                        Component.onCompleted: text = configValue.toString()
+
+                                        onEditingFinished: {
+                                            let newSize = parseInt(text);
+                                            if (!isNaN(newSize) && newSize >= 8 && newSize <= 32 && newSize !== Config.theme.monoFontSize) {
+                                                GlobalStates.markThemeChanged();
+                                                Config.theme.monoFontSize = newSize;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    text: "px"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overSurfaceVariant
+                                }
+                            }
+                        }
+                    }
+
                     // Variant selector section
                     Item {
                         id: variantSelectorPane
