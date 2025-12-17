@@ -1221,9 +1221,7 @@ Singleton {
                 }
             }
             property list<var> custom: [
-                // ============================================
                 // Window Management
-                // ============================================
                 {
                     "name": "Close Window",
                     "keys": [{ "modifiers": ["SUPER"], "key": "C" }],
@@ -1231,9 +1229,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Workspace Navigation (SUPER + [0-9])
-                // ============================================
                 {
                     "name": "Workspace 1",
                     "keys": [{ "modifiers": ["SUPER"], "key": "1" }],
@@ -1295,9 +1291,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Move Window to Workspace (SUPER + SHIFT + [0-9])
-                // ============================================
                 {
                     "name": "Move to Workspace 1",
                     "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "1" }],
@@ -1359,9 +1353,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
-                // Workspace Navigation (Mouse Scroll)
-                // ============================================
+                // Workspace Navigation (Mouse Scroll & Keyboard)
                 {
                     "name": "Previous Occupied Workspace (Scroll)",
                     "keys": [{ "modifiers": ["SUPER"], "key": "mouse_down" }],
@@ -1374,10 +1366,6 @@ Singleton {
                     "actions": [{ "dispatcher": "workspace", "argument": "e+1", "flags": "", "compositor": { "type": "hyprland", "layouts": [] } }],
                     "enabled": true
                 },
-
-                // ============================================
-                // Workspace Navigation (Keyboard)
-                // ============================================
                 {
                     "name": "Previous Occupied Workspace",
                     "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "Z" }],
@@ -1403,9 +1391,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Window Drag/Resize (Mouse)
-                // ============================================
                 {
                     "name": "Drag Window",
                     "keys": [{ "modifiers": ["SUPER"], "key": "mouse:272" }],
@@ -1419,9 +1405,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Media Player Controls
-                // ============================================
                 {
                     "name": "Play/Pause",
                     "keys": [{ "modifiers": [], "key": "XF86AudioPlay" }],
@@ -1453,9 +1437,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Volume Controls
-                // ============================================
                 {
                     "name": "Volume Up",
                     "keys": [{ "modifiers": [], "key": "XF86AudioRaiseVolume" }],
@@ -1475,9 +1457,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Brightness Controls
-                // ============================================
                 {
                     "name": "Brightness Up",
                     "keys": [{ "modifiers": [], "key": "XF86MonBrightnessUp" }],
@@ -1491,9 +1471,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Special Keys
-                // ============================================
                 {
                     "name": "Calculator",
                     "keys": [{ "modifiers": [], "key": "XF86Calculator" }],
@@ -1501,9 +1479,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Special Workspaces
-                // ============================================
                 {
                     "name": "Toggle Special Workspace",
                     "keys": [{ "modifiers": ["SUPER", "SHIFT"], "key": "V" }],
@@ -1517,9 +1493,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Lid Switch Events
-                // ============================================
                 {
                     "name": "Lock on Lid Close",
                     "keys": [{ "modifiers": [], "key": "switch:Lid Switch" }],
@@ -1539,9 +1513,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Window Focus (Layout-aware)
-                // ============================================
                 {
                     "name": "Focus Up",
                     "keys": [
@@ -1593,16 +1565,17 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Window Movement (Layout-aware)
-                // ============================================
                 {
                     "name": "Move Window Left",
                     "keys": [
                         { "modifiers": ["SUPER", "SHIFT"], "key": "Left" },
                         { "modifiers": ["SUPER", "SHIFT"], "key": "h" }
                     ],
-                    "actions": [{ "dispatcher": "movewindow", "argument": "l", "flags": "", "compositor": { "type": "hyprland", "layouts": [] } }],
+                    "actions": [
+                        { "dispatcher": "movewindow", "argument": "l", "flags": "", "compositor": { "type": "hyprland", "layouts": ["master", "dwindle"] } },
+                        { "dispatcher": "layoutmsg", "argument": "movewindowto l", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }
+                    ],
                     "enabled": true
                 },
                 {
@@ -1611,7 +1584,10 @@ Singleton {
                         { "modifiers": ["SUPER", "SHIFT"], "key": "Right" },
                         { "modifiers": ["SUPER", "SHIFT"], "key": "l" }
                     ],
-                    "actions": [{ "dispatcher": "movewindow", "argument": "r", "flags": "", "compositor": { "type": "hyprland", "layouts": [] } }],
+                    "actions": [
+                        { "dispatcher": "movewindow", "argument": "r", "flags": "", "compositor": { "type": "hyprland", "layouts": ["dwindle", "master"] } },
+                        { "dispatcher": "layoutmsg", "argument": "movewindowto r", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }
+                    ],
                     "enabled": true
                 },
                 {
@@ -1620,7 +1596,10 @@ Singleton {
                         { "modifiers": ["SUPER", "SHIFT"], "key": "Up" },
                         { "modifiers": ["SUPER", "SHIFT"], "key": "k" }
                     ],
-                    "actions": [{ "dispatcher": "movewindow", "argument": "u", "flags": "", "compositor": { "type": "hyprland", "layouts": [] } }],
+                    "actions": [
+                        { "dispatcher": "movewindow", "argument": "u", "flags": "", "compositor": { "type": "hyprland", "layouts": ["master", "dwindle"] } },
+                        { "dispatcher": "layoutmsg", "argument": "movewindowto u", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }
+                    ],
                     "enabled": true
                 },
                 {
@@ -1629,13 +1608,14 @@ Singleton {
                         { "modifiers": ["SUPER", "SHIFT"], "key": "Down" },
                         { "modifiers": ["SUPER", "SHIFT"], "key": "j" }
                     ],
-                    "actions": [{ "dispatcher": "movewindow", "argument": "d", "flags": "", "compositor": { "type": "hyprland", "layouts": [] } }],
+                    "actions": [
+                        { "dispatcher": "movewindow", "argument": "d", "flags": "", "compositor": { "type": "hyprland", "layouts": ["master", "dwindle"] } },
+                        { "dispatcher": "layoutmsg", "argument": "movewindowto d", "flags": "", "compositor": { "type": "hyprland", "layouts": [] } }
+                    ],
                     "enabled": true
                 },
 
-                // ============================================
                 // Window Resize (Layout-aware)
-                // ============================================
                 {
                     "name": "Horizontal Resize +",
                     "keys": [
@@ -1679,9 +1659,7 @@ Singleton {
                     "enabled": true
                 },
 
-                // ============================================
                 // Scrolling Layout Specific
-                // ============================================
                 {
                     "name": "Promote (Scrolling)",
                     "keys": [{ "modifiers": ["SUPER", "ALT"], "key": "SPACE" }],
@@ -1716,6 +1694,68 @@ Singleton {
                         { "modifiers": ["SUPER", "ALT", "CTRL"], "key": "l" }
                     ],
                     "actions": [{ "dispatcher": "layoutmsg", "argument": "swapcol r", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+
+                // Move Column to Workspace (Scrolling Layout)
+                {
+                    "name": "Move Column To Workspace 1",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "1" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 1", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+                {
+                    "name": "Move Column To Workspace 2",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "2" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 2", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+                {
+                    "name": "Move Column To Workspace 3",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "3" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 3", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+                {
+                    "name": "Move Column To Workspace 4",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "4" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 4", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+                {
+                    "name": "Move Column To Workspace 5",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "5" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 5", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+                {
+                    "name": "Move Column To Workspace 6",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "6" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 6", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+                {
+                    "name": "Move Column To Workspace 7",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "7" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 7", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+                {
+                    "name": "Move Column To Workspace 8",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "8" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 8", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+                {
+                    "name": "Move Column To Workspace 9",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "9" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 9", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
+                    "enabled": true
+                },
+                {
+                    "name": "Move Column To Workspace 10",
+                    "keys": [{ "modifiers": ["SUPER", "CTRL", "ALT"], "key": "0" }],
+                    "actions": [{ "dispatcher": "layoutmsg", "argument": "movecoltoworkspace 10", "flags": "", "compositor": { "type": "hyprland", "layouts": ["scrolling"] } }],
                     "enabled": true
                 }
             ]
