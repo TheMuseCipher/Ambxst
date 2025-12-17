@@ -17,6 +17,7 @@ import qs.modules.corners
 import qs.modules.components
 import qs.modules.desktop
 import qs.modules.lockscreen
+import qs.modules.dock
 import qs.modules.globals
 import qs.config
 
@@ -104,6 +105,11 @@ ShellRoot {
                 screen: cornersLoader.modelData
             }
         }
+    }
+
+    // Application Dock
+    Dock {
+        id: applicationDock
     }
 
     // Secure lockscreen using WlSessionLock

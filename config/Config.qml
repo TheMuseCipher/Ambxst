@@ -18,6 +18,7 @@ import "defaults/desktop.js" as DesktopDefaults
 import "defaults/lockscreen.js" as LockscreenDefaults
 import "defaults/prefix.js" as PrefixDefaults
 import "defaults/system.js" as SystemDefaults
+import "defaults/dock.js" as DockDefaults
 import "ConfigValidator.js" as ConfigValidator
 
 Singleton {
@@ -41,9 +42,10 @@ Singleton {
     property bool lockscreenReady: false
     property bool prefixReady: false
     property bool systemReady: false
+    property bool dockReady: false
     property bool keybindsInitialLoadComplete: false
 
-    property bool initialLoadComplete: themeReady && barReady && workspacesReady && overviewReady && notchReady && hyprlandReady && performanceReady && weatherReady && desktopReady && lockscreenReady && prefixReady && systemReady
+    property bool initialLoadComplete: themeReady && barReady && workspacesReady && overviewReady && notchReady && hyprlandReady && performanceReady && weatherReady && desktopReady && lockscreenReady && prefixReady && systemReady && dockReady
 
     // Aliases for backward compatibility
     property alias loader: themeLoader
@@ -1042,6 +1044,71 @@ Singleton {
     }
 
     // ============================================
+    // DOCK MODULE
+    // ============================================
+    FileView {
+        id: dockRawLoader
+        path: root.configDir + "/dock.json"
+        onLoaded: {
+            if (!root.dockReady) {
+                validateModule("dock", dockRawLoader, DockDefaults.data, () => {
+                    root.dockReady = true;
+                });
+            }
+        }
+    }
+
+    Process {
+        id: checkDockFile
+        running: true
+        command: ["sh", "-c", "test -f \"" + root.configDir + "/dock.json\""]
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                console.log("dock.json not found, creating with default values...");
+                dockRawLoader.setText(JSON.stringify(DockDefaults.data, null, 4));
+                root.dockReady = true;
+            }
+        }
+    }
+
+    FileView {
+        id: dockLoader
+        path: root.configDir + "/dock.json"
+        atomicWrites: true
+        watchChanges: true
+        onFileChanged: {
+            root.pauseAutoSave = true;
+            reload();
+            root.pauseAutoSave = false;
+        }
+        onPathChanged: reload()
+        onAdapterUpdated: {
+            if (root.dockReady && !root.pauseAutoSave) {
+                dockLoader.writeAdapter();
+            }
+        }
+
+        adapter: JsonAdapter {
+            property bool enabled: false
+            property string position: "bottom"
+            property int height: 56
+            property int iconSize: 40
+            property int spacing: 4
+            property int margin: 8
+            property int hoverRegionHeight: 4
+            property bool pinnedOnStartup: false
+            property bool hoverToReveal: true
+            property bool monochromeIcons: false
+            property bool showRunningIndicators: true
+            property bool showPinButton: true
+            property bool showOverviewButton: true
+            property list<string> pinnedApps: ["org.gnome.Nautilus", "firefox", "kitty"]
+            property list<string> ignoredAppRegexes: ["quickshell.*", "xdg-desktop-portal.*"]
+            property list<string> screenList: []
+        }
+    }
+
+    // ============================================
     // KEYBINDS (kept separate as binds.json)
     // ============================================
     Process {
@@ -1855,6 +1922,9 @@ Singleton {
 
     // System configuration
     property QtObject system: systemLoader.adapter
+
+    // Dock configuration
+    property QtObject dock: dockLoader.adapter
 
     // Helper functions for color handling (HEX or named colors)
     function isHexColor(colorValue) {
