@@ -27,13 +27,13 @@ Button {
     readonly property bool isRight: dockPosition === "right"
     readonly property bool isVertical: isLeft || isRight
 
-    readonly property bool isSeparator: appToplevel.appId === "SEPARATOR"
-    readonly property var desktopEntry: isSeparator ? null : DesktopEntries.heuristicLookup(appToplevel.appId)
-    readonly property bool appIsActive: !isSeparator && appToplevel.toplevels.some(t => t.activated === true)
-    readonly property bool appIsRunning: !isSeparator && appToplevel.toplevelCount > 0
+    readonly property bool isSeparator: appToplevel?.appId === "SEPARATOR"
+    readonly property var desktopEntry: (isSeparator || !appToplevel) ? null : DesktopEntries.heuristicLookup(appToplevel.appId)
+    readonly property bool appIsActive: !isSeparator && (appToplevel?.toplevels?.some(t => t.activated === true) ?? false)
+    readonly property bool appIsRunning: !isSeparator && (appToplevel?.toplevelCount ?? 0) > 0
 
     readonly property bool showIndicators: !isSeparator && (Config.dock?.showRunningIndicators ?? true) && appIsRunning
-    readonly property int instanceCount: isSeparator ? 0 : appToplevel.toplevelCount
+    readonly property int instanceCount: (isSeparator || !appToplevel) ? 0 : appToplevel.toplevelCount
 
     enabled: !isSeparator
     implicitWidth: isSeparator 
@@ -96,7 +96,7 @@ Button {
                         if (root.desktopEntry && root.desktopEntry.icon) {
                             return root.desktopEntry.icon;
                         }
-                        return AppSearch.guessIcon(root.appToplevel.appId);
+                        return AppSearch.guessIcon(root.appToplevel?.appId ?? "");
                     }
 
                     Image {
@@ -203,7 +203,7 @@ Button {
                 }
             } else if (mouse.button === Qt.RightButton) {
                 // Toggle pin
-                TaskbarApps.togglePin(root.appToplevel.appId);
+                TaskbarApps.togglePin(root.appToplevel?.appId ?? "");
             }
         }
     }
@@ -211,6 +211,6 @@ Button {
     // Tooltip
     StyledToolTip {
         show: root.hovered && !root.isSeparator
-        tooltipText: root.desktopEntry?.name ?? root.appToplevel.appId
+        tooltipText: root.desktopEntry?.name ?? root.appToplevel?.appId ?? ""
     }
 }

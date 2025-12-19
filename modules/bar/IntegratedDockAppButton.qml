@@ -95,7 +95,7 @@ Button {
                         if (root.desktopEntry && root.desktopEntry.icon) {
                             return root.desktopEntry.icon;
                         }
-                        return AppSearch.guessIcon(root.appToplevel.appId);
+                        return AppSearch.guessIcon(root.appToplevel?.appId ?? "");
                     }
 
                     Image {
@@ -199,7 +199,7 @@ Button {
                 }
             } else if (mouse.button === Qt.RightButton) {
                 // Toggle pin
-                TaskbarApps.togglePin(root.appToplevel.appId);
+                TaskbarApps.togglePin(root.appToplevel?.appId ?? "");
             }
         }
     }
@@ -207,6 +207,6 @@ Button {
     // Tooltip
     StyledToolTip {
         show: root.hovered && !root.isSeparator
-        tooltipText: root.desktopEntry?.name ?? root.appToplevel.appId
+        tooltipText: root.desktopEntry?.name ?? root.appToplevel?.appId ?? ""
     }
 }
