@@ -128,13 +128,18 @@ Singleton {
     property var themeSnapshot: null
 
     // Constants for theme snapshot operations (avoid duplication)
-    readonly property var _srVariantNames: [
-        "srBg", "srPopup", "srInternalBg", "srBarBg", "srPane", "srCommon", "srFocus",
-        "srPrimary", "srPrimaryFocus", "srOverPrimary",
-        "srSecondary", "srSecondaryFocus", "srOverSecondary",
-        "srTertiary", "srTertiaryFocus", "srOverTertiary",
-        "srError", "srErrorFocus", "srOverError"
-    ]
+    // Get SR variant names dynamically from Config.theme
+    function _getSrVariantNames() {
+        var names = [];
+        var keys = Object.keys(Config.theme);
+        for (var i = 0; i < keys.length; i++) {
+            if (keys[i].startsWith("sr")) {
+                names.push(keys[i]);
+            }
+        }
+        return names;
+    }
+
     readonly property var _simpleThemeProps: [
         "roundness", "oledMode", "lightMode", "font", "fontSize", "monoFont", "monoFontSize",
         "tintIcons", "enableCorners", "animDuration",
@@ -177,6 +182,7 @@ Singleton {
     function createThemeSnapshot() {
         var snapshot = {};
         var theme = Config.theme;
+        var srVariantNames = _getSrVariantNames();
 
         // Copy simple properties
         for (var i = 0; i < _simpleThemeProps.length; i++) {
@@ -185,8 +191,8 @@ Singleton {
         }
 
         // Copy SR variants
-        for (var j = 0; j < _srVariantNames.length; j++) {
-            var name = _srVariantNames[j];
+        for (var j = 0; j < srVariantNames.length; j++) {
+            var name = srVariantNames[j];
             snapshot[name] = _copySrVariant(theme[name]);
         }
 
@@ -198,6 +204,7 @@ Singleton {
         if (!snapshot) return;
 
         var theme = Config.theme;
+        var srVariantNames = _getSrVariantNames();
 
         // Restore simple properties
         for (var i = 0; i < _simpleThemeProps.length; i++) {
@@ -206,9 +213,11 @@ Singleton {
         }
 
         // Restore SR variants
-        for (var j = 0; j < _srVariantNames.length; j++) {
-            var name = _srVariantNames[j];
-            _restoreSrVariant(snapshot[name], theme[name]);
+        for (var j = 0; j < srVariantNames.length; j++) {
+            var name = srVariantNames[j];
+            if (snapshot[name]) {
+                _restoreSrVariant(snapshot[name], theme[name]);
+            }
         }
     }
 
