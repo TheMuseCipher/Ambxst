@@ -15,11 +15,111 @@ QtObject {
     property real windSpeed: 0
     property bool dataAvailable: false
 
+    // Sun position data
+    property string sunrise: ""  // HH:MM format
+    property string sunset: ""   // HH:MM format
+    property real sunProgress: 0.0  // 0.0-1.0 position on the arc
+    property bool isDay: true
+    property string timeOfDay: "Day"  // "Day", "Evening", "Night"
+    property string weatherDescription: ""
+
     // Internal state
     property int retryCount: 0
     property int maxRetries: 5
     property string cachedLat: ""
     property string cachedLon: ""
+
+    function getWeatherDescription(code) {
+        if (code === 0) return "Clear sky";
+        if (code === 1) return "Mainly clear";
+        if (code === 2) return "Partly cloudy";
+        if (code === 3) return "Overcast";
+        if (code === 45) return "Foggy";
+        if (code === 48) return "Rime fog";
+        if (code >= 51 && code <= 53) return "Light drizzle";
+        if (code === 55) return "Dense drizzle";
+        if (code >= 56 && code <= 57) return "Freezing drizzle";
+        if (code === 61) return "Light rain";
+        if (code === 63) return "Moderate rain";
+        if (code === 65) return "Heavy rain";
+        if (code >= 66 && code <= 67) return "Freezing rain";
+        if (code === 71) return "Light snow";
+        if (code === 73) return "Moderate snow";
+        if (code === 75) return "Heavy snow";
+        if (code === 77) return "Snow grains";
+        if (code >= 80 && code <= 81) return "Rain showers";
+        if (code === 82) return "Heavy showers";
+        if (code >= 85 && code <= 86) return "Snow showers";
+        if (code === 95) return "Thunderstorm";
+        if (code >= 96 && code <= 99) return "Thunderstorm with hail";
+        return "Unknown";
+    }
+
+    function parseTime(timeStr) {
+        // Parse "HH:MM" to minutes since midnight
+        var parts = timeStr.split(":");
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+
+    function calculateSunPosition() {
+        var now = new Date();
+        var currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+        if (!sunrise || !sunset) {
+            root.isDay = (now.getHours() >= 6 && now.getHours() < 18);
+            root.sunProgress = root.isDay ? 0.5 : 0.5;
+            root.timeOfDay = root.isDay ? "Day" : "Night";
+            return;
+        }
+
+        var sunriseMinutes = parseTime(sunrise);
+        var sunsetMinutes = parseTime(sunset);
+        
+        // Define golden hour (roughly 1 hour before sunset)
+        var goldenHourStart = sunsetMinutes - 60;
+        // Define twilight end (roughly 1 hour after sunset)
+        var twilightEnd = sunsetMinutes + 60;
+        // Define dawn start (roughly 1 hour before sunrise)
+        var dawnStart = sunriseMinutes - 60;
+
+        if (currentMinutes >= sunriseMinutes && currentMinutes <= sunsetMinutes) {
+            // Daytime: sun moves along the arc
+            root.isDay = true;
+            root.sunProgress = (currentMinutes - sunriseMinutes) / (sunsetMinutes - sunriseMinutes);
+            
+            if (currentMinutes >= goldenHourStart) {
+                root.timeOfDay = "Evening";
+            } else {
+                root.timeOfDay = "Day";
+            }
+        } else {
+            // Nighttime
+            root.isDay = false;
+            
+            if (currentMinutes > sunsetMinutes) {
+                // After sunset
+                if (currentMinutes <= twilightEnd) {
+                    root.timeOfDay = "Evening";
+                } else {
+                    root.timeOfDay = "Night";
+                }
+                // Moon rises at sunset, sets at sunrise (simplified)
+                var nightDuration = (24 * 60 - sunsetMinutes) + sunriseMinutes;
+                var nightElapsed = currentMinutes - sunsetMinutes;
+                root.sunProgress = nightElapsed / nightDuration;
+            } else {
+                // Before sunrise
+                if (currentMinutes >= dawnStart) {
+                    root.timeOfDay = "Day";  // Dawn
+                } else {
+                    root.timeOfDay = "Night";
+                }
+                var nightDuration = (24 * 60 - sunsetMinutes) + sunriseMinutes;
+                var nightElapsed = (24 * 60 - sunsetMinutes) + currentMinutes;
+                root.sunProgress = nightElapsed / nightDuration;
+            }
+        }
+    }
 
     function getWeatherCodeEmoji(code) {
         if (code === 0)
@@ -67,7 +167,7 @@ QtObject {
     }
 
     function fetchWeatherWithCoords(lat, lon) {
-        var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=auto";
+        var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto";
         weatherProcess.command = ["curl", "-s", url];
         weatherProcess.running = true;
     }
@@ -191,7 +291,20 @@ QtObject {
                                 root.minTemp = convertTemp(parseFloat(daily.temperature_2m_min[0]));
                             }
 
+                            // Get sunrise/sunset times
+                            if (daily.sunrise && daily.sunrise.length > 0) {
+                                // Format: "2024-12-20T07:45" -> "07:45"
+                                var sunriseStr = daily.sunrise[0];
+                                root.sunrise = sunriseStr.split("T")[1];
+                            }
+                            if (daily.sunset && daily.sunset.length > 0) {
+                                var sunsetStr = daily.sunset[0];
+                                root.sunset = sunsetStr.split("T")[1];
+                            }
+
                             root.weatherSymbol = getWeatherCodeEmoji(root.weatherCode);
+                            root.weatherDescription = getWeatherDescription(root.weatherCode);
+                            root.calculateSunPosition();
                             root.dataAvailable = true;
                             root.retryCount = 0;
                         } else {
@@ -239,6 +352,14 @@ QtObject {
         running: true
         repeat: true
         onTriggered: root.updateWeather()
+    }
+
+    property Timer sunPositionTimer: Timer {
+        // Update sun position every minute
+        interval: 60000
+        running: root.dataAvailable
+        repeat: true
+        onTriggered: root.calculateSunPosition()
     }
 
     property Connections configConnections: Connections {

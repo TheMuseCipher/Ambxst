@@ -15,6 +15,7 @@ ClippingRectangle {
 
     clip: true
     antialiasing: true
+    contentUnderBorder: true
 
     required property string variant
 

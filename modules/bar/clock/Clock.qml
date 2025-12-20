@@ -151,148 +151,205 @@ Item {
         anchorItem: buttonBg
         bar: root.bar
         visualMargin: 8
-        popupPadding: 16
+        popupPadding: 0
 
-        contentWidth: popupContent.implicitWidth + popupPadding * 2
-        contentHeight: popupContent.implicitHeight + popupPadding * 2
+        contentWidth: 260
+        contentHeight: 140
 
-        ColumnLayout {
+        // Weather widget with sun arc
+        Item {
             id: popupContent
             anchors.fill: parent
-            spacing: 12
+            anchors.margins: Config.theme.srPopup.border[1]
+            visible: root.weatherAvailable
 
-            // Date & Time section
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 4
+            // Weather card with gradient background
+            Rectangle {
+                id: weatherCard
+                anchors.fill: parent
+                radius: Styling.radius(4 - Config.theme.srPopup.border[1])
+                clip: true
 
-                // Full date
-                Text {
-                    text: root.currentFullDate
-                    color: Colors.overBackground
-                    font.family: Config.theme.font
-                    font.pixelSize: Styling.fontSize(0)
-                    font.bold: true
-                    Layout.alignment: Qt.AlignHCenter
+                // Dynamic gradient based on time of day
+                gradient: Gradient {
+                    GradientStop { 
+                        position: 0.0
+                        color: WeatherService.timeOfDay === "Night" ? "#0f0f23" :
+                               WeatherService.timeOfDay === "Evening" ? "#1a1a2e" : "#87CEEB"
+                    }
+                    GradientStop { 
+                        position: 0.5
+                        color: WeatherService.timeOfDay === "Night" ? "#1a1a3a" :
+                               WeatherService.timeOfDay === "Evening" ? "#e94560" : "#B0E0E6"
+                    }
+                    GradientStop { 
+                        position: 1.0
+                        color: WeatherService.timeOfDay === "Night" ? "#2d2d5a" :
+                               WeatherService.timeOfDay === "Evening" ? "#ffeaa7" : "#E0F6FF"
+                    }
                 }
 
-                // Large time
-                Text {
-                    text: root.currentTime
-                    color: Colors.primary
-                    font.family: Config.theme.font
-                    font.pixelSize: Styling.fontSize(6)
-                    font.bold: true
-                    Layout.alignment: Qt.AlignHCenter
-                }
-            }
+                // Sun arc container
+                Item {
+                    id: arcContainer
+                    anchors.fill: parent
 
-            // Weather section (only if available)
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 8
-                visible: root.weatherAvailable
+                    // Arc dimensions - elliptical arc that fits within the container
+                    property real arcWidth: width - 40  // Horizontal span
+                    property real arcHeight: 70  // Vertical height of the arc
+                    property real arcCenterX: width / 2
+                    property real arcCenterY: height - 12  // Position at bottom edge
 
-                // Separator
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 1
-                    color: Colors.outline
-                    opacity: 0.3
-                }
+                    // The arc path (upper half of ellipse only)
+                    Canvas {
+                        id: arcCanvas
+                        anchors.fill: parent
 
-                // Weather info
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 16
-
-                    // Weather emoji and current temp
-                    RowLayout {
-                        spacing: 8
-
-                        Text {
-                            text: WeatherService.weatherSymbol
-                            font.pixelSize: 32
-                            verticalAlignment: Text.AlignVCenter
+                        onPaint: {
+                            var ctx = getContext("2d");
+                            ctx.reset();
+                            ctx.strokeStyle = WeatherService.isDay ? 
+                                "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.15)";
+                            ctx.lineWidth = 1.5;
+                            
+                            var cx = arcContainer.arcCenterX;
+                            var cy = arcContainer.arcCenterY;
+                            var rx = arcContainer.arcWidth / 2;
+                            var ry = arcContainer.arcHeight;
+                            
+                            // Draw only the upper half of the ellipse manually
+                            ctx.beginPath();
+                            ctx.moveTo(cx - rx, cy);
+                            
+                            // Use quadratic bezier curves to approximate upper ellipse arc
+                            var steps = 50;
+                            for (var i = 0; i <= steps; i++) {
+                                var angle = Math.PI - (Math.PI * i / steps);  // PI to 0
+                                var x = cx + rx * Math.cos(angle);
+                                var y = cy - ry * Math.sin(angle);  // Subtract to go up
+                                ctx.lineTo(x, y);
+                            }
+                            
+                            ctx.stroke();
                         }
 
-                        Text {
-                            text: Math.round(WeatherService.currentTemp) + "°" + Config.weather.unit
-                            color: Colors.overBackground
-                            font.family: Config.theme.font
-                            font.pixelSize: Styling.fontSize(2)
-                            font.bold: true
-                            verticalAlignment: Text.AlignVCenter
+                        Component.onCompleted: requestPaint()
+                        
+                        Connections {
+                            target: WeatherService
+                            function onIsDayChanged() { arcCanvas.requestPaint() }
                         }
+                        
+                        onWidthChanged: requestPaint()
+                        onHeightChanged: requestPaint()
                     }
 
-                    // Separator
+                    // Horizon line
                     Rectangle {
-                        Layout.preferredWidth: 1
-                        Layout.preferredHeight: 40
-                        color: Colors.outline
-                        opacity: 0.3
+                        x: arcContainer.arcCenterX - arcContainer.arcWidth / 2 - 8
+                        y: arcContainer.arcCenterY
+                        width: arcContainer.arcWidth + 16
+                        height: 1
+                        color: Qt.rgba(1, 1, 1, 0.2)
                     }
 
-                    // Max/Min temps
-                    ColumnLayout {
-                        spacing: 2
+                    // Sun/Moon indicator
+                    Rectangle {
+                        id: celestialBody
+                        width: 20
+                        height: 20
+                        radius: 10
 
-                        RowLayout {
-                            spacing: 4
-                            Text {
-                                text: Icons.arrowUp
-                                color: Colors.yellow
-                                font.family: Icons.font
-                                font.pixelSize: 12
+                        property real progress: WeatherService.sunProgress
+                        
+                        // Elliptical arc position calculation
+                        property real angle: Math.PI * (1 - progress)  // PI to 0
+                        property real posX: arcContainer.arcCenterX + (arcContainer.arcWidth / 2) * Math.cos(angle) - width / 2
+                        property real posY: arcContainer.arcCenterY - arcContainer.arcHeight * Math.sin(angle) - height / 2
+
+                        x: posX
+                        y: posY
+
+                        Behavior on x { NumberAnimation { duration: 300; easing.type: Easing.OutQuad } }
+                        Behavior on y { NumberAnimation { duration: 300; easing.type: Easing.OutQuad } }
+
+                        gradient: Gradient {
+                            GradientStop { 
+                                position: 0.0
+                                color: WeatherService.isDay ? "#FFF9C4" : "#FFFFFF"
                             }
-                            Text {
-                                text: Math.round(WeatherService.maxTemp) + "°"
-                                color: Colors.yellow
-                                font.family: Config.theme.font
-                                font.pixelSize: Styling.fontSize(0)
-                                font.bold: true
+                            GradientStop { 
+                                position: 0.5
+                                color: WeatherService.isDay ? "#FFE082" : "#E8E8E8"
+                            }
+                            GradientStop { 
+                                position: 1.0
+                                color: WeatherService.isDay ? "#FFB74D" : "#C0C0C0"
                             }
                         }
 
-                        RowLayout {
-                            spacing: 4
-                            Text {
-                                text: Icons.arrowDown
-                                color: Colors.blue
-                                font.family: Icons.font
-                                font.pixelSize: 12
-                            }
-                            Text {
-                                text: Math.round(WeatherService.minTemp) + "°"
-                                color: Colors.blue
-                                font.family: Config.theme.font
-                                font.pixelSize: Styling.fontSize(0)
-                                font.bold: true
-                            }
+                        // Outer glow
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: parent.width + 12
+                            height: parent.height + 12
+                            radius: width / 2
+                            color: "transparent"
+                            border.color: WeatherService.isDay ? 
+                                Qt.rgba(1, 0.95, 0.7, 0.4) : Qt.rgba(1, 1, 1, 0.2)
+                            border.width: 3
+                            z: -1
+                        }
+
+                        // Inner glow
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: parent.width + 6
+                            height: parent.height + 6
+                            radius: width / 2
+                            color: "transparent"
+                            border.color: WeatherService.isDay ? 
+                                Qt.rgba(1, 0.95, 0.7, 0.6) : Qt.rgba(1, 1, 1, 0.3)
+                            border.width: 2
+                            z: -1
                         }
                     }
                 }
 
-                // Wind speed
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 6
-                    visible: WeatherService.windSpeed > 0
+                // Time of day label (top left)
+                Column {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.margins: 12
+                    spacing: 2
 
                     Text {
-                        text: Icons.wind
-                        color: Colors.outline
-                        font.family: Icons.font
-                        font.pixelSize: 14
-                    }
-
-                    Text {
-                        text: Math.round(WeatherService.windSpeed) + " km/h"
-                        color: Colors.outline
+                        text: WeatherService.timeOfDay
+                        color: WeatherService.timeOfDay === "Day" ? "#1a5276" : "#FFFFFF"
                         font.family: Config.theme.font
-                        font.pixelSize: Styling.fontSize(-1)
+                        font.pixelSize: Config.theme.fontSize + 4
+                        font.weight: Font.Bold
                     }
+
+                    Text {
+                        text: WeatherService.weatherDescription
+                        color: WeatherService.timeOfDay === "Day" ? "#2980b9" : 
+                               Qt.rgba(1, 1, 1, 0.7)
+                        font.family: Config.theme.font
+                        font.pixelSize: Config.theme.fontSize - 2
+                    }
+                }
+
+                // Temperature (top right)
+                Text {
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 12
+                    text: Math.round(WeatherService.currentTemp) + Config.weather.unit + "°"
+                    color: WeatherService.timeOfDay === "Day" ? "#1a5276" : "#FFFFFF"
+                    font.family: Config.theme.font
+                    font.pixelSize: Config.theme.fontSize + 6
+                    font.weight: Font.Medium
                 }
             }
         }
