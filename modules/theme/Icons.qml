@@ -9,6 +9,11 @@ QtObject {
     // Overview button
     readonly property string overview: ""
 
+    // Layouts
+    readonly property string dwindle: ""
+    readonly property string master: ""
+    readonly property string scrolling: ""
+
     // Powermenu
     readonly property string lock: ""
     readonly property string suspend: ""
