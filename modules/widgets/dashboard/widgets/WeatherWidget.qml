@@ -2,12 +2,13 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import Quickshell.Widgets
 import qs.modules.theme
 import qs.modules.services
 import qs.modules.components
 import qs.config
 
-Rectangle {
+ClippingRectangle {
     id: root
 
     // Configurable properties
@@ -18,6 +19,7 @@ Rectangle {
 
     radius: Styling.radius(0)
     clip: true
+    color: "transparent"
 
     // Request weather update when widget becomes visible if no data
     onVisibleChanged: {
@@ -57,18 +59,21 @@ Rectangle {
     readonly property color botColor: blendColors(dayBot, eveningBot, nightBot, blend)
 
     // Dynamic gradient based on time of day (smooth interpolation)
-    gradient: Gradient {
-        GradientStop {
-            position: 0.0
-            color: root.topColor
-        }
-        GradientStop {
-            position: 0.5
-            color: root.midColor
-        }
-        GradientStop {
-            position: 1.0
-            color: root.botColor
+    Rectangle {
+        anchors.fill: parent
+        gradient: Gradient {
+            GradientStop {
+                position: 0.0
+                color: root.topColor
+            }
+            GradientStop {
+                position: 0.5
+                color: root.midColor
+            }
+            GradientStop {
+                position: 1.0
+                color: root.botColor
+            }
         }
     }
 
