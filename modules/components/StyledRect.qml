@@ -28,6 +28,8 @@ ClippingRectangle {
         switch (variant) {
         case "bg":
             return Config.theme.srBg;
+        case "popup":
+            return Config.theme.srPopup;
         case "internalbg":
             return Config.theme.srInternalBg;
         case "pane":

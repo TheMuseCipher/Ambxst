@@ -32,6 +32,22 @@ var data = {
         "itemColor": "overBackground",
         "opacity": 1.0
     },
+    "srPopup": {
+        "gradient": [["background", 0.0]],
+        "gradientType": "linear",
+        "gradientAngle": 0,
+        "gradientCenterX": 0.5,
+        "gradientCenterY": 0.5,
+        "halftoneDotMin": 0.0,
+        "halftoneDotMax": 2.0,
+        "halftoneStart": 0.0,
+        "halftoneEnd": 1.0,
+        "halftoneDotColor": "surface",
+        "halftoneBackgroundColor": "background",
+        "border": ["surfaceBright", 2],
+        "itemColor": "overBackground",
+        "opacity": 1.0
+    },
     "srInternalBg": {
         "gradient": [["background", 0.0]],
         "gradientType": "linear",
