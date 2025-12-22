@@ -201,30 +201,26 @@ Item {
                         color: Colors.overBackground
                     }
 
-                    ColumnLayout {
-                        Layout.alignment: Qt.AlignVCenter
+                    Text {
+                        text: Math.round(Battery.percentage) + "% " + (Battery.isPluggedIn ? 
+                              (Battery.isCharging ? "Charging" : "Full") :
+                              "On battery")
+                        font.family: Styling.defaultFont
+                        font.pixelSize: Styling.fontSize(0)
+                        font.bold: true
+                        color: Colors.overBackground
+                    }
+
+                    Text {
+                        text: Battery.isPluggedIn ? 
+                              (Battery.timeToFull !== "" ? "Full in " + Battery.timeToFull : "") :
+                              (Battery.timeToEmpty !== "" ? Battery.timeToEmpty + " remaining" : "")
+                        font.family: Styling.defaultFont
+                        font.pixelSize: Styling.fontSize(-1)
+                        color: Colors.overBackground
+                        opacity: 0.8
                         Layout.fillWidth: true
-                        spacing: 2
-
-                        Text {
-                            text: Math.round(Battery.percentage) + "%"
-                            font.family: Styling.defaultFont
-                            font.pixelSize: Styling.fontSize(0)
-                            font.bold: true
-                            color: Colors.overBackground
-                        }
-
-                        Text {
-                            text: Battery.isPluggedIn ? 
-                                  (Battery.timeToFull !== "" ? "Full in " + Battery.timeToFull : "Charging") :
-                                  (Battery.timeToEmpty !== "" ? Battery.timeToEmpty + " remaining" : "On battery")
-                            font.family: Styling.defaultFont
-                            font.pixelSize: Styling.fontSize(-1)
-                            color: Colors.overBackground
-                            opacity: 0.8
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                        }
+                        elide: Text.ElideRight
                     }
                 }
             }
