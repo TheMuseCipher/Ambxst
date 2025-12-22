@@ -11,7 +11,9 @@ Popup {
     id: root
     
     width: 400
-    height: Math.min(contentItem.implicitHeight + 20, 500)
+    // Height: Header (48) + Spacing (12) + List (5 * 48 = 240) + Bottom Padding/Margins approx
+    // We constrain the List height specifically.
+    height: contentItem.implicitHeight + 20
     
     // Center in parent
     x: (parent.width - width) / 2
@@ -57,14 +59,13 @@ Popup {
         if (selectedIndex >= filteredModels.length) {
             selectedIndex = Math.max(0, filteredModels.length - 1);
         }
+        
+        // Sync ListView current index
+        modelList.currentIndex = selectedIndex;
     }
 
     background: StyledRect {
         variant: "popup"
-        radius: Styling.radius(8)
-        enableShadow: true
-        border.width: 1
-        border.color: Colors.outline
     }
     
     contentItem: ColumnLayout {
@@ -80,28 +81,25 @@ Popup {
                 id: searchInput
                 Layout.fillWidth: true
                 placeholderText: "Search models..."
-                iconText: Icons.assistant
+                iconText: "" // Removed icon as requested
                 
                 onSearchTextChanged: text => {
                     root.updateFilteredModels();
                     root.selectedIndex = 0;
+                    modelList.currentIndex = 0;
                 }
                 
                 onDownPressed: {
                     if (root.selectedIndex < root.filteredModels.length - 1) {
                         root.selectedIndex++;
-                        // Auto-scroll
-                        // Note: A bit complex to scroll precisely with grouping, 
-                        // but we can trust the user's "highlight" requirement is visual mostly.
-                        // Ideally we'd scroll the listview.
-                        modelList.positionViewAtIndex(root.selectedIndex, ListView.Contain);
+                        modelList.currentIndex = root.selectedIndex;
                     }
                 }
                 
                 onUpPressed: {
                     if (root.selectedIndex > 0) {
                         root.selectedIndex--;
-                        modelList.positionViewAtIndex(root.selectedIndex, ListView.Contain);
+                        modelList.currentIndex = root.selectedIndex;
                     }
                 }
                 
@@ -172,22 +170,68 @@ Popup {
             }
         }
         
-        Separator { Layout.fillWidth: true; vert: false }
-        
         // Model List
         ListView {
             id: modelList
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredHeight: Math.min(contentHeight, 400)
+            // Limit height to 5 items (5 * 48 = 240)
+            Layout.preferredHeight: Math.min(contentHeight, 240)
             clip: true
             
             model: root.filteredModels
             
-            // Note: Grouping complicates index-based navigation significantly.
-            // For true keyboard nav over a filtered list, flat list is often better UX.
-            // User requested "SearchInput to filter models", so flatness is expected.
-            // We can show the "provider" as a subtitle or badge instead of sections.
+            property bool enableScrollAnimation: true
+            
+            Behavior on contentY {
+                enabled: Config.animDuration > 0 && modelList.enableScrollAnimation && !modelList.moving
+                NumberAnimation {
+                    duration: Config.animDuration / 2
+                    easing.type: Easing.OutCubic
+                }
+            }
+            
+            // Handle smooth auto-scroll on index change
+            onCurrentIndexChanged: {
+                if (currentIndex >= 0) {
+                    let itemY = currentIndex * 48;
+                    let itemHeight = 48;
+                    let viewportTop = contentY;
+                    let viewportBottom = viewportTop + height;
+                    
+                    if (itemY < viewportTop) {
+                        // Item above viewport, scroll up
+                        contentY = itemY;
+                    } else if (itemY + itemHeight > viewportBottom) {
+                        // Item below viewport, scroll down
+                        contentY = itemY + itemHeight - height;
+                    }
+                }
+            }
+            
+            // Highlight component - matches App Launcher pattern
+            highlight: Item {
+                width: modelList.width
+                height: 48
+                
+                // Calculate Y position based on index (all items have same height)
+                y: modelList.currentIndex >= 0 ? modelList.currentIndex * 48 : 0
+                
+                Behavior on y {
+                    enabled: Config.animDuration > 0
+                    NumberAnimation {
+                        duration: Config.animDuration / 2
+                        easing.type: Easing.OutCubic
+                    }
+                }
+                
+                StyledRect {
+                    anchors.fill: parent
+                    variant: "primary"
+                    radius: Styling.radius(4)
+                    visible: modelList.currentIndex >= 0
+                }
+            }
+            highlightFollowsCurrentItem: false
             
             delegate: Button {
                 id: delegateBtn
@@ -197,7 +241,8 @@ Popup {
                 leftPadding: 8
                 rightPadding: 8
                 
-                property bool isSelected: index === root.selectedIndex
+                // Controlled by ListView's currentIndex via root.selectedIndex
+                property bool isSelected: ListView.isCurrentItem
                 property bool isActiveModel: Ai.currentModel.name === modelData.name
 
                 contentItem: RowLayout {
@@ -221,6 +266,8 @@ Popup {
                             }
                             font.family: Icons.font
                             font.pixelSize: 20
+                            // Logic: Text becomes white (overPrimary) when selected (because highlight is primary), 
+                            // otherwise uses standard colors.
                             color: delegateBtn.isSelected ? Config.resolveColor(Config.theme.srPrimary.itemColor) : (delegateBtn.isActiveModel ? Colors.primary : Colors.overSurface)
                             
                             Behavior on color {
@@ -270,22 +317,20 @@ Popup {
                         text: Icons.accept
                         font.family: Icons.font
                         font.pixelSize: 16
-                        color: Colors.primary
+                        // On primary highlight, color should be readable. srPrimary itemColor usually contrasts well.
+                        color: delegateBtn.isSelected ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.primary
                         visible: delegateBtn.isActiveModel
+                        
+                        Behavior on color {
+                            enabled: Config.animDuration > 0
+                            ColorAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                        }
                     }
                 }
                 
-                background: Rectangle {
-                   color: "transparent"
-                   
-                   // Hover/Selection Highlight
-                   Rectangle {
-                       anchors.fill: parent
-                       color: Colors.surface
-                       visible: delegateBtn.isSelected || delegateBtn.hovered
-                       opacity: 0.5
-                       radius: Styling.radius(4)
-                   }
+                background: Item {
+                   // Background handled by ListView highlight
+                   // We keep this empty or transparent
                 }
                 
                 onClicked: {
@@ -296,7 +341,10 @@ Popup {
                 // Mouse hover updates selection
                 MouseArea {
                     anchors.fill: parent
-                    onEntered: root.selectedIndex = index
+                    onEntered: {
+                        root.selectedIndex = index;
+                        modelList.currentIndex = index;
+                    }
                     propagateComposedEvents: true
                     onClicked: mouse => mouse.accepted = false // Pass to Button
                 }
