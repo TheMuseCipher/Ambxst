@@ -10,31 +10,10 @@ import "ai/strategies"
 Singleton {
     id: root
 
-    property string litellmConfig: Qt.resolvedUrl("ai/litellm_config.yaml").replace("file://", "")
-    
     // ============================================ 
     // PROPERTIES
     // ============================================ 
     
-    // ... (dataDir, chatDir, tmpDir) ...
-
-    // Start LiteLLM Proxy on load
-    Process {
-        id: litellmProcess
-        command: ["litellm", "--config", litellmConfig, "--port", "4000"]
-        running: true
-        stdout: StdioCollector { id: litellmStdout }
-        stderr: StdioCollector { id: litellmStderr }
-        
-        onExited: exitCode => {
-            console.warn("LiteLLM Proxy exited with code: " + exitCode + ". Stderr: " + litellmStderr.text)
-            // Retry logic could go here
-        }
-    }
-    
-    // ... (rest of the file)
-
-
     property string dataDir: (Quickshell.env("XDG_DATA_HOME") || (Quickshell.env("HOME") + "/.local/share")) + "/Ambxst"
     property string chatDir: dataDir + "/chats"
     property string tmpDir: "/tmp/ambxst-ai"
