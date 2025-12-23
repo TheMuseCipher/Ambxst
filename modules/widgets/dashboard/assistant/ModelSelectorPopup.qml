@@ -201,6 +201,7 @@ Popup {
                         Layout.alignment: Qt.AlignVCenter
 
                         Text {
+                            id: refreshIcon
                             anchors.centerIn: parent
                             text: Ai.fetchingModels ? Icons.circleNotch : (refreshBtn.confirming ? Icons.sync : Icons.arrowCounterClockwise)
                             font.family: Icons.font
@@ -215,7 +216,7 @@ Popup {
                                 running: Ai.fetchingModels
                                 onRunningChanged: {
                                     if (!running) {
-                                        parent.rotation = 0;
+                                        refreshIcon.rotation = 0;
                                     }
                                 }
                             }
