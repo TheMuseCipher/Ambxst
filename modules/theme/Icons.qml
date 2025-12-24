@@ -237,4 +237,5 @@ QtObject {
 
     readonly property string list: ""
     readonly property string paperPlane: ""
+    readonly property string compositor: ""
 }

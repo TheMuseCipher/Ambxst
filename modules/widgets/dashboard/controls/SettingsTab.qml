@@ -180,13 +180,9 @@ Rectangle {
 
                 // Scroll wheel navigation between sections
                 WheelHandler {
+                    enabled: sidebarFlickable.contentHeight <= sidebarFlickable.height
                     acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                     onWheel: event => {
-                        // If content is scrollable, let Flickable handle it
-                        if (sidebarFlickable.contentHeight > sidebarFlickable.height) {
-                            return;
-                        }
-                        // Otherwise, navigate sections
                         if (event.angleDelta.y > 0 && root.currentSection > 0) {
                             root.currentSection--;
                         } else if (event.angleDelta.y < 0 && root.currentSection < 8) {
