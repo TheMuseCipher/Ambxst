@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import qs.modules.theme
 import qs.modules.components
@@ -388,6 +389,65 @@ Item {
         }
     }
 
+    // Inline component for Compositor Tabs
+    component CompositorTabButton: StyledRect {
+        id: tabBtn
+        property string label: ""
+        property string icon: ""
+        property string image: ""
+        property bool isSelected: false
+        signal clicked()
+
+        variant: isSelected ? "primary" : (hoverHandler.hovered ? "focus" : "common")
+        Layout.preferredWidth: 140
+        Layout.preferredHeight: 36
+        radius: isSelected ? Styling.radius(0) / 2 : Styling.radius(0)
+        enableShadow: true
+
+        HoverHandler { id: hoverHandler }
+        TapHandler { onTapped: tabBtn.clicked() }
+
+        RowLayout {
+            anchors.centerIn: parent
+            spacing: 8
+
+            // Image Icon (with effect)
+            Image {
+                visible: tabBtn.image !== ""
+                source: tabBtn.image
+                Layout.preferredWidth: 16
+                Layout.preferredHeight: 16
+                sourceSize: Qt.size(32, 32)
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    colorization: 1.0
+                    colorizationColor: tabBtn.itemColor
+                }
+            }
+
+            // Font Icon
+            Text {
+                visible: tabBtn.icon !== "" && tabBtn.image === ""
+                text: tabBtn.icon
+                font.family: Icons.font
+                font.pixelSize: 14
+                color: tabBtn.itemColor
+            }
+
+            // Label
+            Text {
+                text: tabBtn.label
+                font.family: Config.theme.font
+                font.pixelSize: Styling.fontSize(0)
+                font.bold: true
+                color: tabBtn.itemColor
+            }
+        }
+    }
+
     // Main content
     Flickable {
         id: mainFlickable
@@ -463,14 +523,23 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
                 
-                SegmentedSwitch {
+                RowLayout {
                     anchors.centerIn: parent
-                    options: [
-                        { label: "Hyprland", value: "hyprland", icon: Icons.layout },
-                        { label: "Coming Soon", value: "placeholder", icon: Icons.clock }
-                    ]
-                    currentIndex: 0
-                    onIndexChanged: (index) => stackLayout.currentIndex = index
+                    spacing: 8
+
+                    CompositorTabButton {
+                        label: "Hyprland"
+                        image: "../../../../assets/compositors/hyprland.svg"
+                        isSelected: stackLayout.currentIndex === 0
+                        onClicked: stackLayout.currentIndex = 0
+                    }
+
+                    CompositorTabButton {
+                        label: "Coming Soon"
+                        icon: Icons.clock
+                        isSelected: stackLayout.currentIndex === 1
+                        onClicked: stackLayout.currentIndex = 1
+                    }
                 }
             }
 
@@ -506,30 +575,6 @@ Item {
                             font.weight: Font.Medium
                             color: Colors.overSurfaceVariant
                             Layout.bottomMargin: -4
-                        }
-
-                        // Layout Selector
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 8
-                            Text {
-                                text: "Layout"
-                                font.family: Config.theme.font
-                                font.pixelSize: Styling.fontSize(0)
-                                color: Colors.overBackground
-                                Layout.fillWidth: true
-                            }
-                            SegmentedSwitch {
-                                options: [
-                                    { label: "Dwindle", value: "dwindle" },
-                                    { label: "Master", value: "master" }
-                                ]
-                                currentIndex: Config.hyprland.layout === "master" ? 1 : 0
-                                onIndexChanged: index => {
-                                    GlobalStates.markCompositorChanged();
-                                    Config.hyprland.layout = index === 1 ? "master" : "dwindle";
-                                }
-                            }
                         }
 
                         ToggleRow {

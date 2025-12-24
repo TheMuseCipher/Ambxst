@@ -21,8 +21,8 @@ StyledRect {
 
     signal indexChanged(int index)
 
-    implicitWidth: options.length * buttonSize + (options.length - 1) * spacing + padding * 2
-    implicitHeight: buttonSize + padding * 2
+    implicitWidth: buttonsRow.implicitWidth + padding * 2
+    implicitHeight: Math.max(buttonSize, buttonsRow.implicitHeight) + padding * 2
 
     Item {
         anchors.fill: parent
@@ -35,11 +35,20 @@ StyledRect {
             z: 0
             radius: Styling.radius(-6)
 
-            width: root.buttonSize
+            property Item activeItem: repeater.itemAt(root.currentIndex)
+            width: activeItem ? activeItem.width : root.buttonSize
             height: parent.height
-            x: root.currentIndex * (root.buttonSize + root.spacing)
+            x: activeItem ? activeItem.x : 0
 
             Behavior on x {
+                enabled: Config.animDuration > 0
+                NumberAnimation {
+                    duration: Config.animDuration / 2
+                    easing.type: Easing.OutCubic
+                }
+            }
+            
+            Behavior on width {
                 enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 2
@@ -50,11 +59,13 @@ StyledRect {
 
         // Buttons
         RowLayout {
+            id: buttonsRow
             anchors.fill: parent
             spacing: root.spacing
             z: 1
 
             Repeater {
+                id: repeater
                 model: root.options
 
                 Button {
@@ -63,7 +74,8 @@ StyledRect {
                     required property int index
 
                     Layout.fillHeight: true
-                    Layout.preferredWidth: root.buttonSize
+                    Layout.minimumWidth: root.buttonSize
+                    Layout.preferredWidth: contentRow.implicitWidth + 16 // Add some padding
 
                     focusPolicy: Qt.NoFocus
                     hoverEnabled: true
@@ -73,21 +85,65 @@ StyledRect {
                         color: "transparent"
                     }
 
-                    contentItem: Text {
-                        text: typeof optionButton.modelData === "object" ? (optionButton.modelData.icon || "") : optionButton.modelData
-                        color: root.currentIndex === optionButton.index 
-                            ? Config.resolveColor(Config.theme.srOverPrimary.itemColor)
-                            : Colors.overBackground
-                        font.family: typeof optionButton.modelData === "object" && optionButton.modelData.icon ? Icons.font : Config.theme.font
-                        font.pixelSize: 14
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
+                    contentItem: RowLayout {
+                        id: contentRow
+                        anchors.centerIn: parent
+                        spacing: 8
+                        
+                        // Image Icon
+                        Image {
+                            visible: typeof optionButton.modelData === "object" && !!optionButton.modelData.image
+                            source: visible ? optionButton.modelData.image : ""
+                            sourceSize.width: 16
+                            sourceSize.height: 16
+                            width: 16
+                            height: 16
+                            fillMode: Image.PreserveAspectFit
+                            opacity: root.currentIndex === optionButton.index ? 1.0 : 0.7
+                        }
 
-                        Behavior on color {
-                            enabled: Config.animDuration > 0
-                            ColorAnimation {
-                                duration: Config.animDuration / 2
-                                easing.type: Easing.OutCubic
+                        // Font Icon
+                        Text {
+                            visible: typeof optionButton.modelData === "object" && !!optionButton.modelData.icon && !optionButton.modelData.image
+                            text: visible ? optionButton.modelData.icon : ""
+                            color: root.currentIndex === optionButton.index 
+                                ? Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                                : Colors.overBackground
+                            font.family: Icons.font
+                            font.pixelSize: 14
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+
+                            Behavior on color {
+                                enabled: Config.animDuration > 0
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+                        }
+
+                        // Label
+                        Text {
+                            visible: typeof optionButton.modelData !== "object" || !!optionButton.modelData.label
+                            text: typeof optionButton.modelData === "object" 
+                                ? (optionButton.modelData.label || "") 
+                                : optionButton.modelData
+                            color: root.currentIndex === optionButton.index 
+                                ? Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                                : Colors.overBackground
+                            font.family: Config.theme.font
+                            font.pixelSize: 14
+                            font.weight: root.currentIndex === optionButton.index ? Font.DemiBold : Font.Normal
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+
+                            Behavior on color {
+                                enabled: Config.animDuration > 0
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutCubic
+                                }
                             }
                         }
                     }
