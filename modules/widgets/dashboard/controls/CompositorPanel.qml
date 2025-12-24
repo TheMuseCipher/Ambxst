@@ -545,7 +545,7 @@ Item {
                             label: "Border Size"
                             value: Config.hyprland.borderSize ?? 2
                             minValue: 0
-                            maxValue: 10
+                            maxValue: 999
                             suffix: "px"
                             enabled: !Config.hyprland.syncBorderWidth
                             onValueEdited: newValue => {
@@ -567,7 +567,7 @@ Item {
                             label: "Rounding"
                             value: Config.hyprland.rounding ?? 16
                             minValue: 0
-                            maxValue: 30
+                            maxValue: 999
                             suffix: "px"
                             enabled: !Config.hyprland.syncRoundness
                             onValueEdited: newValue => {
