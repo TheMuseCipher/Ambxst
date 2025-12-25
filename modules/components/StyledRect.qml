@@ -124,7 +124,35 @@ ClippingRectangle {
     Behavior on radius {
         enabled: root.animateRadius && Config.animDuration > 0
         NumberAnimation {
-            duration: Config.animDuration / 2
+            duration: Config.animDuration / 4
+        }
+    }
+
+    Behavior on topLeftRadius {
+        enabled: root.animateRadius && Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 4
+        }
+    }
+
+    Behavior on topRightRadius {
+        enabled: root.animateRadius && Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 4
+        }
+    }
+
+    Behavior on bottomLeftRadius {
+        enabled: root.animateRadius && Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 4
+        }
+    }
+
+    Behavior on bottomRightRadius {
+        enabled: root.animateRadius && Config.animDuration > 0
+        NumberAnimation {
+            duration: Config.animDuration / 4
         }
     }
 
