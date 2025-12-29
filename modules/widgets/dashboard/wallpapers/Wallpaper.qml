@@ -31,6 +31,7 @@ PanelWindow {
     property bool usingFallback: false
     property string currentMatugenScheme: wallpaperConfig.adapter.matugenScheme
     property string colorPresetsDir: "/home/adriano/.config/Ambxst/colors"
+    property string officialColorPresetsDir: Qt.resolvedUrl("../../../../assets/colors").toString().replace("file://", "")
     onColorPresetsDirChanged: console.log("Color Presets Directory:", colorPresetsDir)
     property list<string> colorPresets: []
     onColorPresetsChanged: console.log("Color Presets Updated:", colorPresets)
@@ -62,11 +63,16 @@ PanelWindow {
         if (!activeColorPreset) return;
         
         var mode = Config.theme.lightMode ? "light.json" : "dark.json";
-        var source = colorPresetsDir + "/" + activeColorPreset + "/" + mode;
+        
+        var officialFile = officialColorPresetsDir + "/" + activeColorPreset + "/" + mode;
+        var userFile = colorPresetsDir + "/" + activeColorPreset + "/" + mode;
         var dest = Quickshell.dataPath("colors.json");
         
-        console.log("Applying color preset:", activeColorPreset, "Source:", source, "Dest:", dest);
-        applyPresetProcess.command = ["cp", source, dest];
+        // Try official first, then user. Use bash conditional.
+        var cmd = "if [ -f '" + officialFile + "' ]; then cp '" + officialFile + "' '" + dest + "'; else cp '" + userFile + "' '" + dest + "'; fi";
+        
+        console.log("Applying color preset:", activeColorPreset);
+        applyPresetProcess.command = ["bash", "-c", cmd];
         applyPresetProcess.running = true;
     }
 
@@ -301,6 +307,7 @@ PanelWindow {
         // Start directory monitoring
         directoryWatcher.reload();
         presetsWatcher.reload();
+        officialPresetsWatcher.reload();
         // Load initial wallpaper config
         wallpaperConfig.reload();
         
@@ -559,7 +566,7 @@ PanelWindow {
         // Remove onLoadFailed to prevent premature fallback activation
     }
 
-    // Directory watcher for color presets
+    // Directory watcher for user color presets
     FileView {
         id: presetsWatcher
         path: colorPresetsDir
@@ -567,7 +574,20 @@ PanelWindow {
         printErrors: false
         
         onFileChanged: {
-             console.log("Color presets directory changed, rescanning...");
+             console.log("User color presets directory changed, rescanning...");
+             scanPresetsProcess.running = true;
+        }
+    }
+    
+    // Directory watcher for official color presets
+    FileView {
+        id: officialPresetsWatcher
+        path: officialColorPresetsDir
+        watchChanges: true
+        printErrors: false
+        
+        onFileChanged: {
+             console.log("Official color presets directory changed, rescanning...");
              scanPresetsProcess.running = true;
         }
     }
@@ -684,20 +704,33 @@ PanelWindow {
     Process {
         id: scanPresetsProcess
         running: false
-        command: ["find", colorPresetsDir, "-mindepth", "1", "-maxdepth", "1", "-type", "d"]
+        // Scan both directories. find will complain to stderr if one is missing but still output what it finds.
+        command: ["find", officialColorPresetsDir, colorPresetsDir, "-mindepth", "1", "-maxdepth", "1", "-type", "d"]
         
         stdout: StdioCollector {
             onStreamFinished: {
                 console.log("Scan Presets Output:", text);
-                var presets = text.trim().split("\n").filter(p => p.length > 0).map(p => p.split('/').pop()).sort();
-                console.log("Found color presets:", presets);
-                colorPresets = presets;
+                var rawLines = text.trim().split("\n");
+                var uniqueNames = [];
+                for (var i=0; i<rawLines.length; i++) {
+                    var line = rawLines[i].trim();
+                    if (line.length === 0) continue;
+                    var name = line.split('/').pop();
+                    // Deduplicate
+                    if (uniqueNames.indexOf(name) === -1) {
+                        uniqueNames.push(name);
+                    }
+                }
+                uniqueNames.sort();
+                console.log("Found color presets:", uniqueNames);
+                colorPresets = uniqueNames;
             }
         }
         
         stderr: StdioCollector {
             onStreamFinished: {
-                console.warn("Scan Presets Error:", text);
+                // Suppress common "No such file or directory" if one dir is missing
+                // console.warn("Scan Presets Error:", text);
             }
         }
     }
