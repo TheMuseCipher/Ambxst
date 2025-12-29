@@ -56,7 +56,7 @@ Item {
             font.family: Icons.font
             font.pixelSize: 18
             color: root.isSelected 
-                ? Config.resolveColor(Config.theme.srPrimary.itemColor)
+                ? Styling.styledRectItem("primary")
                 : Colors.overBackground
         }
 
@@ -68,7 +68,7 @@ Item {
             font.pixelSize: Config.theme.fontSize
             font.weight: root.isSelected ? Font.Bold : Font.Normal
             color: root.isSelected 
-                ? Config.resolveColor(Config.theme.srPrimary.itemColor)
+                ? Styling.styledRectItem("primary")
                 : Colors.overBackground
             elide: Text.ElideRight
         }
@@ -79,7 +79,7 @@ Item {
             text: Icons.accept
             font.family: Icons.font
             font.pixelSize: 16
-            color: Config.resolveColor(Config.theme.srPrimary.itemColor)
+            color: Styling.styledRectItem("primary")
         }
     }
 }

@@ -673,9 +673,9 @@ Rectangle {
                                     text: appName
                                     color: {
                                         if (isExpanded) {
-                                            return Config.resolveColor(Config.theme.srPane.itemColor);
+                                            return Styling.styledRectItem("pane");
                                         } else if (appLauncher.selectedIndex === index) {
-                                            return Config.resolveColor(Config.theme.srPrimary.itemColor);
+                                            return Styling.styledRectItem("primary");
                                         } else {
                                             return Colors.overBackground;
                                         }
@@ -699,9 +699,9 @@ Rectangle {
                                     text: appComment || ""
                                     color: {
                                         if (isExpanded) {
-                                            return Config.resolveColor(Config.theme.srPane.itemColor);
+                                            return Styling.styledRectItem("pane");
                                         } else if (appLauncher.selectedIndex === index) {
-                                            return Config.resolveColor(Config.theme.srPrimary.itemColor);
+                                            return Styling.styledRectItem("primary");
                                         } else {
                                             return Colors.outline;
                                         }
@@ -759,7 +759,7 @@ Rectangle {
                                             text: "Launch",
                                             icon: Icons.launch,
                                             highlightColor: Colors.primary,
-                                            textColor: Config.resolveColor(Config.theme.srPrimary.itemColor),
+                                            textColor: Styling.styledRectItem("primary"),
                                             action: function () {
                                                 appLauncher.executeApp(appId);
                                                 Visibilities.setActiveModule("");
@@ -770,8 +770,8 @@ Rectangle {
                                             icon: TaskbarApps.isPinned(appId) ? Icons.unpin : Icons.pin,
                                             highlightColor: TaskbarApps.isPinned(appId) ? Colors.error : Colors.tertiary,
                                             textColor: TaskbarApps.isPinned(appId)
-                                                ? Config.resolveColor(Config.theme.srError.itemColor)
-                                                : Config.resolveColor(Config.theme.srTertiary.itemColor),
+                                                ? Styling.styledRectItem("error")
+                                                : Styling.styledRectItem("tertiary"),
                                             action: function () {
                                                 TaskbarApps.togglePin(appId);
                                                 appLauncher.expandedItemIndex = -1;
@@ -781,7 +781,7 @@ Rectangle {
                                             text: "Create Shortcut",
                                             icon: Icons.shortcut,
                                             highlightColor: Colors.secondary,
-                                            textColor: Config.resolveColor(Config.theme.srSecondary.itemColor),
+                                            textColor: Styling.styledRectItem("secondary"),
                                             action: function () {
                                                 let desktopDir = Quickshell.env("XDG_DESKTOP_DIR") || Quickshell.env("HOME") + "/Desktop";
                                                 let timestamp = Date.now();
@@ -1303,7 +1303,7 @@ Rectangle {
                             text: iconContainer.showingSyncFeedback ? Icons.sync : Icons.sun
                             font.family: Icons.font
                             font.pixelSize: 18
-                            color: Brightness.syncBrightness ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
+                            color: Brightness.syncBrightness ? Styling.styledRectItem("primary") : Colors.overBackground
                             rotation: iconContainer.showingSyncFeedback ? syncIconRotation : brightnessIconRotation
                             scale: iconContainer.showingSyncFeedback ? 1 : brightnessIconScale
                             opacity: iconOpacity

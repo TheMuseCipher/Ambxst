@@ -152,7 +152,7 @@ Rectangle {
                                     text: sidebarButton.modelData.isIcon ? sidebarButton.modelData.icon : ""
                                     font.family: Icons.font
                                     font.pixelSize: 20
-                                    color: sidebarButton.isActive ? Config.resolveColor(Config.theme.srOverPrimary.itemColor) : Config.resolveColor(Config.theme.srCommon.itemColor)
+                                    color: sidebarButton.isActive ? Styling.styledRectItem("overprimary") : Styling.styledRectItem("common")
                                     anchors.verticalCenter: parent.verticalCenter
                                     leftPadding: 10
                                     visible: sidebarButton.modelData.isIcon
@@ -188,7 +188,7 @@ Rectangle {
                                         layer.effect: MultiEffect {
                                             brightness: 1.0
                                             colorization: 1.0
-                                            colorizationColor: sidebarButton.isActive ? Config.resolveColor(Config.theme.srOverPrimary.itemColor) : Config.resolveColor(Config.theme.srCommon.itemColor)
+                                            colorizationColor: sidebarButton.isActive ? Styling.styledRectItem("overprimary") : Styling.styledRectItem("common")
                                         }
                                     }
                                 }
@@ -199,7 +199,7 @@ Rectangle {
                                     font.family: Config.theme.font
                                     font.pixelSize: Styling.fontSize(0)
                                     font.weight: sidebarButton.isActive ? Font.Bold : Font.Normal
-                                    color: sidebarButton.isActive ? Config.resolveColor(Config.theme.srOverPrimary.itemColor) : Config.resolveColor(Config.theme.srCommon.itemColor)
+                                    color: sidebarButton.isActive ? Styling.styledRectItem("overprimary") : Styling.styledRectItem("common")
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     Behavior on color {

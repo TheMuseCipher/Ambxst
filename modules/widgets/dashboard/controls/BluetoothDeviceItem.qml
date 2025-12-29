@@ -176,7 +176,7 @@ Item {
                     text: "Forget"
                     font.family: Config.theme.font
                     font.pixelSize: Styling.fontSize(-1)
-                    color: Config.resolveColor(Config.theme.srError.itemColor)
+                    color: Styling.styledRectItem("error")
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
@@ -204,7 +204,7 @@ Item {
                     font.pixelSize: Styling.fontSize(-1)
                     color: root.device?.connected 
                         ? Colors.overSurfaceVariant 
-                        : Config.resolveColor(Config.theme.srPrimary.itemColor)
+                        : Styling.styledRectItem("primary")
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }

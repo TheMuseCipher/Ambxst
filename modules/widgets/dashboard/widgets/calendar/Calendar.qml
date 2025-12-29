@@ -76,7 +76,7 @@ Item {
                         Layout.fillHeight: true
                         radius: Styling.radius(0)
 
-                        readonly property color buttonItemColor: leftMouseArea.pressed ? itemColor : Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                        readonly property color buttonItemColor: leftMouseArea.pressed ? itemColor : Styling.styledRectItem("overprimary")
 
                         Text {
                             anchors.centerIn: parent
@@ -101,7 +101,7 @@ Item {
                         Layout.fillHeight: true
                         radius: Styling.radius(0)
 
-                        readonly property color buttonItemColor: rightMouseArea.pressed ? itemColor : Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                        readonly property color buttonItemColor: rightMouseArea.pressed ? itemColor : Styling.styledRectItem("overprimary")
 
                         Text {
                             anchors.centerIn: parent

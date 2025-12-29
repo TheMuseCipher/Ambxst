@@ -230,7 +230,7 @@ Item {
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
                             text: Icons.sun
-                            color: Config.theme.lightMode ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
+                            color: Config.theme.lightMode ? Styling.styledRectItem("primary") : Colors.overBackground
                             font.family: Icons.font
                             font.pixelSize: 20
                         }
@@ -241,7 +241,7 @@ Item {
                             anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             text: Icons.moon
-                            color: Config.theme.lightMode ? Colors.overBackground : Config.resolveColor(Config.theme.srPrimary.itemColor)
+                            color: Config.theme.lightMode ? Colors.overBackground : Styling.styledRectItem("primary")
                             font.family: Icons.font
                             font.pixelSize: 20
                         }
@@ -322,7 +322,7 @@ Item {
 
                             contentItem: Text {
                                 text: parent.text
-                                color: selectedSchemeIndex === index ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overSurface
+                                color: selectedSchemeIndex === index ? Styling.styledRectItem("primary") : Colors.overSurface
                                 font.family: Config.theme.font
                                 font.pixelSize: Config.theme.fontSize
                                 font.weight: selectedSchemeIndex === index ? Font.Bold : Font.Normal

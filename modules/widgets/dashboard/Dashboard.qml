@@ -205,7 +205,7 @@ NotchAnimationBehavior {
                         contentItem: Text {
                             text: parent.text
                             textFormat: Text.RichText
-                            color: root.state.currentTab === index ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
+                            color: root.state.currentTab === index ? Styling.styledRectItem("primary") : Colors.overBackground
                             // font.family: Config.theme.font
                             font.family: Icons.font
                             // font.pixelSize: Config.theme.fontSize
@@ -269,7 +269,7 @@ NotchAnimationBehavior {
                     font.family: Icons.font
                     font.pixelSize: 20
                     font.weight: Font.Medium
-                    color: root.state.currentTab === 4 ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
+                    color: root.state.currentTab === 4 ? Styling.styledRectItem("primary") : Colors.overBackground
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
 

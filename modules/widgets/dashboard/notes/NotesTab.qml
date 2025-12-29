@@ -1389,11 +1389,11 @@ Item {
                     property bool isExpanded: index === root.expandedItemIndex
                     property color textColor: {
                         if (isInDeleteMode) {
-                            return Config.resolveColor(Config.theme.srError.itemColor);
+                            return Styling.styledRectItem("error");
                         } else if (isExpanded) {
-                            return Config.resolveColor(Config.theme.srPane.itemColor);
+                            return Styling.styledRectItem("pane");
                         } else if (isSelected) {
-                            return Config.resolveColor(Config.theme.srPrimary.itemColor);
+                            return Styling.styledRectItem("primary");
                         } else {
                             return Colors.overSurface;
                         }
@@ -1952,14 +1952,14 @@ Item {
                                 text: "Edit",
                                 icon: Icons.edit,
                                 highlightColor: Colors.primary,
-                                textColor: Config.resolveColor(Config.theme.srPrimary.itemColor),
+                                textColor: Styling.styledRectItem("primary"),
                                 action: function() { openNoteInEditor(modelData.id); }
                             },
                             {
                                 text: "Rename",
                                 icon: Icons.edit,
                                 highlightColor: Colors.secondary,
-                                textColor: Config.resolveColor(Config.theme.srSecondary.itemColor),
+                                textColor: Styling.styledRectItem("secondary"),
                                 action: function() { 
                                     enterRenameMode(modelData.id); 
                                     root.expandedItemIndex = -1;
@@ -1969,7 +1969,7 @@ Item {
                                 text: "Delete",
                                 icon: Icons.trash,
                                 highlightColor: Colors.error,
-                                textColor: Config.resolveColor(Config.theme.srError.itemColor),
+                                textColor: Styling.styledRectItem("error"),
                                 action: function() { 
                                     enterDeleteMode(modelData.id); 
                                     root.expandedItemIndex = -1;
@@ -1982,7 +1982,7 @@ Item {
                                 text: "Rich Text",
                                 icon: Icons.file,
                                 highlightColor: Colors.primary,
-                                textColor: Config.resolveColor(Config.theme.srPrimary.itemColor),
+                                textColor: Styling.styledRectItem("primary"),
                                 action: function() { 
                                     root.expandedItemIndex = -1;
                                     createNewNote(modelData.noteNameToCreate || "", false); 
@@ -1992,7 +1992,7 @@ Item {
                                 text: "Markdown",
                                 icon: Icons.markdown,
                                 highlightColor: Colors.secondary,
-                                textColor: Config.resolveColor(Config.theme.srSecondary.itemColor),
+                                textColor: Styling.styledRectItem("secondary"),
                                 action: function() { 
                                     root.expandedItemIndex = -1;
                                     createNewNote(modelData.noteNameToCreate || "", true); 

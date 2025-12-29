@@ -984,7 +984,7 @@ Item {
                 Text {
                     anchors.centerIn: parent
                     text: Icons.accept
-                    color: Config.resolveColor(Config.theme.srPrimary.itemColor)
+                    color: Styling.styledRectItem("primary")
                     font.family: Icons.font
                     font.pixelSize: 16
                     scale: checked ? 1.0 : 0.0

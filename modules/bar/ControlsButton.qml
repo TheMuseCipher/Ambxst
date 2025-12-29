@@ -53,7 +53,7 @@ Item {
             text: Icons.faders
             font.family: Icons.font
             font.pixelSize: 18
-            color: root.popupOpen ? buttonBg.itemColor : Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+            color: root.popupOpen ? buttonBg.itemColor : Styling.styledRectItem("overprimary")
         }
 
         MouseArea {

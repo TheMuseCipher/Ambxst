@@ -107,7 +107,7 @@ StyledRect {
                             visible: typeof optionButton.modelData === "object" && !!optionButton.modelData.icon && !optionButton.modelData.image
                             text: visible ? optionButton.modelData.icon : ""
                             color: root.currentIndex === optionButton.index 
-                                ? Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                                ? Styling.styledRectItem("overprimary")
                                 : Colors.overBackground
                             font.family: Icons.font
                             font.pixelSize: 14
@@ -130,7 +130,7 @@ StyledRect {
                                 ? (optionButton.modelData.label || "") 
                                 : optionButton.modelData
                             color: root.currentIndex === optionButton.index 
-                                ? Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                                ? Styling.styledRectItem("overprimary")
                                 : Colors.overBackground
                             font.family: Config.theme.font
                             font.pixelSize: 14

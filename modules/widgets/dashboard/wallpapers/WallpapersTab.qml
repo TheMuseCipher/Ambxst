@@ -353,7 +353,7 @@ FocusScope {
                                     Text {
                                         anchors.centerIn: parent
                                         text: Icons.accept
-                                        color: Config.resolveColor(Config.theme.srPrimary.itemColor)
+                                        color: Styling.styledRectItem("primary")
                                         font.family: Icons.font
                                         font.pixelSize: 20
                                         scale: oledCheckbox.checked ? 1.0 : 0.0
@@ -645,7 +645,7 @@ FocusScope {
                                             }
                                             return "";
                                         }
-                                        color: parent.parent.isCurrentWallpaper ? Config.resolveColor(Config.theme.srOverPrimary.itemColor) : Colors.overBackground
+                                        color: parent.parent.isCurrentWallpaper ? Styling.styledRectItem("overprimary") : Colors.overBackground
                                         font.family: Config.theme.font
                                         font.pixelSize: Config.theme.fontSize
                                         font.weight: Font.Bold

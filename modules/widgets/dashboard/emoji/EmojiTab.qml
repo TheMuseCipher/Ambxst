@@ -659,7 +659,7 @@ Rectangle {
                                 text: root.clearButtonConfirmState ? Icons.xeyes : Icons.broom
                                 font.family: Icons.font
                                 font.pixelSize: 20
-                                color: root.clearButtonConfirmState ? clearButton.itemColor : Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                                color: root.clearButtonConfirmState ? clearButton.itemColor : Styling.styledRectItem("overprimary")
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                                 textFormat: Text.RichText
@@ -821,9 +821,9 @@ Rectangle {
                         property color textColor: {
                             if (root.selectedIndex === index && !root.isRecentFocused) {
                                 if (root.expandedItemIndex === index) {
-                                    return Config.resolveColor(Config.theme.srPane.itemColor);
+                                    return Styling.styledRectItem("pane");
                                 }
-                                return Config.resolveColor(Config.theme.srPrimary.itemColor);
+                                return Styling.styledRectItem("primary");
                             } else {
                                 return Colors.overSurface;
                             }
@@ -1040,7 +1040,7 @@ Rectangle {
                                                     font.weight: skinToneOptionsListView.currentIndex === index ? Font.Bold : Font.Normal
                                                     color: {
                                                         if (skinToneOptionsListView.currentIndex === index) {
-                                                            return Config.resolveColor(Config.theme.srPrimary.itemColor);
+                                                            return Styling.styledRectItem("primary");
                                                         }
                                                         return Colors.overSurface;
                                                     }
@@ -1295,7 +1295,7 @@ Rectangle {
                             
                             property color textColor: {
                                 if (root.selectedRecentIndex === index && root.isRecentFocused) {
-                                    return Config.resolveColor(Config.theme.srPrimary.itemColor);
+                                    return Styling.styledRectItem("primary");
                                 } else {
                                     return Colors.overSurface;
                                 }

@@ -1664,7 +1664,7 @@ Item {
                         Text {
                             anchors.centerIn: parent
                             text: Icons.accept
-                            color: Config.resolveColor(Config.theme.srPrimary.itemColor)
+                            color: Styling.styledRectItem("primary")
                             font.family: Icons.font
                             font.pixelSize: 16
                             scale: bindItem.isEnabled ? 1.0 : 0.0
@@ -1737,7 +1737,7 @@ Item {
                                     font.family: Config.theme.font
                                     font.pixelSize: Styling.fontSize(-3)
                                     font.weight: Font.Bold
-                                    color: Config.resolveColor(Config.theme.srPrimary.itemColor)
+                                    color: Styling.styledRectItem("primary")
                                 }
 
                                 MouseArea {

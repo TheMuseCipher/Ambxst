@@ -113,7 +113,7 @@ Item {
                         Layout.fillHeight: true
                         radius: Notifications.silent ? Styling.radius(-4) : Styling.radius(0)
 
-                        readonly property color dndItemColor: Notifications.silent ? itemColor : Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                        readonly property color dndItemColor: Notifications.silent ? itemColor : Styling.styledRectItem("overprimary")
 
                         Text {
                             anchors.centerIn: parent
@@ -140,7 +140,7 @@ Item {
                         Layout.fillHeight: true
                         radius: Styling.radius(0)
 
-                        readonly property color clearItemColor: broomHover.pressed ? itemColor : Config.resolveColor(Config.theme.srOverError.itemColor)
+                        readonly property color clearItemColor: broomHover.pressed ? itemColor : Styling.styledRectItem("overerror")
 
                         Text {
                             anchors.centerIn: parent

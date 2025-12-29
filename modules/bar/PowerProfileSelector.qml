@@ -139,7 +139,7 @@ StyledRect {
 
                     contentItem: Text {
                         text: PowerProfile.getProfileIcon(modelData)
-                        color: PowerProfile.currentProfile === modelData ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
+                        color: PowerProfile.currentProfile === modelData ? Styling.styledRectItem("primary") : Colors.overBackground
                         font.family: Icons.font
                         font.pixelSize: 18
                         horizontalAlignment: Text.AlignHCenter
@@ -193,7 +193,7 @@ StyledRect {
 
                     contentItem: Text {
                         text: PowerProfile.getProfileIcon(modelData)
-                        color: PowerProfile.currentProfile === modelData ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.overBackground
+                        color: PowerProfile.currentProfile === modelData ? Styling.styledRectItem("primary") : Colors.overBackground
                         font.family: Icons.font
                         font.pixelSize: 18
                         horizontalAlignment: Text.AlignHCenter

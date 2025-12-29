@@ -927,7 +927,7 @@ Item {
                             textFormat: Text.RichText
                             font.family: Icons.font
                             font.pixelSize: 20
-                            color: root.clearButtonConfirmState ? clearButton.itemColor : Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                            color: root.clearButtonConfirmState ? clearButton.itemColor : Styling.styledRectItem("overprimary")
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                         }
@@ -1189,11 +1189,11 @@ Item {
                         property bool isDraggingForReorder: false
                         property color textColor: {
                             if (isInDeleteMode) {
-                                return Config.resolveColor(Config.theme.srError.itemColor);
+                                return Styling.styledRectItem("error");
                             } else if (isExpanded) {
-                                return Config.resolveColor(Config.theme.srPane.itemColor);
+                                return Styling.styledRectItem("pane");
                             } else if (isSelected) {
-                                return Config.resolveColor(Config.theme.srPrimary.itemColor);
+                                return Styling.styledRectItem("primary");
                             } else {
                                 return Colors.overSurface;
                             }
@@ -1751,7 +1751,7 @@ Item {
                                                 text: "Copy",
                                                 icon: Icons.copy,
                                                 highlightColor: Colors.primary,
-                                                textColor: Config.resolveColor(Config.theme.srPrimary.itemColor),
+                                                textColor: Styling.styledRectItem("primary"),
                                                 action: function () {
                                                     root.copyToClipboard(modelData.id);
                                                     Visibilities.setActiveModule("");
@@ -1765,7 +1765,7 @@ Item {
                                                 text: "Open",
                                                 icon: Icons.popOpen,
                                                 highlightColor: Colors.primary,
-                                                textColor: Config.resolveColor(Config.theme.srPrimary.itemColor),
+                                                textColor: Styling.styledRectItem("primary"),
                                                 action: function () {
                                                     root.openItem(modelData.id);
                                                 }
@@ -1776,7 +1776,7 @@ Item {
                                             text: modelData.pinned ? "Unpin" : "Pin",
                                             icon: modelData.pinned ? Icons.unpin : Icons.pin,
                                             highlightColor: Colors.primary,
-                                            textColor: Config.resolveColor(Config.theme.srPrimary.itemColor),
+                                            textColor: Styling.styledRectItem("primary"),
                                             action: function () {
                                                 root.pendingItemIdToSelect = modelData.id;
                                                 ClipboardService.togglePin(modelData.id);
@@ -1786,7 +1786,7 @@ Item {
                                             text: "Alias",
                                             icon: Icons.edit,
                                             highlightColor: Colors.secondary,
-                                            textColor: Config.resolveColor(Config.theme.srSecondary.itemColor),
+                                            textColor: Styling.styledRectItem("secondary"),
                                             action: function () {
                                                 root.enterAliasMode(modelData.id);
                                                 root.expandedItemIndex = -1;
@@ -1795,7 +1795,7 @@ Item {
                                             text: "Delete",
                                             icon: Icons.trash,
                                             highlightColor: Colors.error,
-                                            textColor: Config.resolveColor(Config.theme.srError.itemColor),
+                                            textColor: Styling.styledRectItem("error"),
                                             action: function () {
                                                 root.enterDeleteMode(modelData.id);
                                                 root.expandedItemIndex = -1;
@@ -2277,7 +2277,7 @@ Item {
                                         } else if (isExpanded) {
                                             return Colors.overBackground;
                                         } else if (isSelected) {
-                                            return Config.resolveColor(Config.theme.srPrimary.itemColor);
+                                            return Styling.styledRectItem("primary");
                                         } else {
                                             return Colors.outline;
                                         }
