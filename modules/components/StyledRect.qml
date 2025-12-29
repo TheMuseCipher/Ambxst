@@ -90,157 +90,54 @@ ClippingRectangle {
         }
     }
 
+    // Linear gradient texture generator
+    Canvas {
+        id: linearGradientCanvas
+        width: 256
+        height: 1
+        visible: false
+        
+        onPaint: {
+            var ctx = getContext("2d");
+            ctx.clearRect(0, 0, width, height);
+            
+            var stops = root.gradientStops;
+            if (!stops || stops.length === 0) return;
+
+            var grad = ctx.createLinearGradient(0, 0, width, 0);
+            for (var i = 0; i < stops.length; i++) {
+                var s = stops[i];
+                grad.addColorStop(s[1], Config.resolveColor(s[0]));
+            }
+            
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+        }
+        
+        Connections {
+            target: root
+            function onGradientStopsChanged() { linearGradientCanvas.requestPaint(); }
+        }
+        Component.onCompleted: requestPaint()
+    }
+
     // Linear gradient
-    Rectangle {
-        id: linearGrad
+    ShaderEffect {
+        anchors.fill: parent
         opacity: rectOpacity
-        readonly property real maxDim: Math.max(parent.width, parent.height)
-        readonly property real angleRad: gradientAngle * Math.PI / 180
-        readonly property real cosAbs: Math.abs(Math.cos(angleRad))
-        readonly property real sinAbs: Math.abs(Math.sin(angleRad))
-        readonly property real scaleX: (parent.width * cosAbs + parent.height * sinAbs) / maxDim
-        readonly property real scaleY: (parent.height * cosAbs + parent.width * sinAbs) / maxDim
-
-        antialiasing: true
-
-        width: maxDim
-        height: maxDim
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
         visible: gradientType === "linear"
-        rotation: gradientAngle
-        transformOrigin: Item.Center
 
-        transform: Scale {
-            xScale: linearGrad.scaleX
-            yScale: linearGrad.scaleY
-            origin.x: linearGrad.width / 2
-            origin.y: linearGrad.height / 2
+        property real angle: gradientAngle
+        property real canvasWidth: width
+        property real canvasHeight: height
+        property var gradTex: ShaderEffectSource {
+            sourceItem: linearGradientCanvas
+            hideSource: true
+            smooth: true
+            wrapMode: ShaderEffectSource.ClampToEdge
         }
 
-        gradient: Gradient {
-            orientation: gradientOrientation === "horizontal" ? Gradient.Horizontal : Gradient.Vertical
-
-            GradientStop {
-                property var stopData: gradientStops[0] || ["surface", 0.0]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[1] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[2] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[3] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[4] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[5] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[6] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[7] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[8] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[9] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[10] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[11] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[12] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[13] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[14] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[15] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[16] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[17] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[18] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-
-            GradientStop {
-                property var stopData: gradientStops[19] || gradientStops[gradientStops.length - 1]
-                position: stopData[1]
-                color: Config.resolveColor(stopData[0])
-            }
-        }
+        fragmentShader: "linear_gradient.frag.qsb"
     }
 
     // Radial gradient
