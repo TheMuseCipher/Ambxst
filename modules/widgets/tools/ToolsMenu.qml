@@ -99,6 +99,12 @@ ActionGrid {
         id: qrProc
     }
 
+    Process {
+        id: openFolderProc
+        // Usamos nohup para desvincular el proceso de visualización de carpetas
+        command: ["bash", "-c", "nohup xdg-open \"$0\" > /dev/null 2>&1 &"]
+    }
+
     onActionTriggered: action => {
         console.log("Tools action triggered:", action.tooltip);
 
@@ -116,12 +122,20 @@ ActionGrid {
         } else if (action.tooltip === "Toggle Microphone") {
             root.recordAudioInput = !root.recordAudioInput;
         } else if (action.tooltip === "Open Screenshots") {
-            // Logic to open screenshots folder if implemented
-            Screenshot.openScreenshotsFolder();
+            // Usamos xdg-user-dir en el comando bash para respetar las rutas del sistema
+            var cmd = "dir=\"$(xdg-user-dir PICTURES)/Screenshots\"; mkdir -p \"$dir\"; nohup xdg-open \"$dir\" > /dev/null 2>&1 &";
+            
+            openFolderProc.command = ["bash", "-c", cmd];
+            openFolderProc.running = true;
+            
             root.itemSelected();
         } else if (action.tooltip === "Open Recordings") {
-            // Logic to open recordings folder if implemented
-             ScreenRecorder.openRecordingsFolder();
+            // Usamos xdg-user-dir para videos, manteniendo la subcarpeta Recordings
+            var cmd = "dir=\"$(xdg-user-dir VIDEOS)/Recordings\"; mkdir -p \"$dir\"; nohup xdg-open \"$dir\" > /dev/null 2>&1 &";
+            
+            openFolderProc.command = ["bash", "-c", cmd];
+            openFolderProc.running = true;
+            
              root.itemSelected();
         } else if (action.tooltip === "Color Picker") {
             var scriptPath = Qt.resolvedUrl("../../../scripts/colorpicker.py").toString().replace("file://", "");
