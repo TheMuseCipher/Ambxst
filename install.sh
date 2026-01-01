@@ -4,7 +4,7 @@ set -e
 # === Configuration ===
 REPO_URL="https://github.com/Axenide/Ambxst.git"
 INSTALL_PATH="$HOME/Ambxst"
-BIN_DIR="$HOME/.local/bin"
+BIN_DIR="/usr/local/bin"
 QUICKSHELL_REPO="https://git.outfoxxed.me/outfoxxed/quickshell"
 
 # Colors
@@ -193,12 +193,19 @@ install_python_tools() {
 setup_launcher() {
 	if [ "$DISTRO" == "nixos" ]; then return; fi
 
+	# Clean up old launcher location
+	OLD_LAUNCHER="$HOME/.local/bin/ambxst"
+	if [ -f "$OLD_LAUNCHER" ]; then
+		log_info "Removing old launcher at $OLD_LAUNCHER..."
+		rm -f "$OLD_LAUNCHER"
+	fi
+
 	mkdir -p "$BIN_DIR" # Ensure bin dir exists
 	LAUNCHER="$BIN_DIR/ambxst"
 
 	log_info "Creating launcher at $LAUNCHER..."
 
-	cat >"$LAUNCHER" <<EOF
+	sudo tee "$LAUNCHER" >/dev/null <<EOF
 #!/usr/bin/env bash
 export PATH="$HOME/.local/bin:\$PATH"
 export QML2_IMPORT_PATH="$HOME/.local/lib/qml:\$QML2_IMPORT_PATH"
@@ -208,7 +215,7 @@ export QML_IMPORT_PATH="\$QML2_IMPORT_PATH"
 exec "$INSTALL_PATH/cli.sh" "\$@"
 EOF
 
-	chmod +x "$LAUNCHER"
+	sudo chmod +x "$LAUNCHER"
 	log_success "Launcher created."
 }
 
@@ -235,6 +242,5 @@ setup_launcher
 echo ""
 log_success "Installation steps completed!"
 if [ "$DISTRO" != "nixos" ]; then
-	echo -e "Ensure ${BLUE}$HOME/.local/bin${NC} is in your PATH."
 	echo -e "Run ${GREEN}ambxst${NC} to start."
 fi
