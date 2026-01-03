@@ -219,8 +219,8 @@ QtObject {
             // Unbind any existing SUPER,Super_L and the normal widgets keybind
             unbindCommands.push("keyword unbind SUPER,Super_L");
             unbindCommands.push(createUnbindCommand(dashboard.widgets));
-            // Use SUPER key alone (release) to trigger launcher via fork's cli.sh
-            batchCommands.push("keyword bindr SUPER,Super_L,exec,/home/sam/Ambxst-Fork/cli.sh launcher");
+            // Use SUPER key alone (release) to trigger launcher via ambxst CLI
+            batchCommands.push("keyword bindr SUPER,Super_L,exec,ambxst launcher");
         } else {
             // Use the normal widgets keybind from config
             unbindCommands.push("keyword unbind SUPER,Super_L");
